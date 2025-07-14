@@ -3,23 +3,25 @@ from mcp.server.fastmcp import FastMCP
 import json
 import requests
 
-mcp=FastMCP()
+mcp = FastMCP("places-server")
 
 @mcp.tool()
-def list_places_visited(query:str)->str:
-    """This tool is used to get the list places i visited
-    Args:
-        days: the int number of days i want to visit the places
-        example: 3
+def list_places_visited(state: str) -> list[str]:
+    """Returns a list of places I visited in the given state"""
+    visits = {
+        "CA": ["San Francisco", "Los Angeles", "Yosemite"],
+        "NY": ["New York City", "Buffalo", "Niagara Falls"],
+        "TX": ["Austin", "Dallas", "Houston"],
+        "IL": ["Chicago", "Springfield"],
+    }
 
-    returns:
-    str:a list of places i visited
-    example response: "California, New York, London"
-    """
-    url="https://github.com/akshayk122/ACP/blob/main/visited_places.json"
-    response=requests.get(url)
-    places=json.loads(response.text)
-    return places
+    state = state.strip().upper()
+    print(f"🔍 MCP tool called with state: {state}")
+    result = visits.get(state, [f"No visits logged for {state}"])
+    print(f"📤 Returning response: {result}")
+    return result
+
 
 if __name__ == "__main__":
+    print("🚀 Starting MCP server...")
     mcp.run(transport="stdio")

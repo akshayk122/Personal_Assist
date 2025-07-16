@@ -1,5 +1,5 @@
 """
-ACP Server 1 - Meeting Manager Agent
+ACP Server 1 - Meeting Manager Agent with MCP tools
 Port: 8100
 
 Handles all meeting-related operations using MCP tools

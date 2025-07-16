@@ -1,5 +1,5 @@
 """
-ACP Server 3 - Personal Assistant Orchestrator
+ACP Server 3 - Personal Assistant Orchestrator 
 Port: 8300
 
 Coordinates between Meeting Manager and Expense Tracker agents
@@ -44,7 +44,7 @@ class SubAgentCommunicator:
                 )
                 return run.output[0].parts[0].content
         except Exception as e:
-            return f"❌ Unable to contact Meeting Manager: {str(e)}"
+            return f"Unable to contact Meeting Manager: {str(e)}"
     
     async def query_expense_agent(self, query: str) -> str:
         """Query the expense tracking agent"""
@@ -56,7 +56,7 @@ class SubAgentCommunicator:
                 )
                 return run.output[0].parts[0].content
         except Exception as e:
-            return f"❌ Unable to contact Expense Tracker: {str(e)}"
+            return f"Unable to contact Expense Tracker: {str(e)}"
 
 # Initialize communicator
 sub_agent_comm = SubAgentCommunicator()
@@ -182,9 +182,9 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         
         # Compile comprehensive response
         if agent_responses:
-            response = f"""🤖 **Personal Assistant Orchestrator**
+            response = f"""**Personal Assistant Orchestrator**
 
-📋 **Query Analysis:** {str(analysis_result)}
+**Query Analysis:** {str(analysis_result)}
 
 ---
 
@@ -203,42 +203,42 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
 🔗 **Integrated Summary:**
 The above responses from specialized agents have been coordinated to provide comprehensive assistance. Each agent focuses on its area of expertise while I ensure the overall coherence and completeness of the response.
 
-💡 **Next Steps:**
+**Next Steps:**
 - For meeting operations: Contact the Meeting Manager directly
 - For expense operations: Contact the Expense Tracker directly  
 - For complex queries: Continue using this orchestrator for coordinated responses
 
-🌟 **Tip:** You can ask questions that span both domains, like "What meetings do I have this week and how much did I spend on client dinners?" for integrated insights.
+**Tip:** You can ask questions that span both domains, like "What meetings do I have this week and how much did I spend on client dinners?" for integrated insights.
 """
         else:
             # General query not requiring specialized agents
             response = f"""🤖 **Personal Assistant Orchestrator**
 
-📋 **Analysis:** {str(analysis_result)}
+**Analysis:** {str(analysis_result)}
 
 ---
 
-💡 **Available Services:**
+**Available Services:**
 I coordinate between two specialized agents to help you:
 
-🕐 **Meeting Management:**
+**Meeting Management:**
 - Schedule and manage meetings
 - Check for conflicts  
 - Update meeting details
 - Search meetings by various criteria
 
-💰 **Expense Tracking:**
+**Expense Tracking:**
 - Record and categorize expenses
 - Generate spending summaries
 - Analyze budgets and spending patterns
 - Track expenses across time periods
 
-🔗 **Integrated Assistance:**
+**Integrated Assistance:**
 - Combine meeting and expense information
 - Provide comprehensive personal assistance
 - Coordinate complex multi-domain queries
 
-📞 **How to Use:**
+**How to Use:**
 - Ask meeting questions like: "Schedule a team standup tomorrow at 9 AM"
 - Ask expense questions like: "How much did I spend on food this month?"
 - Ask combined questions like: "What meetings do I have and what's my spending this week?"
@@ -247,17 +247,17 @@ I coordinate between two specialized agents to help you:
         yield Message(parts=[MessagePart(content=response)])
         
     except Exception as e:
-        error_response = f"❌ Error in Personal Assistant Orchestrator: {str(e)}"
+        error_response = f"Error in Personal Assistant Orchestrator: {str(e)}"
         yield Message(parts=[MessagePart(content=error_response)])
 
 if __name__ == "__main__":
-    print("🤖 Starting Personal Assistant Orchestrator on port 8300...")
-    print("🔗 Available endpoints:")
+    print(" Starting Personal Assistant Orchestrator on port 8300...")
+    print("Available endpoints:")
     print("  - POST /runs (agent: personal_assistant)")
-    print("🎯 Coordinates between:")
+    print("Coordinates between:")
     print("  - Meeting Manager (port 8100)")
     print("  - Expense Tracker (port 8200)")
-    print("\n💡 Example queries:")
+    print("\n Example queries:")
     print("  - 'Schedule a meeting with John tomorrow at 2 PM'")
     print("  - 'I spent $25 on lunch today'") 
     print("  - 'What meetings do I have this week and my food expenses?'")

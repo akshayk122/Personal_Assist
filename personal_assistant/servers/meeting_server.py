@@ -172,7 +172,7 @@ the actual meeting operations would be performed using the integrated MCP tools.
 if __name__ == "__main__":
     print("Starting Meeting Manager Server on port 8100...")
     print("Available endpoints:")
-    print("  - POST /runs (agent: meeting_manager)")
-    print("🔧 MCP Tools integrated: meeting management operations")
+    print("POST /runs (agent: meeting_manager)")
+    print("MCP Tools integrated: meeting management operations")
     
     server.run(port=8100) 

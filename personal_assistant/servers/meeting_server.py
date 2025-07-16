@@ -140,12 +140,12 @@ async def meeting_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         result = await crew.kickoff_async()
         
         # For now, we'll provide the AI response along with a note about MCP integration
-        response = f"""🕐 **Meeting Manager Response:**
+        response = f"""**Meeting Manager Response:**
 
 {str(result)}
 
 ---
-💡 **Note:** This is the AI analysis of your meeting request. In a full implementation, 
+**Note:** This is the AI analysis of your meeting request. In a full implementation, 
 the actual meeting operations would be performed using the integrated MCP tools.
 
 🔧 **Available Operations:**
@@ -156,7 +156,7 @@ the actual meeting operations would be performed using the integrated MCP tools.
 - Delete/cancel meetings
 - Check scheduling conflicts
 
-📅 **Example Usage:**
+**Example Usage:**
 - "Schedule a team standup tomorrow at 9 AM"
 - "Show me all meetings this week"
 - "Find meetings with John in the title"
@@ -166,12 +166,12 @@ the actual meeting operations would be performed using the integrated MCP tools.
         yield Message(parts=[MessagePart(content=response)])
         
     except Exception as e:
-        error_response = f"❌ Error in Meeting Manager: {str(e)}"
+        error_response = f"Error in Meeting Manager: {str(e)}"
         yield Message(parts=[MessagePart(content=error_response)])
 
 if __name__ == "__main__":
-    print("🕐 Starting Meeting Manager Server on port 8100...")
-    print("📅 Available endpoints:")
+    print("Starting Meeting Manager Server on port 8100...")
+    print("Available endpoints:")
     print("  - POST /runs (agent: meeting_manager)")
     print("🔧 MCP Tools integrated: meeting management operations")
     

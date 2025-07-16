@@ -1,5 +1,5 @@
 """
-ACP Server 2 - Expense Tracker Agent
+ACP Server 2 - Expense Tracker Agent with MCP tools
 Port: 8200
 
 Handles all expense-related operations using MCP tools

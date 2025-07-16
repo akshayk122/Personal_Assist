@@ -258,8 +258,8 @@ if __name__ == "__main__":
     print("  - Meeting Manager (port 8100)")
     print("  - Expense Tracker (port 8200)")
     print("\n Example queries:")
-    print("  - 'Schedule a meeting with John tomorrow at 2 PM'")
-    print("  - 'I spent $25 on lunch today'") 
-    print("  - 'What meetings do I have this week and my food expenses?'")
+    print(" 'Schedule a meeting with John tomorrow at 2 PM'")
+    print("'I spent $25 on lunch today'") 
+    print("'What meetings do I have this week and my food expenses?'")
     
     server.run(port=8300) 

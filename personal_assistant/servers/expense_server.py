@@ -148,7 +148,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
 {str(result)}
 
 ---
-💡 **Note:** This is the AI analysis of your expense request. In a full implementation, 
+**Note:** This is the AI analysis of your expense request. In a full implementation, 
 the actual expense operations would be performed using the integrated MCP tools.
 
 🔧 **Available Operations:**
@@ -159,13 +159,13 @@ the actual expense operations would be performed using the integrated MCP tools.
 - Delete incorrect expenses
 - Analyze budget status with recommendations
 
-💸 **Example Usage:**
+**Example Usage:**
 - "I spent $25 on dinner at Italian restaurant"
 - "Show me all food expenses this month"
 - "How much did I spend on transportation this quarter?"
 - "Give me a budget analysis for entertainment"
 
-📊 **Analytics Features:**
+**Analytics Features:**
 - Monthly/quarterly spending summaries
 - Category-wise expense breakdowns
 - Budget status with alerts
@@ -176,13 +176,13 @@ the actual expense operations would be performed using the integrated MCP tools.
         yield Message(parts=[MessagePart(content=response)])
         
     except Exception as e:
-        error_response = f"❌ Error in Expense Tracker: {str(e)}"
+        error_response = f" Error in Expense Tracker: {str(e)}"
         yield Message(parts=[MessagePart(content=error_response)])
 
 if __name__ == "__main__":
-    print("💰 Starting Expense Tracker Server on port 8200...")
-    print("📊 Available endpoints:")
-    print("  - POST /runs (agent: expense_tracker)")
-    print("🔧 MCP Tools integrated: expense management operations")
+    print("Starting Expense Tracker Server on port 8200...")
+    print("Available endpoints:")
+    print("POST /runs (agent: expense_tracker)")
+    print("MCP Tools integrated: expense management operations")
     
     server.run(port=8200) 

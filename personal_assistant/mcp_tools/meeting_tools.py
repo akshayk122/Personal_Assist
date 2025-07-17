@@ -61,10 +61,10 @@ def add_meeting(
         }
         
         meeting_id = data_manager.add_meeting(meeting_data)
-        return f"✅ Meeting '{title}' scheduled successfully with ID: {meeting_id}"
+        return f"Meeting '{title}' scheduled successfully with ID: {meeting_id}"
         
     except Exception as e:
-        return f"❌ Error adding meeting: {str(e)}"
+        return f"Error adding meeting: {str(e)}"
 
 @mcp.tool()
 def list_meetings(

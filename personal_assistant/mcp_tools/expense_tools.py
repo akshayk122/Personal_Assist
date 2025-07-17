@@ -67,12 +67,12 @@ def add_expense(
         }
         
         expense_id = data_manager.add_expense(expense_data)
-        return f"✅ Expense of ${amount:.2f} for '{description}' added successfully with ID: {expense_id}"
+        return f"Expense of ${amount:.2f} for '{description}' added successfully with ID: {expense_id}"
         
     except ValueError as e:
-        return f"❌ Invalid amount format: {str(e)}"
+        return f"Invalid amount format: {str(e)}"
     except Exception as e:
-        return f"❌ Error adding expense: {str(e)}"
+        return f"Error adding expense: {str(e)}"
 
 @mcp.tool()
 def list_expenses(

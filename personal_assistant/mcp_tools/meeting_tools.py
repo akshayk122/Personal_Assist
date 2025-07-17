@@ -164,13 +164,13 @@ def search_meetings(query: str, search_type: str = "title") -> str:
         # Format results
         result = f"🔍 Found {len(matching_meetings)} meeting(s) matching '{query}':\n\n"
         for meeting in matching_meetings:
-            result += f"🕐 **{meeting['title']}** on {meeting['date']} at {meeting['time']}\n"
-            result += f"   📍 {meeting['location']} | 🆔 {meeting['meeting_id']}\n\n"
+            result += f"**{meeting['title']}** on {meeting['date']} at {meeting['time']}\n"
+            result += f"{meeting['location']} | 🆔 {meeting['meeting_id']}\n\n"
         
         return result
         
     except Exception as e:
-        return f"❌ Error searching meetings: {str(e)}"
+        return f"Error searching meetings: {str(e)}"
 
 @mcp.tool()
 def update_meeting(meeting_id: str, updates: str) -> str:

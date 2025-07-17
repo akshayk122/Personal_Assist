@@ -193,14 +193,14 @@ def update_meeting(meeting_id: str, updates: str) -> str:
         success = data_manager.update_meeting(meeting_id, update_data)
         
         if success:
-            return f"✅ Meeting {meeting_id} updated successfully."
+            return f"Meeting {meeting_id} updated successfully."
         else:
-            return f"❌ Meeting {meeting_id} not found."
+            return f"Meeting {meeting_id} not found."
             
     except json.JSONDecodeError:
-        return "❌ Invalid JSON format for updates."
+        return "Invalid JSON format for updates."
     except Exception as e:
-        return f"❌ Error updating meeting: {str(e)}"
+        return f"Error updating meeting: {str(e)}"
 
 @mcp.tool()
 def delete_meeting(meeting_id: str) -> str:

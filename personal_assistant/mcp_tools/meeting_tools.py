@@ -116,7 +116,7 @@ def list_meetings(
         return result
         
     except Exception as e:
-        return f"❌ Error listing meetings: {str(e)}"
+        return f" Error listing meetings: {str(e)}"
 
 @mcp.tool()
 def search_meetings(query: str, search_type: str = "title") -> str:

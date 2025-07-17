@@ -116,7 +116,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
             
             Always consider the financial context and provide helpful budgeting advice.
             Suggest appropriate categories if the user doesn't specify them.
-            Flag unusual spending patterns or amounts if noticed.
+            Flag unusual spending patterns or amount if noticed.
             """,
             expected_output="""
             A detailed response that addresses the user's expense-related request. This should include:

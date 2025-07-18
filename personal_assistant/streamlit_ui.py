@@ -31,6 +31,10 @@ if 'server_status' not in st.session_state:
         'meeting': 'unknown', 
         'expense': 'unknown'
     }
+if 'user_input' not in st.session_state:
+    st.session_state.user_input = ''
+if 'clear_input' not in st.session_state:
+    st.session_state.clear_input = False
 
 async def check_server_status(url: str) -> bool:
     """Check if a server is running"""
@@ -174,17 +178,27 @@ def main():
     col1, col2 = st.columns([3, 1])
     
     with col1:
+        # Clear input if requested
+        if st.session_state.clear_input:
+            st.session_state.user_input = ''
+            st.session_state.clear_input = False
+        
+        # Handle example query selection
+        if 'current_query' in st.session_state:
+            st.session_state.user_input = st.session_state.current_query
+            del st.session_state.current_query
+        
         # Query input
         user_query = st.text_area(
             "💭 What can I help you with?",
-            value=st.session_state.get('current_query', ''),
+            value=st.session_state.user_input,
             height=100,
-            placeholder="Ask about meetings, expenses, or anything else..."
+            placeholder="Ask about meetings, expenses, or anything else...",
+            key="query_input"
         )
         
-        # Clear the current query after displaying
-        if 'current_query' in st.session_state:
-            del st.session_state.current_query
+        # Update session state with current input
+        st.session_state.user_input = user_query
     
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)  # Spacer

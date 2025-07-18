@@ -54,7 +54,7 @@ async def send_query_to_orchestrator(query: str) -> str:
             )
             return run.output[0].parts[0].content
     except Exception as e:
-        return f"❌ Error connecting to Personal Assistant: {str(e)}\n\nPlease ensure the orchestrator server is running on port 8300."
+        return f"Error connecting to Personal Assistant: {str(e)}\n\nPlease ensure the orchestrator server is running on port 8300."
 
 async def check_all_servers():
     """Check status of all servers"""
@@ -109,12 +109,12 @@ def display_example_queries():
             "Show me all food expenses this month", 
             "How much did I spend on transportation?",
             "Give me a budget analysis for entertainment"
-        ],
-        "🔗 Combined Queries": [
-            "What meetings do I have today and what did I spend yesterday?",
-            "Show my schedule for next week and my food budget status",
-            "Do I have lunch meetings this week and restaurant expenses?"
         ]
+        # "🔗 Combined Queries": [
+        #     "What meetings do I have today and what did I spend yesterday?",
+        #     "Show my schedule for next week and my food budget status",
+        #     "Do I have lunch meetings this week and restaurant expenses?"
+        # ]
     }
     
     for category, queries in examples.items():

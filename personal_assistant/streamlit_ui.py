@@ -201,7 +201,7 @@ def main():
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)  # Spacer
         
-        send_button = st.button("🚀 Send Query", type="primary", use_container_width=True)
+        send_button = st.button("🚀 Submit", type="primary", use_container_width=True)
         
         if st.button("🗑️ Clear History", use_container_width=True):
             st.session_state.chat_history = []

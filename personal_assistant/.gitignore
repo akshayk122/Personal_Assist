@@ -5,7 +5,7 @@
 .env.staging
 
 # Data files (may contain personal information)
-data/*.json
+#data/*.json
 !data/.gitkeep
 
 # Logs

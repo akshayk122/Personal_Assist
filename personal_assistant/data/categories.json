@@ -1,0 +1,66 @@
+{
+  "expense_categories": [
+    "food",
+    "transportation", 
+    "entertainment",
+    "utilities",
+    "healthcare",
+    "shopping",
+    "other"
+  ],
+  "expense_subcategories": {
+    "food": ["lunch", "dinner", "breakfast", "coffee", "snacks", "takeout", "groceries"],
+    "transportation": ["gas", "parking", "public-transit", "rideshare", "car-maintenance"],
+    "entertainment": ["dining", "streaming", "movies", "concert", "books"],
+    "utilities": ["rent", "electricity", "internet", "phone"],
+    "healthcare": ["pharmacy", "gym", "doctor", "dental"],
+    "shopping": ["groceries", "electronics", "clothing", "household", "home"]
+  },
+  "payment_methods": [
+    "cash",
+    "credit", 
+    "debit",
+    "online"
+  ],
+  "meeting_types": [
+    "team-standup",
+    "client-meeting", 
+    "presentation",
+    "interview",
+    "training",
+    "one-on-one",
+    "strategy-session",
+    "budget-planning",
+    "customer-interview",
+    "security-review",
+    "vendor-negotiation",
+    "code-review",
+    "project-kickoff",
+    "board-meeting",
+    "onboarding",
+    "other"
+  ],
+  "meeting_locations": [
+    "Conference Room A",
+    "Conference Room B", 
+    "Executive Boardroom",
+    "Marketing Conference Room",
+    "Finance Department",
+    "Secure Conference Room B",
+    "Manager's Office",
+    "Development Room",
+    "Innovation Lab",
+    "Demo Room",
+    "Executive Suite",
+    "HR Training Room",
+    "Virtual - Zoom",
+    "Virtual - Google Meet",
+    "Virtual - Microsoft Teams",
+    "Restaurant/External Location"
+  ],
+  "meeting_statuses": [
+    "scheduled",
+    "completed", 
+    "cancelled"
+  ]
+}

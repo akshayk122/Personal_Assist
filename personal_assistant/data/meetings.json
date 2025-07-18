@@ -1,0 +1,253 @@
+[
+  {
+    "meeting_id": "m001",
+    "title": "Daily Team Standup",
+    "date": "2024-12-17",
+    "time": "09:00",
+    "duration_minutes": 30,
+    "attendees": [
+      "john.smith@company.com",
+      "sarah.johnson@company.com",
+      "mike.chen@company.com"
+    ],
+    "location": "Conference Room A",
+    "description": "Daily sync-up and progress updates",
+    "status": "scheduled",
+    "created_at": "2024-12-10T10:00:00Z",
+    "updated_at": "2024-12-10T10:00:00Z"
+  },
+  {
+    "meeting_id": "m002",
+    "title": "Client Quarterly Review",
+    "date": "2024-12-17",
+    "time": "14:00",
+    "duration_minutes": 90,
+    "attendees": [
+      "alice.brown@clientcorp.com",
+      "robert.white@clientcorp.com",
+      "sarah.johnson@company.com"
+    ],
+    "location": "Virtual - Zoom",
+    "description": "Q4 performance review and 2025 planning",
+    "status": "scheduled",
+    "created_at": "2024-12-12T15:30:00Z",
+    "updated_at": "2024-12-12T15:30:00Z"
+  },
+  {
+    "meeting_id": "m003",
+    "title": "Product Strategy Meeting",
+    "date": "2024-12-18",
+    "time": "10:30",
+    "duration_minutes": 120,
+    "attendees": [
+      "david.wilson@company.com",
+      "emily.davis@company.com",
+      "alex.martinez@company.com",
+      "john.smith@company.com"
+    ],
+    "location": "Executive Boardroom",
+    "description": "2025 product roadmap and feature prioritization",
+    "status": "scheduled",
+    "created_at": "2024-12-13T09:15:00Z",
+    "updated_at": "2024-12-14T11:20:00Z"
+  },
+  {
+    "meeting_id": "m004",
+    "title": "Weekly Marketing Sync",
+    "date": "2024-12-18",
+    "time": "15:00",
+    "duration_minutes": 45,
+    "attendees": [
+      "lisa.thompson@company.com",
+      "mark.anderson@company.com",
+      "jennifer.garcia@company.com"
+    ],
+    "location": "Marketing Conference Room",
+    "description": "Campaign performance review and upcoming initiatives",
+    "status": "scheduled",
+    "created_at": "2024-12-11T16:00:00Z",
+    "updated_at": "2024-12-11T16:00:00Z"
+  },
+  {
+    "meeting_id": "m005",
+    "title": "Budget Planning Session",
+    "date": "2024-12-19",
+    "time": "09:30",
+    "duration_minutes": 180,
+    "attendees": [
+      "finance@company.com",
+      "cfo@company.com",
+      "department-heads@company.com"
+    ],
+    "location": "Finance Department",
+    "description": "Annual budget review and 2025 allocation planning",
+    "status": "scheduled",
+    "created_at": "2024-12-05T14:00:00Z",
+    "updated_at": "2024-12-15T10:30:00Z"
+  },
+  {
+    "meeting_id": "m006",
+    "title": "Customer Interview - Tech Startup",
+    "date": "2024-12-19",
+    "time": "13:00",
+    "duration_minutes": 60,
+    "attendees": [
+      "startup.ceo@techcompany.io",
+      "research@company.com"
+    ],
+    "location": "Virtual - Google Meet",
+    "description": "User research interview for new feature validation",
+    "status": "scheduled",
+    "created_at": "2024-12-16T08:45:00Z",
+    "updated_at": "2024-12-16T08:45:00Z"
+  },
+  {
+    "meeting_id": "m007",
+    "title": "1:1 with Sarah",
+    "date": "2024-12-20",
+    "time": "11:00",
+    "duration_minutes": 30,
+    "attendees": [
+      "sarah.johnson@company.com"
+    ],
+    "location": "Manager's Office",
+    "description": "Monthly one-on-one check-in and career development",
+    "status": "scheduled",
+    "created_at": "2024-12-13T12:00:00Z",
+    "updated_at": "2024-12-13T12:00:00Z"
+  },
+  {
+    "meeting_id": "m008",
+    "title": "Security Review Meeting",
+    "date": "2024-12-20",
+    "time": "14:30",
+    "duration_minutes": 75,
+    "attendees": [
+      "security@company.com",
+      "devops@company.com",
+      "compliance@company.com"
+    ],
+    "location": "Secure Conference Room B",
+    "description": "Monthly security audit and compliance review",
+    "status": "scheduled",
+    "created_at": "2024-12-14T10:15:00Z",
+    "updated_at": "2024-12-14T10:15:00Z"
+  },
+  {
+    "meeting_id": "m009",
+    "title": "Team Lunch - Holiday Celebration",
+    "date": "2024-12-20",
+    "time": "12:00",
+    "duration_minutes": 90,
+    "attendees": [
+      "all-team@company.com"
+    ],
+    "location": "Giovanni's Italian Restaurant",
+    "description": "End of year team celebration lunch",
+    "status": "scheduled",
+    "created_at": "2024-12-01T15:30:00Z",
+    "updated_at": "2024-12-10T09:20:00Z"
+  },
+  {
+    "meeting_id": "m010",
+    "title": "Vendor Negotiation - Cloud Services",
+    "date": "2024-12-23",
+    "time": "10:00",
+    "duration_minutes": 60,
+    "attendees": [
+      "procurement@company.com",
+      "aws.rep@amazon.com",
+      "it-director@company.com"
+    ],
+    "location": "Virtual - Microsoft Teams",
+    "description": "Annual contract renewal and pricing negotiation",
+    "status": "scheduled",
+    "created_at": "2024-12-16T11:30:00Z",
+    "updated_at": "2024-12-16T14:45:00Z"
+  },
+  {
+    "meeting_id": "m011",
+    "title": "Code Review Session",
+    "date": "2024-12-16",
+    "time": "16:00",
+    "duration_minutes": 45,
+    "attendees": [
+      "senior.dev@company.com",
+      "junior.dev@company.com",
+      "tech.lead@company.com"
+    ],
+    "location": "Development Room",
+    "description": "Weekly code review and best practices discussion",
+    "status": "completed",
+    "created_at": "2024-12-09T13:20:00Z",
+    "updated_at": "2024-12-16T16:45:00Z"
+  },
+  {
+    "meeting_id": "m012",
+    "title": "Project Kickoff - Mobile App",
+    "date": "2024-12-13",
+    "time": "09:00",
+    "duration_minutes": 120,
+    "attendees": [
+      "project.manager@company.com",
+      "mobile.dev@company.com",
+      "ui.designer@company.com",
+      "product.owner@company.com"
+    ],
+    "location": "Innovation Lab",
+    "description": "New mobile application project initiation",
+    "status": "completed",
+    "created_at": "2024-12-06T10:00:00Z",
+    "updated_at": "2024-12-13T11:30:00Z"
+  },
+  {
+    "meeting_id": "m013",
+    "title": "Cancelled: Vendor Demo",
+    "date": "2024-12-15",
+    "time": "15:00",
+    "duration_minutes": 60,
+    "attendees": [
+      "vendor.sales@solutionsinc.com"
+    ],
+    "location": "Demo Room",
+    "description": "CRM software demonstration - cancelled due to scheduling conflict",
+    "status": "cancelled",
+    "created_at": "2024-12-08T14:20:00Z",
+    "updated_at": "2024-12-14T16:30:00Z"
+  },
+  {
+    "meeting_id": "m014",
+    "title": "Board Meeting Preparation",
+    "date": "2025-01-03",
+    "time": "08:30",
+    "duration_minutes": 90,
+    "attendees": [
+      "ceo@company.com",
+      "cfo@company.com",
+      "cto@company.com",
+      "exec.assistant@company.com"
+    ],
+    "location": "Executive Suite",
+    "description": "Q4 board presentation preparation and rehearsal",
+    "status": "scheduled",
+    "created_at": "2024-12-16T12:15:00Z",
+    "updated_at": "2024-12-16T12:15:00Z"
+  },
+  {
+    "meeting_id": "m015",
+    "title": "New Employee Onboarding",
+    "date": "2025-01-06",
+    "time": "10:00",
+    "duration_minutes": 180,
+    "attendees": [
+      "hr@company.com",
+      "new.hire@company.com",
+      "buddy@company.com"
+    ],
+    "location": "HR Training Room",
+    "description": "Comprehensive onboarding for new software engineer",
+    "status": "scheduled",
+    "created_at": "2024-12-15T09:30:00Z",
+    "updated_at": "2024-12-15T09:30:00Z"
+  }
+]

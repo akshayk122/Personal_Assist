@@ -209,7 +209,7 @@ def main():
     
     # Process query
     if send_button and user_query.strip():
-        with st.spinner("🤔 Thinking..."):
+        with st.spinner("🤔 Thinking....."):
             # Send query to orchestrator
             response = asyncio.run(send_query_to_orchestrator(user_query.strip()))
             

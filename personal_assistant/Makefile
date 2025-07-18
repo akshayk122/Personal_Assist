@@ -1,7 +1,7 @@
 # Personal Assistant Makefile
 # Provides common development tasks using uv
 
-.PHONY: help install install-dev test lint format clean servers meeting expense orchestrator
+.PHONY: help install install-dev test lint format clean servers meeting expense orchestrator streamlit demo
 
 # Default target
 help:
@@ -23,6 +23,8 @@ help:
 	@echo "  meeting      - Start meeting server (port 8100)"
 	@echo "  expense      - Start expense server (port 8200)"
 	@echo "  orchestrator - Start orchestrator server (port 8300)"
+	@echo "  streamlit    - Start Streamlit UI (port 8501)"
+	@echo "  demo         - Run demo script to test the system"
 	@echo ""
 	@echo "Usage: make <command>"
 
@@ -96,6 +98,14 @@ expense:
 orchestrator:
 	@echo "🤖 Starting Orchestrator Server (port 8300)..."
 	uv run python servers/orchestrator_server.py
+
+streamlit:
+	@echo "💻 Starting Streamlit UI (port 8501)..."
+	uv run python run_streamlit.py
+
+demo:
+	@echo "🧪 Running Personal Assistant Demo..."
+	uv run python demo.py
 
 # Alternative server commands using project scripts
 meeting-script:

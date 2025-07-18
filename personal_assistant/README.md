@@ -21,7 +21,10 @@ make meeting      # Terminal 1: Meeting Manager (port 8100)
 make expense      # Terminal 2: Expense Tracker (port 8200) 
 make orchestrator # Terminal 3: Orchestrator (port 8300)
 
-# 5. Test the system
+# 5. Launch Streamlit UI (4th terminal - optional)
+make streamlit    # Terminal 4: Web UI (port 8501)
+
+# 6. Test the system
 uv run python -c "
 import asyncio
 from acp_sdk.client import Client
@@ -69,6 +72,13 @@ The system consists of three main ACP servers:
 - 🔗 Multi-agent coordination for complex queries
 - 📋 Intelligent routing to appropriate specialists
 - 🧠 Context-aware response synthesis
+
+### Web Interface
+- 💻 Modern Streamlit-based UI
+- 🎨 Clean, intuitive chat interface
+- 📊 Real-time server status monitoring
+- 💡 Example queries and quick actions
+- 📱 Responsive design for desktop and mobile
 
 ## 📁 Project Structure
 
@@ -180,7 +190,34 @@ uv run orchestrator-server
 
 ## 📖 Usage Examples
 
-### Using ACP SDK Client
+### Using Streamlit Web UI (Recommended)
+
+1. **Start all servers** (in separate terminals):
+   ```bash
+   make meeting      # Terminal 1
+   make expense      # Terminal 2  
+   make orchestrator # Terminal 3
+   ```
+
+2. **Launch the web interface**:
+   ```bash
+   make streamlit    # Terminal 4
+   ```
+
+3. **Open your browser** to `http://localhost:8501`
+
+4. **Start chatting!** Try these example queries:
+   - "Schedule a team standup tomorrow at 9 AM"
+   - "I spent $25 on lunch at Subway today"
+   - "What meetings do I have this week and how much did I spend on food?"
+
+The web UI provides:
+- 💬 **Interactive chat interface** with your personal assistant
+- 📊 **Real-time server status** monitoring
+- 💡 **Example queries** for quick actions  
+- 📱 **Mobile-friendly** responsive design
+
+### Using ACP SDK Client (Programmatic)
 
 ```python
 import asyncio

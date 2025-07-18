@@ -207,9 +207,9 @@ def main():
             # Send query to orchestrator
             response = asyncio.run(send_query_to_orchestrator(user_query.strip()))
             
-            # Add to chat history
+            # Replace chat history with only the new conversation (clear previous)
             timestamp = datetime.now().strftime("%H:%M:%S")
-            st.session_state.chat_history.append((timestamp, user_query.strip(), response))
+            st.session_state.chat_history = [(timestamp, user_query.strip(), response)]
             
             # Clear input by changing the key (forces widget recreation)
             st.session_state.input_key += 1

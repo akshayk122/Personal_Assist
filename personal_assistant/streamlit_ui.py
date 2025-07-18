@@ -31,10 +31,9 @@ if 'server_status' not in st.session_state:
         'meeting': 'unknown', 
         'expense': 'unknown'
     }
-if 'user_input' not in st.session_state:
-    st.session_state.user_input = ''
-if 'clear_input' not in st.session_state:
-    st.session_state.clear_input = False
+if 'input_key' not in st.session_state:
+    st.session_state.input_key = 0
+
 
 async def check_server_status(url: str) -> bool:
     """Check if a server is running"""
@@ -178,27 +177,20 @@ def main():
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        # Clear input if requested
-        if st.session_state.clear_input:
-            st.session_state.user_input = ''
-            st.session_state.clear_input = False
-        
         # Handle example query selection
+        input_value = ""
         if 'current_query' in st.session_state:
-            st.session_state.user_input = st.session_state.current_query
+            input_value = st.session_state.current_query
             del st.session_state.current_query
         
-        # Query input
+        # Query input (using dynamic key to force clear)
         user_query = st.text_area(
             "💭 What can I help you with?",
-            value=st.session_state.user_input,
+            value=input_value,
             height=100,
             placeholder="Ask about meetings, expenses, or anything else...",
-            key="query_input"
+            key=f"query_input_{st.session_state.input_key}"
         )
-        
-        # Update session state with current input
-        st.session_state.user_input = user_query
     
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)  # Spacer
@@ -219,8 +211,8 @@ def main():
             timestamp = datetime.now().strftime("%H:%M:%S")
             st.session_state.chat_history.append((timestamp, user_query.strip(), response))
             
-            # Clear the input field for next query
-            st.session_state.clear_input = True
+            # Clear input by changing the key (forces widget recreation)
+            st.session_state.input_key += 1
             
             # Rerun to update chat display
             st.rerun()

@@ -219,6 +219,9 @@ def main():
             timestamp = datetime.now().strftime("%H:%M:%S")
             st.session_state.chat_history.append((timestamp, user_query.strip(), response))
             
+            # Clear the input field for next query
+            st.session_state.clear_input = True
+            
             # Rerun to update chat display
             st.rerun()
     

@@ -121,7 +121,19 @@ def display_example_queries():
         with st.sidebar.expander(category):
             for query in queries:
                 if st.button(f"📝 {query}", key=f"example_{query[:20]}"):
-                    st.session_state.current_query = query
+                    # Process the example query immediately
+                    with st.spinner("🤔 Thinking..."):
+                        response = asyncio.run(send_query_to_orchestrator(query))
+                        
+                        # Replace chat history with the example query result
+                        timestamp = datetime.now().strftime("%H:%M:%S")
+                        st.session_state.chat_history = [(timestamp, query, response)]
+                        
+                        # Clear input by changing the key
+                        st.session_state.input_key += 1
+                        
+                        # Rerun to update display
+                        st.rerun()
 
 def display_chat_history():
     """Display chat history"""
@@ -177,16 +189,10 @@ def main():
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        # Handle example query selection
-        input_value = ""
-        if 'current_query' in st.session_state:
-            input_value = st.session_state.current_query
-            del st.session_state.current_query
-        
         # Query input (using dynamic key to force clear)
         user_query = st.text_area(
             "💭 What can I help you with?",
-            value=input_value,
+            value="",
             height=100,
             placeholder="Ask about meetings, expenses, or anything else...",
             key=f"query_input_{st.session_state.input_key}"

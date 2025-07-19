@@ -4,6 +4,10 @@ Handles database connections for expense management
 """
 
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 from typing import Optional, Dict, Any, List
 from supabase import create_client, Client
 from datetime import datetime
@@ -25,13 +29,24 @@ class SupabaseManager:
         """Initialize the Supabase client"""
         if not self.supabase_url or not self.supabase_key:
             logger.warning("Supabase credentials not found in environment variables")
-            logger.warning("Please set SUPABASE_URL and SUPABASE_ANON_KEY")
+            logger.warning("Please set SUPABASE_URL and SUPABASE_API_KEY")
             return
         
         try:
+            # Print URL for debugging (masking most of it)
+            safe_url = self.supabase_url[:20] + "..." if self.supabase_url else "None"
+            print(f"[Supabase] Initializing with URL: {safe_url}")
+            
+            # Ensure URL starts with https://
+            if self.supabase_url and not self.supabase_url.startswith("https://"):
+                self.supabase_url = "https://" + self.supabase_url
+                print(f"[Supabase] Added https:// prefix to URL")
+            
             self.client = create_client(self.supabase_url, self.supabase_key)
+            print("[Supabase] Client initialized successfully")
             logger.info("Supabase client initialized successfully")
         except Exception as e:
+            print(f"[Supabase] Initialization error: {str(e)}")
             logger.error(f"Failed to initialize Supabase client: {str(e)}")
             self.client = None
     
@@ -41,7 +56,13 @@ class SupabaseManager:
     
     def add_expense(self, expense_data: Dict[str, Any]) -> str:
         """Add a new expense to Supabase"""
+        print("[Supabase] Starting expense addition...")
+        print(f"[Supabase] Expense data: {expense_data}")
+        
         if not self.is_connected():
+            print("[Supabase] ERROR: Client not initialized")
+            print(f"[Supabase] URL Status: {'SET' if self.supabase_url else 'MISSING'}")
+            print(f"[Supabase] API Key Status: {'SET' if self.supabase_key else 'MISSING'}")
             raise Exception("Supabase client not initialized. Check your credentials.")
         
         try:
@@ -63,13 +84,16 @@ class SupabaseManager:
                 "created_at": datetime.now().isoformat()
             }
             
+            print("[Supabase] Attempting database insertion...")
             # Insert into Supabase
             result = self.client.table("expenses").insert(supabase_data).execute()
             
             if result.data:
-                logger.info(f"Expense {expense_id} added successfully to Supabase")
+                print(f"[Supabase] SUCCESS: Expense {expense_id} added to database")
+                print(f"[Supabase] Response data: {result.data}")
                 return expense_id
             else:
+                print("[Supabase] ERROR: Insert returned no data")
                 raise Exception("Failed to insert expense into Supabase")
                 
         except Exception as e:

@@ -47,6 +47,7 @@ def add_expense(
     Example:
         add_expense(12.50, "food", "Subway sandwich", "2024-01-15", "credit", "lunch", "quick-meal")
     """
+    print(f"[MCP Tool] add_expense called with: amount={amount}, category={category}, description={description}")
     try:
         # Use today's date if not provided
         if not date:
@@ -66,16 +67,35 @@ def add_expense(
             "is_recurring": False,
             "tags": tag_list
         }
+        print(f"[MCP Tool] Prepared expense data: {expense_data}")
         
         # Try to add to Supabase first, fallback to JSON if Supabase fails
         try:
+            print("[MCP Tool] Checking Supabase connection...")
+            print(f"[MCP Tool] Supabase URL: {'SET' if supabase_manager.supabase_url else 'MISSING'}")
+            print(f"[MCP Tool] Supabase Key: {'SET' if supabase_manager.supabase_key else 'MISSING'}")
+            print(f"[MCP Tool] Supabase Client: {'INITIALIZED' if supabase_manager.client else 'NOT INITIALIZED'}")
+            
             if supabase_manager.is_connected():
+                print("[MCP Tool] Supabase connected, attempting to add expense...")
                 expense_id = supabase_manager.add_expense(expense_data)
+                print(f"[MCP Tool] Successfully added to Supabase with ID: {expense_id}")
                 return f"💾 Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
             else:
-                # Fallback to JSON file
-                expense_id = data_manager.add_expense(expense_data)
-                return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Supabase not available)"
+                print("[MCP Tool] Supabase not connected, attempting to reinitialize...")
+                # Try to reinitialize the connection
+                supabase_manager._initialize_client()
+                if supabase_manager.is_connected():
+                    print("[MCP Tool] Reinitialized successfully, adding expense...")
+                    expense_id = supabase_manager.add_expense(expense_data)
+                    print(f"[MCP Tool] Successfully added to Supabase with ID: {expense_id}")
+                    return f"💾 Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
+                else:
+                    print("[MCP Tool] Reinitialization failed, falling back to JSON...")
+                    # Fallback to JSON file
+                    expense_id = data_manager.add_expense(expense_data)
+                    print(f"[MCP Tool] Added to JSON with ID: {expense_id}")
+                    return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Supabase not available)"
         except Exception as db_error:
             # Fallback to JSON file if Supabase fails
             expense_id = data_manager.add_expense(expense_data)

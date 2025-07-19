@@ -547,5 +547,57 @@
     ],
     "expense_id": "2ff22f3b-09a7-4d42-86d7-0568a553a86d",
     "created_at": "2025-07-18T20:47:03.506683"
+  },
+  {
+    "amount": 75.0,
+    "currency": "USD",
+    "category": "electronics",
+    "subcategory": "",
+    "description": "add  for electronics",
+    "date": "2025-07-18",
+    "payment_method": "credit",
+    "is_recurring": false,
+    "tags": [],
+    "expense_id": "469b9399-3eff-4f1c-96e0-6a01ffa0f871",
+    "created_at": "2025-07-18T21:15:22.053023"
+  },
+  {
+    "amount": 75.0,
+    "currency": "USD",
+    "category": "electronics",
+    "subcategory": "",
+    "description": "add  for electronics",
+    "date": "2025-07-18",
+    "payment_method": "credit",
+    "is_recurring": false,
+    "tags": [],
+    "expense_id": "9731eb1e-d1b2-452b-b243-7a505cd35e69",
+    "created_at": "2025-07-18T21:17:57.912901"
+  },
+  {
+    "amount": 75.0,
+    "currency": "USD",
+    "category": "electronics",
+    "subcategory": "",
+    "description": "add  for electronics",
+    "date": "2025-07-18",
+    "payment_method": "credit",
+    "is_recurring": false,
+    "tags": [],
+    "expense_id": "da43e9ed-ceb7-436c-986a-65dc3cd6717d",
+    "created_at": "2025-07-18T21:20:10.145716"
+  },
+  {
+    "amount": 50.0,
+    "currency": "USD",
+    "category": "electronics",
+    "subcategory": "",
+    "description": "add  for electronics",
+    "date": "2025-07-18",
+    "payment_method": "credit",
+    "is_recurring": false,
+    "tags": [],
+    "expense_id": "e49a1a63-af4d-43a3-9039-78b8ead8cd52",
+    "created_at": "2025-07-18T21:22:40.271631"
   }
 ]

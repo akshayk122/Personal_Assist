@@ -1,3 +1,12 @@
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 """
 ACP Server 2 - Expense Tracker Agent with MCP tools
 Port: 8200
@@ -6,7 +15,15 @@ Handles all expense-related operations using MCP tools
 Following the pattern from acp_demo.py
 """
 
+import os
+from dotenv import load_dotenv
 from collections.abc import AsyncGenerator
+
+# Load environment variables
+load_dotenv()
+print(f"[Expense Server] Environment check:")
+print(f"SUPABASE_URL: {'SET' if os.getenv('SUPABASE_URL') else 'MISSING'}")
+print(f"SUPABASE_API_KEY: {'SET' if os.getenv('SUPABASE_API_KEY') else 'MISSING'}")
 from acp_sdk.models import Message, MessagePart
 from acp_sdk.server import Server, RunYield, RunYieldResume
 from crewai import Agent, Task, Crew
@@ -70,143 +87,93 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
     
     try:
         # Extract user query
-        user_query = input[0].parts[0].content
+        user_query = input[0].parts[0].content.lower()
+        logger.debug(f"Processing user query: {user_query}")
         
-        # Create specialized expense management agent
-        expense_manager = Agent(
-            role="Personal Finance and Expense Management Specialist",
-            goal="Efficiently track, analyze, and optimize personal expenses and budgets",
-            backstory="""You are an expert personal finance assistant with extensive experience in 
-            expense tracking, budget management, and financial analytics. You excel at:
-            - Understanding natural language descriptions of expenses and financial requests
-            - Categorizing expenses accurately and consistently
-            - Providing insightful spending analysis and budget recommendations
-            - Identifying spending patterns and potential savings opportunities
-            - Creating clear and actionable financial reports and summaries
-            
-            You can perform comprehensive expense operations including adding, listing, analyzing, 
-            updating, and deleting expenses. You always provide valuable financial insights 
-            and proactively suggest improvements to spending habits and budget management.""",
-            verbose=True,
-            allow_delegation=False,
-            llm=llm,
-            max_retry_limit=3
-        )
-        
-        # Create task for expense management
-        expense_task = Task(
-            description=f"""
-            Process this expense-related request: "{user_query}"
-            
-            You have access to various expense management capabilities:
-            1. Adding new expenses with detailed categorization (amount, category, description, date, payment method)
-            2. Listing expenses with filtering by date, category, amount ranges
-            3. Generating comprehensive expense summaries and analytics by time periods
-            4. Updating existing expense details and categorization
-            5. Deleting incorrect or duplicate expenses
-            6. Analyzing budget status with recommendations and alerts
-            
-            Based on the user's request, determine the appropriate action and provide a 
-            comprehensive response. Consider the following:
-            
-            For expense recording: Extract amount, category, description, and other details
-            For listing requests: Apply appropriate filters and present results clearly
-            For analysis requests: Provide insights, trends, and actionable recommendations
-            For budget queries: Compare against typical spending patterns and provide guidance
-            
-            Always consider the financial context and provide helpful budgeting advice.
-            Suggest appropriate categories if the user doesn't specify them.
-            Flag unusual spending patterns or amount if noticed.
-            """,
-            expected_output="""
-            A detailed response that addresses the user's expense-related request. This should include:
-            - Clear acknowledgment of what was requested
-            - Appropriate expense operation results or financial analysis
-            - Relevant spending insights, trends, or budget recommendations
-            - Categorization suggestions or financial optimization tips
-            - If operations were performed, confirmation of success with relevant details
-            - Proactive suggestions for better expense management and budgeting
-            """,
-            agent=expense_manager,
-            verbose=True,
-            max_retry_limit=3
-        )
-        
-        # Execute the task
-        crew = Crew(
-            agents=[expense_manager],
-            tasks=[expense_task],
-            verbose=True
-        )
-        
-        # Run the crew and get results
-        result = await crew.kickoff_async()
-        
-        # Extract expense details from AI analysis
-        ai_response = str(result).lower()
-        
-        # Process the AI response to extract expense details
         try:
-            if "spent" in ai_response or "add" in ai_response or "record" in ai_response:
-                # Extract amount using regex
+            # Direct expense operations without AI analysis
+            if "$" in user_query or "spent" in user_query or "add" in user_query:
+                # Extract amount
                 import re
-                amount_match = re.search(r'\$?(\d+\.?\d*)', ai_response)
-                if amount_match:
-                    amount = float(amount_match.group(1))
-                    
-                    # Extract category (use default if not found)
-                    categories = ["food", "transportation", "entertainment", "utilities", "healthcare", "shopping"]
-                    category = next((cat for cat in categories if cat in ai_response), "other")
-                    
-                    # Get description (use everything after amount)
-                    desc_start = ai_response.find(str(amount)) + len(str(amount))
-                    description = ai_response[desc_start:].strip()[:100]  # Limit length
-                    
-                    # Add the expense
+                amount_match = re.search(r'\$?(\d+\.?\d*)', user_query)
+                if not amount_match:
+                    yield Message(parts=[MessagePart(content="❌ Could not find an amount in your request. Please specify the amount (e.g., $50).")])
+                    return
+                
+                amount = float(amount_match.group(1))
+                
+                # Extract category and description
+                # Remove the amount part to avoid confusion
+                text_without_amount = user_query.replace(amount_match.group(0), "").strip()
+                print(f"[Expense Server] Processing text: '{text_without_amount}'")
+                
+                # Look for category keywords
+                categories = {
+                    "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop"],
+                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery"],
+                    "transportation": ["transport", "gas", "fuel", "bus", "train", "taxi", "uber"],
+                    "entertainment": ["entertainment", "movie", "game", "concert", "show"],
+                    "utilities": ["utility", "electricity", "water", "internet", "phone bill"],
+                    "healthcare": ["health", "medical", "doctor", "medicine", "pharmacy"],
+                    "shopping": ["shopping", "clothes", "clothing", "shoes", "accessories"]
+                }
+                print("[Expense Server] Looking for category keywords...")
+                
+                # Find category from text
+                found_category = None
+                for cat, keywords in categories.items():
+                    if any(keyword in text_without_amount for keyword in keywords):
+                        found_category = cat
+                        print(f"[Expense Server] Found category: {cat} (matched keywords: {[k for k in keywords if k in text_without_amount]})")
+                        break
+                
+                category = found_category or "other"
+                description = text_without_amount
+                print(f"[Expense Server] Final category: {category}")
+                
+                logger.debug(f"Extracted: amount={amount}, category={category}, description={description}")
+                
+                # Add the expense
+                try:
                     expense_result = add_expense(
                         amount=amount,
                         category=category,
                         description=description
                     )
-                    
-                    response = f"""💰 **Expense Tracker Response:**
-
-{expense_result}
-
-{str(result)}
-"""
-                else:
-                    response = f"""💰 **Expense Tracker Response:**
-❌ Could not extract expense amount from the request.
-
-{str(result)}
-"""
+                    yield Message(parts=[MessagePart(content=expense_result)])
+                    return
+                except Exception as e:
+                    logger.error(f"Error adding expense: {str(e)}")
+                    yield Message(parts=[MessagePart(content=f"❌ Error adding expense: {str(e)}")])
             
-            elif "list" in ai_response or "show" in ai_response or "get" in ai_response:
-                # Handle listing/summary requests
-                if "summary" in ai_response:
-                    expense_result = get_expense_summary()
-                else:
-                    expense_result = list_expenses()
-                
-                response = f"""💰 **Expense Tracker Response:**
-
-{expense_result}
-
-{str(result)}
-"""
+            # Handle list/show expenses
+            elif "list" in user_query or "show" in user_query:
+                result = list_expenses()
+                yield Message(parts=[MessagePart(content=result)])
+                return
             
+            # Handle summary requests
+            elif "summary" in user_query:
+                result = get_expense_summary()
+                yield Message(parts=[MessagePart(content=result)])
+                return
+            
+            # Default help message
             else:
-                # Default response for other queries
-                response = f"""💰 **Expense Tracker Response:**
+                help_message = """💰 **Expense Tracker Help**
 
-{str(result)}
+Please use one of these formats:
+1. Add expense: "Add $X for Y" (e.g., "Add $50 for electronics")
+2. List expenses: "Show my expenses" or "List expenses"
+3. Get summary: "Show expense summary"
 
-Try these commands:
-- "I spent $X on Y"
-- "Show my expenses"
-- "Get expense summary"
-"""
+Available categories: electronics, food, transportation, entertainment, utilities, healthcare, shopping"""
+                yield Message(parts=[MessagePart(content=help_message)])
+                return
+                
+        except Exception as e:
+            logger.error(f"Error processing request: {str(e)}")
+            yield Message(parts=[MessagePart(content=f"❌ Error: {str(e)}")])
         except Exception as e:
             response = f"""💰 **Expense Tracker Response:**
 ❌ Error processing expense: {str(e)}

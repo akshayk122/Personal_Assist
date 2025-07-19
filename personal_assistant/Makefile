@@ -1,7 +1,7 @@
 # Personal Assistant Makefile
 # Provides common development tasks using uv
 
-.PHONY: help install install-dev test lint format clean servers meeting expense orchestrator streamlit demo
+.PHONY: help install install-dev test lint format clean servers meeting expense orchestrator streamlit demo test-supabase
 
 # Default target
 help:
@@ -25,6 +25,7 @@ help:
 	@echo "  orchestrator - Start orchestrator server (port 8300)"
 	@echo "  streamlit    - Start Streamlit UI (port 8501)"
 	@echo "  demo         - Run demo script to test the system"
+	@echo "  test-supabase - Test Supabase connection and integration"
 	@echo ""
 	@echo "Usage: make <command>"
 
@@ -106,6 +107,10 @@ streamlit:
 demo:
 	@echo "🧪 Running Personal Assistant Demo..."
 	uv run python demo.py
+
+test-supabase:
+	@echo "🔗 Testing Supabase Connection..."
+	uv run python test_supabase.py
 
 # Alternative server commands using project scripts
 meeting-script:

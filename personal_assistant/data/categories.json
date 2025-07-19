@@ -1,7 +1,7 @@
 {
   "expense_categories": [
     "food",
-    "transportation", 
+    "transportation",
     "entertainment",
     "utilities",
     "healthcare",
@@ -24,7 +24,7 @@
   ],
   "meeting_types": [
     "team-standup",
-    "client-meeting", 
+    "client-meeting",
     "presentation",
     "interview",
     "training",

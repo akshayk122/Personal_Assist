@@ -42,14 +42,15 @@ CREATE TRIGGER update_expenses_updated_at
 -- Enable Row Level Security (RLS)
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow all operations for authenticated users
--- You can modify these policies based on your security requirements
-CREATE POLICY "Allow all operations for authenticated users" ON expenses
-    FOR ALL USING (auth.role() = 'authenticated');
+-- For development, enable anonymous access
+-- In production, you should use proper authentication
+DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
+CREATE POLICY "Allow all operations for anonymous users" ON expenses FOR ALL USING (true);
 
--- For development, you might want to allow anonymous access
--- Uncomment the line below if you want to allow anonymous operations
--- CREATE POLICY "Allow all operations for anonymous users" ON expenses FOR ALL USING (true);
+-- Later, for production, you can switch to authenticated users only:
+-- DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
+-- CREATE POLICY "Allow all operations for authenticated users" ON expenses
+--     FOR ALL USING (auth.role() = 'authenticated');
 
 -- Create some sample data (optional)
 -- This matches the structure of your existing JSON data

@@ -142,35 +142,76 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         # Run the crew and get results
         result = await crew.kickoff_async()
         
-        # For now, we'll provide the AI response along with a note about MCP integration
-        response = f"""💰 **Expense Tracker Response:**
+        # Extract expense details from AI analysis
+        ai_response = str(result).lower()
+        
+        # Process the AI response to extract expense details
+        try:
+            if "spent" in ai_response or "add" in ai_response or "record" in ai_response:
+                # Extract amount using regex
+                import re
+                amount_match = re.search(r'\$?(\d+\.?\d*)', ai_response)
+                if amount_match:
+                    amount = float(amount_match.group(1))
+                    
+                    # Extract category (use default if not found)
+                    categories = ["food", "transportation", "entertainment", "utilities", "healthcare", "shopping"]
+                    category = next((cat for cat in categories if cat in ai_response), "other")
+                    
+                    # Get description (use everything after amount)
+                    desc_start = ai_response.find(str(amount)) + len(str(amount))
+                    description = ai_response[desc_start:].strip()[:100]  # Limit length
+                    
+                    # Add the expense
+                    expense_result = add_expense(
+                        amount=amount,
+                        category=category,
+                        description=description
+                    )
+                    
+                    response = f"""💰 **Expense Tracker Response:**
+
+{expense_result}
+
+{str(result)}
+"""
+                else:
+                    response = f"""💰 **Expense Tracker Response:**
+❌ Could not extract expense amount from the request.
+
+{str(result)}
+"""
+            
+            elif "list" in ai_response or "show" in ai_response or "get" in ai_response:
+                # Handle listing/summary requests
+                if "summary" in ai_response:
+                    expense_result = get_expense_summary()
+                else:
+                    expense_result = list_expenses()
+                
+                response = f"""💰 **Expense Tracker Response:**
+
+{expense_result}
+
+{str(result)}
+"""
+            
+            else:
+                # Default response for other queries
+                response = f"""💰 **Expense Tracker Response:**
 
 {str(result)}
 
----
-**Note:** This is the AI analysis of your expense request. In a full implementation, 
-the actual expense operations would be performed using the integrated MCP tools.
+Try these commands:
+- "I spent $X on Y"
+- "Show my expenses"
+- "Get expense summary"
+"""
+        except Exception as e:
+            response = f"""💰 **Expense Tracker Response:**
+❌ Error processing expense: {str(e)}
 
-🔧 **Available Operations:**
-- Add expenses with automatic categorization
-- List expenses by date/category/amount
-- Generate spending summaries and analytics
-- Update expense details and categories
-- Delete incorrect expenses
-- Analyze budget status with recommendations
-
-**Example Usage:**
-- "I spent $25 on dinner at Italian restaurant"
-- "Show me all food expenses this month"
-- "How much did I spend on transportation this quarter?"
-- "Give me a budget analysis for entertainment"
-
-**Analytics Features:**
-- Monthly/quarterly spending summaries
-- Category-wise expense breakdowns
-- Budget status with alerts
-- Spending pattern analysis
-- Financial recommendations
+{str(result)}
 """
         
         yield Message(parts=[MessagePart(content=response)])

@@ -36,7 +36,7 @@ Update your `.env` file with Supabase credentials:
 ```env
 # Supabase Configuration
 SUPABASE_URL=https://your-project-ref.supabase.co
-SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_API_KEY=your-anon-key-here
 ```
 
 ### 4. Create the Database Schema
@@ -144,7 +144,7 @@ CREATE POLICY "Allow all operations for authenticated users" ON expenses
 ### Common Issues
 
 **1. "Supabase client not initialized"**
-- Check your `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `.env`
+- Check your `SUPABASE_URL` and `SUPABASE_API_KEY` in `.env`
 - Ensure the values don't have quotes or extra spaces
 
 **2. "Table 'expenses' doesn't exist"**

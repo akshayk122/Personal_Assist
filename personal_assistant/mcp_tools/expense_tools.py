@@ -80,7 +80,7 @@ def add_expense(
                 print("[MCP Tool] Supabase connected, attempting to add expense...")
                 expense_id = supabase_manager.add_expense(expense_data)
                 print(f"[MCP Tool] Successfully added to Supabase with ID: {expense_id}")
-                return f"💾 Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
+                return f"Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
             else:
                 print("[MCP Tool] Supabase not connected, attempting to reinitialize...")
                 # Try to reinitialize the connection
@@ -89,17 +89,17 @@ def add_expense(
                     print("[MCP Tool] Reinitialized successfully, adding expense...")
                     expense_id = supabase_manager.add_expense(expense_data)
                     print(f"[MCP Tool] Successfully added to Supabase with ID: {expense_id}")
-                    return f"💾 Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
+                    return f"Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
                 else:
                     print("[MCP Tool] Reinitialization failed, falling back to JSON...")
                     # Fallback to JSON file
                     expense_id = data_manager.add_expense(expense_data)
                     print(f"[MCP Tool] Added to JSON with ID: {expense_id}")
-                    return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Supabase not available)"
+                    return f"Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Supabase not available)"
         except Exception as db_error:
             # Fallback to JSON file if Supabase fails
             expense_id = data_manager.add_expense(expense_data)
-            return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Database error: {str(db_error)})"
+            return f"Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Database error: {str(db_error)})"
         
     except ValueError as e:
         return f"Invalid amount format: {str(e)}"
@@ -147,7 +147,7 @@ def list_expenses(
                     filters["max_amount"] = max_amount
                 
                 expenses = supabase_manager.get_expenses(filters)
-                data_source = "💾 Supabase"
+                data_source = "Supabase"
             else:
                 # Fallback to JSON file
                 expenses = data_manager.get_expenses()
@@ -161,7 +161,7 @@ def list_expenses(
                     expenses = [e for e in expenses if e["category"] == category.lower()]
                 
                 expenses = [e for e in expenses if min_amount <= e["amount"] <= max_amount]
-                data_source = "📁 Local Storage"
+                data_source = "Local Storage"
         except Exception as db_error:
             # Fallback to JSON file if Supabase fails
             expenses = data_manager.get_expenses()
@@ -175,7 +175,7 @@ def list_expenses(
                 expenses = [e for e in expenses if e["category"] == category.lower()]
             
             expenses = [e for e in expenses if min_amount <= e["amount"] <= max_amount]
-            data_source = f"📁 Local Storage (DB Error: {str(db_error)})"
+            data_source = f"Local Storage (DB Error: {str(db_error)})"
         
         if not expenses:
             return "💰 No expenses found for the specified criteria."
@@ -191,21 +191,21 @@ def list_expenses(
         
         for expense in expenses:
             tags_str = ", ".join(expense.get("tags", []))
-            result += f"💸 **${expense['amount']:.2f}** - {expense['description']}\n"
-            result += f"   📅 {expense['date']}\n"
-            result += f"   🏷️ Category: {expense['category'].title()}"
+            result += f"${expense['amount']:.2f} - {expense['description']}\n"
+            result += f" {expense['date']}\n"
+            result += f"   Category: {expense['category'].title()}"
             if expense.get("subcategory"):
                 result += f" > {expense['subcategory']}"
             result += "\n"
-            result += f"   💳 Payment: {expense['payment_method'].title()}\n"
+            result += f"Payment: {expense['payment_method'].title()}\n"
             if tags_str:
-                result += f"   🏷️ Tags: {tags_str}\n"
+                result += f"Tags: {tags_str}\n"
             result += f"ID: {expense['expense_id']}\n\n"
         
         return result
         
     except Exception as e:
-        return f"❌ Error listing expenses: {str(e)}"
+        return f"Error listing expenses: {str(e)}"
 
 @mcp.tool()
 def get_expense_summary(period: str = "month", group_by: str = "category") -> str:
@@ -241,16 +241,16 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
             if supabase_manager.is_connected():
                 filters = {"start_date": start_date} if start_date else None
                 summary = supabase_manager.get_expense_summary(filters)
-                data_source = "💾 Supabase"
+                data_source = "Supabase"
                 
                 if summary["total_expenses"] == 0:
-                    return "💰 No expenses found to summarize."
+                    return "No expenses found to summarize."
             else:
                 # Fallback to JSON file processing
                 expenses = data_manager.get_expenses()
                 
                 if not expenses:
-                    return "💰 No expenses found to summarize."
+                    return "No expenses found to summarize."
                 
                 # Filter by date if needed
                 if start_date:
@@ -275,13 +275,13 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
                     "categories": categories,
                     "average_expense": total_amount / total_expenses if total_expenses > 0 else 0.0
                 }
-                data_source = "📁 Local Storage"
+                data_source = "Local Storage"
         except Exception as db_error:
             # Fallback to JSON processing if Supabase fails
             expenses = data_manager.get_expenses()
             
             if not expenses:
-                return "💰 No expenses found to summarize."
+                return "No expenses found to summarize."
             
             # Filter by date if needed
             if start_date:
@@ -306,13 +306,13 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
                 "categories": categories,
                 "average_expense": total_amount / total_expenses if total_expenses > 0 else 0.0
             }
-            data_source = f"📁 Local Storage (DB Error: {str(db_error)})"
+            data_source = f"Local Storage (DB Error: {str(db_error)})"
         
         # Format the summary response using the calculated summary
-        result = f"📊 Expense Summary - Last {period.title()} | Source: {data_source}\n"
-        result += f"💰 Total Spent: ${summary['total_amount']:.2f}\n"
-        result += f"📈 Number of Transactions: {summary['total_expenses']}\n"
-        result += f"📊 Average per Transaction: ${summary['average_expense']:.2f}\n\n"
+        result = f"Expense Summary - Last {period.title()} | Source: {data_source}\n"
+        result += f"Total Spent: ${summary['total_amount']:.2f}\n"
+        result += f"Number of Transactions: {summary['total_expenses']}\n"
+        result += f"Average per Transaction: ${summary['average_expense']:.2f}\n\n"
         
         result += f"Breakdown by Category:\n"
         
@@ -321,12 +321,12 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
         
         for category_name, category_data in sorted_categories:
             percentage = (category_data['amount'] / summary['total_amount']) * 100
-            result += f"  💸 {category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
+            result += f"{category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
         
         return result
         
     except Exception as e:
-        return f"❌ Error generating expense summary: {str(e)}"
+        return f"Error generating expense summary: {str(e)}"
 
 @mcp.tool()
 def update_expense(expense_id: str, updates: str) -> str:
@@ -349,14 +349,14 @@ def update_expense(expense_id: str, updates: str) -> str:
         success = data_manager.update_expense(expense_id, update_data)
         
         if success:
-            return f"✅ Expense {expense_id} updated successfully."
+            return f"Expense {expense_id} updated successfully."
         else:
-            return f"❌ Expense {expense_id} not found."
+            return f"Expense {expense_id} not found."
             
     except json.JSONDecodeError:
-        return "❌ Invalid JSON format for updates."
+        return "Invalid JSON format for updates."
     except Exception as e:
-        return f"❌ Error updating expense: {str(e)}"
+        return f"Error updating expense: {str(e)}"
 
 @mcp.tool()
 def delete_expense(expense_id: str) -> str:
@@ -375,12 +375,12 @@ def delete_expense(expense_id: str) -> str:
         success = data_manager.delete_expense(expense_id)
         
         if success:
-            return f"✅ Expense {expense_id} deleted successfully."
+            return f"Expense {expense_id} deleted successfully."
         else:
-            return f"❌ Expense {expense_id} not found."
+            return f"Expense {expense_id} not found."
             
     except Exception as e:
-        return f"❌ Error deleting expense: {str(e)}"
+        return f"Error deleting expense: {str(e)}"
 
 @mcp.tool()
 def get_budget_status(category: str = "all", period: str = "month") -> str:
@@ -444,10 +444,10 @@ def get_budget_status(category: str = "all", period: str = "month") -> str:
             "other": {"week": 50, "month": 200, "quarter": 600, "year": 2400}
         }
         
-        result = f"📊 Budget Status for {category.title()} - {period_label.title()}\n\n"
-        result += f"💰 Total Spent: ${total_spent:.2f}\n"
-        result += f"📈 Transactions: {transaction_count}\n"
-        result += f"📊 Average per Transaction: ${avg_per_transaction:.2f}\n\n"
+        result = f"Budget Status for {category.title()} - {period_label.title()}\n\n"
+        result += f"Total Spent: ${total_spent:.2f}\n"
+        result += f"Transactions: {transaction_count}\n"
+        result += f"Average per Transaction: ${avg_per_transaction:.2f}\n\n"
         
         # Budget analysis for specific category
         if category != "all" and category in budget_limits and period in budget_limits[category]:
@@ -455,26 +455,26 @@ def get_budget_status(category: str = "all", period: str = "month") -> str:
             remaining = budget_limit - total_spent
             percentage_used = (total_spent / budget_limit) * 100
             
-            result += f"🎯 Suggested Budget: ${budget_limit:.2f}\n"
-            result += f"💸 Amount Used: ${total_spent:.2f} ({percentage_used:.1f}%)\n"
-            result += f"💰 Remaining: ${remaining:.2f}\n\n"
+            result += f"Suggested Budget: ${budget_limit:.2f}\n"
+            result += f"Amount Used: ${total_spent:.2f} ({percentage_used:.1f}%)\n"
+            result += f"Remaining: ${remaining:.2f}\n\n"
             
             # Recommendations
             if percentage_used < 50:
-                result += "✅ Great job! You're well within budget.\n"
+                result += "Great job! You're well within budget.\n"
             elif percentage_used < 80:
-                result += "⚠️ You're on track but monitor spending.\n"
+                result += "You're on track but monitor spending.\n"
             elif percentage_used < 100:
-                result += "🚨 Warning: You're approaching your budget limit.\n"
+                result += "Warning: You're approaching your budget limit.\n"
             else:
-                result += "🚨 Alert: You've exceeded the suggested budget!\n"
+                result += "Alert: You've exceeded the suggested budget!\n"
         else:
-            result += "💡 Tip: Consider setting a budget for better expense tracking.\n"
+            result += "Tip: Consider setting a budget for better expense tracking.\n"
         
         return result
         
     except Exception as e:
-        return f"❌ Error getting budget status: {str(e)}"
+        return f"Error getting budget status: {str(e)}"
 
 if __name__ == "__main__":
     mcp.run(transport="stdio") 

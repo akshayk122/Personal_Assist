@@ -28,6 +28,9 @@ uuid
 # Web UI
 streamlit>=1.28.0
 
+# Database
+supabase>=2.3.0
+
 # JSON handling
 orjson>=3.9.0
 

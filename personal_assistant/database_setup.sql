@@ -1,0 +1,73 @@
+-- Supabase Database Setup for Personal Assistant
+-- Run this SQL in your Supabase SQL Editor
+
+-- Create expenses table
+CREATE TABLE IF NOT EXISTS expenses (
+    id BIGSERIAL PRIMARY KEY,
+    expense_id TEXT UNIQUE NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency TEXT DEFAULT 'USD',
+    category TEXT NOT NULL,
+    subcategory TEXT DEFAULT '',
+    description TEXT NOT NULL,
+    date DATE NOT NULL,
+    payment_method TEXT DEFAULT 'credit',
+    is_recurring BOOLEAN DEFAULT FALSE,
+    tags JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for better query performance
+CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
+CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);
+CREATE INDEX IF NOT EXISTS idx_expenses_amount ON expenses(amount);
+CREATE INDEX IF NOT EXISTS idx_expenses_expense_id ON expenses(expense_id);
+
+-- Create a function to automatically update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create trigger to automatically update updated_at
+CREATE TRIGGER update_expenses_updated_at 
+    BEFORE UPDATE ON expenses 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow all operations for authenticated users
+-- You can modify these policies based on your security requirements
+CREATE POLICY "Allow all operations for authenticated users" ON expenses
+    FOR ALL USING (auth.role() = 'authenticated');
+
+-- For development, you might want to allow anonymous access
+-- Uncomment the line below if you want to allow anonymous operations
+-- CREATE POLICY "Allow all operations for anonymous users" ON expenses FOR ALL USING (true);
+
+-- Create some sample data (optional)
+-- This matches the structure of your existing JSON data
+INSERT INTO expenses (
+    expense_id, amount, currency, category, subcategory, description, 
+    date, payment_method, is_recurring, tags
+) VALUES 
+    ('sample-001', 12.50, 'USD', 'food', 'lunch', 'Subway sandwich and drink', 
+     '2024-12-16', 'credit', false, '["quick-meal", "weekday-lunch"]'::jsonb),
+    ('sample-002', 45.80, 'USD', 'transportation', 'gas', 'Shell gas station - full tank', 
+     '2024-12-15', 'debit', false, '["car", "fuel", "commute"]'::jsonb),
+    ('sample-003', 89.99, 'USD', 'entertainment', 'dining', 'Dinner at Giovanni''s Italian Restaurant', 
+     '2024-12-14', 'credit', false, '["dinner", "italian", "date-night"]'::jsonb)
+ON CONFLICT (expense_id) DO NOTHING;
+
+-- Grant necessary permissions
+-- These are typically handled automatically in Supabase, but included for completeness
+GRANT ALL ON expenses TO authenticated;
+GRANT ALL ON expenses TO anon;
+GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon; 

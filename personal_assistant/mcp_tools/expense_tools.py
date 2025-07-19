@@ -14,6 +14,7 @@ from collections import defaultdict
 # Add parent directory to path to import utils
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.data_manager import DataManager
+from utils.supabase_config import supabase_manager
 
 # Initialize MCP server
 mcp = FastMCP()
@@ -66,8 +67,19 @@ def add_expense(
             "tags": tag_list
         }
         
-        expense_id = data_manager.add_expense(expense_data)
-        return f"Expense of ${amount:.2f} for '{description}' added successfully with ID: {expense_id}"
+        # Try to add to Supabase first, fallback to JSON if Supabase fails
+        try:
+            if supabase_manager.is_connected():
+                expense_id = supabase_manager.add_expense(expense_data)
+                return f"💾 Expense of ${amount:.2f} for '{description}' added to Supabase with ID: {expense_id}"
+            else:
+                # Fallback to JSON file
+                expense_id = data_manager.add_expense(expense_data)
+                return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Supabase not available)"
+        except Exception as db_error:
+            # Fallback to JSON file if Supabase fails
+            expense_id = data_manager.add_expense(expense_data)
+            return f"📁 Expense of ${amount:.2f} for '{description}' added to local storage with ID: {expense_id} (Database error: {str(db_error)})"
         
     except ValueError as e:
         return f"Invalid amount format: {str(e)}"
@@ -98,17 +110,52 @@ def list_expenses(
         list_expenses("2024-01-01", "2024-01-31", "food", 10, 50)
     """
     try:
-        expenses = data_manager.get_expenses()
-        
-        # Apply filters
-        if start_date:
-            expenses = [e for e in expenses if e["date"] >= start_date]
-        if end_date:
-            expenses = [e for e in expenses if e["date"] <= end_date]
-        if category != "all":
-            expenses = [e for e in expenses if e["category"] == category.lower()]
-        
-        expenses = [e for e in expenses if min_amount <= e["amount"] <= max_amount]
+        # Try to get from Supabase first, fallback to JSON if needed
+        try:
+            if supabase_manager.is_connected():
+                # Build filters for Supabase
+                filters = {}
+                if start_date:
+                    filters["start_date"] = start_date
+                if end_date:
+                    filters["end_date"] = end_date
+                if category != "all":
+                    filters["category"] = category.lower()
+                if min_amount > 0:
+                    filters["min_amount"] = min_amount
+                if max_amount < 999999:
+                    filters["max_amount"] = max_amount
+                
+                expenses = supabase_manager.get_expenses(filters)
+                data_source = "💾 Supabase"
+            else:
+                # Fallback to JSON file
+                expenses = data_manager.get_expenses()
+                
+                # Apply filters manually for JSON data
+                if start_date:
+                    expenses = [e for e in expenses if e["date"] >= start_date]
+                if end_date:
+                    expenses = [e for e in expenses if e["date"] <= end_date]
+                if category != "all":
+                    expenses = [e for e in expenses if e["category"] == category.lower()]
+                
+                expenses = [e for e in expenses if min_amount <= e["amount"] <= max_amount]
+                data_source = "📁 Local Storage"
+        except Exception as db_error:
+            # Fallback to JSON file if Supabase fails
+            expenses = data_manager.get_expenses()
+            
+            # Apply filters manually for JSON data
+            if start_date:
+                expenses = [e for e in expenses if e["date"] >= start_date]
+            if end_date:
+                expenses = [e for e in expenses if e["date"] <= end_date]
+            if category != "all":
+                expenses = [e for e in expenses if e["category"] == category.lower()]
+            
+            expenses = [e for e in expenses if min_amount <= e["amount"] <= max_amount]
+            data_source = f"📁 Local Storage (DB Error: {str(db_error)})"
         
         if not expenses:
             return "💰 No expenses found for the specified criteria."
@@ -120,7 +167,7 @@ def list_expenses(
         expenses.sort(key=lambda x: x["date"], reverse=True)
         
         # Format expenses list
-        result = f"💰 Found {len(expenses)} expense(s) | Total: ${total_amount:.2f}\n\n"
+        result = f"💰 Found {len(expenses)} expense(s) | Total: ${total_amount:.2f} | Source: {data_source}\n\n"
         
         for expense in expenses:
             tags_str = ", ".join(expense.get("tags", []))
@@ -155,11 +202,6 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
         get_expense_summary("month", "category")
     """
     try:
-        expenses = data_manager.get_expenses()
-        
-        if not expenses:
-            return "💰 No expenses found to summarize."
-        
         # Calculate date range based on period
         now = datetime.now()
         if period == "week":
@@ -172,46 +214,94 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
         elif period == "year":
             start_date = now.replace(month=1, day=1).strftime("%Y-%m-%d")
         else:
-            start_date = ""
+            start_date = None
         
-        # Filter expenses by period
-        if start_date:
-            expenses = [e for e in expenses if e["date"] >= start_date]
-        
-        if not expenses:
-            return f"💰 No expenses found for the last {period}."
-        
-        # Group expenses
-        grouped = defaultdict(float)
-        for expense in expenses:
-            if group_by == "category":
-                key = expense["category"].title()
-            elif group_by == "date":
-                key = expense["date"]
-            elif group_by == "payment_method":
-                key = expense["payment_method"].title()
+        # Try to get summary from Supabase first
+        try:
+            if supabase_manager.is_connected():
+                filters = {"start_date": start_date} if start_date else None
+                summary = supabase_manager.get_expense_summary(filters)
+                data_source = "💾 Supabase"
+                
+                if summary["total_expenses"] == 0:
+                    return "💰 No expenses found to summarize."
             else:
-                key = "All"
+                # Fallback to JSON file processing
+                expenses = data_manager.get_expenses()
+                
+                if not expenses:
+                    return "💰 No expenses found to summarize."
+                
+                # Filter by date if needed
+                if start_date:
+                    expenses = [e for e in expenses if e["date"] >= start_date]
+                
+                # Calculate summary manually
+                total_amount = sum(e["amount"] for e in expenses)
+                total_expenses = len(expenses)
+                
+                # Category breakdown
+                categories = {}
+                for expense in expenses:
+                    category = expense["category"]
+                    if category not in categories:
+                        categories[category] = {"count": 0, "amount": 0.0}
+                    categories[category]["count"] += 1
+                    categories[category]["amount"] += expense["amount"]
+                
+                summary = {
+                    "total_expenses": total_expenses,
+                    "total_amount": total_amount,
+                    "categories": categories,
+                    "average_expense": total_amount / total_expenses if total_expenses > 0 else 0.0
+                }
+                data_source = "📁 Local Storage"
+        except Exception as db_error:
+            # Fallback to JSON processing if Supabase fails
+            expenses = data_manager.get_expenses()
             
-            grouped[key] += expense["amount"]
+            if not expenses:
+                return "💰 No expenses found to summarize."
+            
+            # Filter by date if needed
+            if start_date:
+                expenses = [e for e in expenses if e["date"] >= start_date]
+            
+            # Calculate summary manually
+            total_amount = sum(e["amount"] for e in expenses)
+            total_expenses = len(expenses)
+            
+            # Category breakdown
+            categories = {}
+            for expense in expenses:
+                category = expense["category"]
+                if category not in categories:
+                    categories[category] = {"count": 0, "amount": 0.0}
+                categories[category]["count"] += 1
+                categories[category]["amount"] += expense["amount"]
+            
+            summary = {
+                "total_expenses": total_expenses,
+                "total_amount": total_amount,
+                "categories": categories,
+                "average_expense": total_amount / total_expenses if total_expenses > 0 else 0.0
+            }
+            data_source = f"📁 Local Storage (DB Error: {str(db_error)})"
         
-        # Calculate total
-        total_amount = sum(grouped.values())
+        # Format the summary response using the calculated summary
+        result = f"📊 Expense Summary - Last {period.title()} | Source: {data_source}\n"
+        result += f"💰 Total Spent: ${summary['total_amount']:.2f}\n"
+        result += f"📈 Number of Transactions: {summary['total_expenses']}\n"
+        result += f"📊 Average per Transaction: ${summary['average_expense']:.2f}\n\n"
         
-        # Format summary
-        result = f"📊 Expense Summary - Last {period.title()}\n"
-        result += f"💰 Total Spent: ${total_amount:.2f}\n"
-        result += f"📈 Number of Transactions: {len(expenses)}\n"
-        result += f"📊 Average per Transaction: ${total_amount/len(expenses):.2f}\n\n"
+        result += f"Breakdown by Category:\n"
         
-        result += f"Breakdown by {group_by.replace('_', ' ').title()}:\n"
+        # Sort categories by amount (highest first)
+        sorted_categories = sorted(summary['categories'].items(), key=lambda x: x[1]['amount'], reverse=True)
         
-        # Sort by amount (highest first)
-        sorted_groups = sorted(grouped.items(), key=lambda x: x[1], reverse=True)
-        
-        for group_name, amount in sorted_groups:
-            percentage = (amount / total_amount) * 100
-            result += f"  💸 {group_name}: ${amount:.2f} ({percentage:.1f}%)\n"
+        for category_name, category_data in sorted_categories:
+            percentage = (category_data['amount'] / summary['total_amount']) * 100
+            result += f"  💸 {category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
         
         return result
         

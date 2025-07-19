@@ -200,7 +200,7 @@ def list_expenses(
             result += f"   💳 Payment: {expense['payment_method'].title()}\n"
             if tags_str:
                 result += f"   🏷️ Tags: {tags_str}\n"
-            result += f"   🆔 ID: {expense['expense_id']}\n\n"
+            result += f"ID: {expense['expense_id']}\n\n"
         
         return result
         

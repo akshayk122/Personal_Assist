@@ -25,7 +25,7 @@ def test_supabase():
     print(f"Supabase Connected: {is_connected}")
     
     if not is_connected:
-        print("❌ Supabase connection failed. Please check your credentials.")
+        print("Supabase connection failed. Please check your credentials.")
         return
     
     # Test expense operations
@@ -45,10 +45,10 @@ def test_supabase():
         expenses = list_expenses()
         print(f"Result: {expenses}")
         
-        print("\n✅ All tests completed successfully!")
+        print("\n All tests completed successfully!")
         
     except Exception as e:
-        print(f"\n❌ Error during testing: {str(e)}")
+        print(f"\n Error during testing: {str(e)}")
 
 if __name__ == "__main__":
     test_supabase() 

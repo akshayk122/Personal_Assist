@@ -97,7 +97,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 import re
                 amount_match = re.search(r'\$?(\d+\.?\d*)', user_query)
                 if not amount_match:
-                    yield Message(parts=[MessagePart(content="❌ Could not find an amount in your request. Please specify the amount (e.g., $50).")])
+                    yield Message(parts=[MessagePart(content="Could not find an amount in your request. Please specify the amount (e.g., $50).")])
                     return
                 
                 amount = float(amount_match.group(1))
@@ -144,7 +144,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                     return
                 except Exception as e:
                     logger.error(f"Error adding expense: {str(e)}")
-                    yield Message(parts=[MessagePart(content=f"❌ Error adding expense: {str(e)}")])
+                    yield Message(parts=[MessagePart(content=f"Error adding expense: {str(e)}")])
             
             # Handle list/show expenses
             elif "list" in user_query or "show" in user_query:
@@ -173,10 +173,10 @@ Available categories: electronics, food, transportation, entertainment, utilitie
                 
         except Exception as e:
             logger.error(f"Error processing request: {str(e)}")
-            yield Message(parts=[MessagePart(content=f"❌ Error: {str(e)}")])
+            yield Message(parts=[MessagePart(content=f"Error: {str(e)}")])
         except Exception as e:
-            response = f"""💰 **Expense Tracker Response:**
-❌ Error processing expense: {str(e)}
+            response = f"""**Expense Tracker Response:**
+Error processing expense: {str(e)}
 
 {str(result)}
 """

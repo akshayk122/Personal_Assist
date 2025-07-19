@@ -2,12 +2,12 @@
 
 This guide helps you set up Supabase as the database backend for expense storage in your Personal Assistant system.
 
-## 📋 Prerequisites
+##Prerequisites
 
 - A Supabase account (sign up at [supabase.com](https://supabase.com))
 - Your Personal Assistant system set up and running
 
-## 🚀 Quick Setup
+##Quick Setup
 
 ### 1. Create a Supabase Project
 
@@ -46,7 +46,7 @@ SUPABASE_API_KEY=your-anon-key-here
 3. Paste and run the SQL script
 4. Verify the `expenses` table was created in **Table Editor**
 
-## 📊 Database Schema
+##Database Schema
 
 The expenses table includes:
 
@@ -82,12 +82,12 @@ The system is designed with automatic fallback:
 
 When using the expense tools, you'll see indicators like:
 
-- `💾 Supabase` - Data stored/retrieved from Supabase
-- `📁 Local Storage` - Using JSON files as fallback
-- `📁 Local Storage (Supabase not available)` - Supabase credentials missing
-- `📁 Local Storage (DB Error: ...)` - Supabase error occurred
+- `Supabase` - Data stored/retrieved from Supabase
+- `Local Storage` - Using JSON files as fallback
+- `Local Storage (Supabase not available)` - Supabase credentials missing
+- `Local Storage (DB Error: ...)` - Supabase error occurred
 
-## 🧪 Testing the Integration
+##Testing the Integration
 
 ### 1. Test Adding Expenses
 
@@ -113,7 +113,7 @@ Try these example queries:
 - "How much did I spend on food?"
 - "Give me an expense summary"
 
-## 🔒 Security Configuration
+## Security Configuration
 
 ### Row Level Security (RLS)
 
@@ -139,7 +139,7 @@ CREATE POLICY "Allow all operations for authenticated users" ON expenses
 - Implement user-specific policies
 - Consider using the service role key for server-side operations
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -169,9 +169,9 @@ from personal_assistant.utils.supabase_config import supabase_manager
 print(f"Supabase connected: {supabase_manager.is_connected()}")
 ```
 
-## 📈 Benefits of Supabase Integration
+## Benefits of Supabase Integration
 
-### ✅ Advantages
+### Advantages
 
 - **Real-time sync**: Multiple users can share expense data
 - **Backup & Recovery**: Cloud-based storage with automatic backups
@@ -180,7 +180,7 @@ print(f"Supabase connected: {supabase_manager.is_connected()}")
 - **Data Security**: Row-level security and authentication
 - **API Access**: Direct database access via REST/GraphQL APIs
 
-### 🔄 Migration
+### Migration
 
 Your existing JSON data remains as a fallback. To migrate existing expenses to Supabase:
 
@@ -188,7 +188,7 @@ Your existing JSON data remains as a fallback. To migrate existing expenses to S
 2. New expenses will be stored in Supabase
 3. Both sources are queried for comprehensive results
 
-## 🚀 Next Steps
+## Next Steps
 
 1. **User Authentication**: Implement user-specific expense tracking
 2. **Real-time Updates**: Add real-time expense notifications
@@ -196,7 +196,7 @@ Your existing JSON data remains as a fallback. To migrate existing expenses to S
 4. **Mobile App**: Connect mobile apps to the same database
 5. **Sharing**: Allow expense sharing between family members
 
-## 📞 Support
+## Support
 
 - [Supabase Documentation](https://supabase.com/docs)
 - [Personal Assistant Issues](https://github.com/your-repo/issues)

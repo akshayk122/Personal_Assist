@@ -174,11 +174,11 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         
         if needs_meeting_agent:
             meeting_response = await sub_agent_comm.query_meeting_agent(user_query)
-            agent_responses.append(("🕐 Meeting Manager", meeting_response))
+            agent_responses.append(("Meeting Manager", meeting_response))
         
         if needs_expense_agent:
             expense_response = await sub_agent_comm.query_expense_agent(user_query)
-            agent_responses.append(("💰 Expense Tracker", expense_response))
+            agent_responses.append(("Expense Tracker", expense_response))
         
         # Compile comprehensive response
         if agent_responses:
@@ -212,7 +212,7 @@ The above responses from specialized agents have been coordinated to provide com
 """
         else:
             # General query not requiring specialized agents
-            response = f"""🤖 **Personal Assistant Orchestrator**
+            response = f"""**Personal Assistant Orchestrator**
 
 **Analysis:** {str(analysis_result)}
 

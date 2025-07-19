@@ -15,17 +15,17 @@ def main():
     # Launch streamlit
     cmd = [sys.executable, "-m", "streamlit", "run", streamlit_file]
     
-    print("🚀 Launching Personal Assistant Streamlit UI...")
-    print("📍 UI will be available at: http://localhost:8501")
-    print("💡 Make sure your ACP servers are running!")
+    print("Launching Personal Assistant Streamlit UI...")
+    print("UI will be available at: http://localhost:8501")
+    print("Make sure your ACP servers are running!")
     print("---")
     
     try:
         subprocess.run(cmd, check=True)
     except KeyboardInterrupt:
-        print("\n👋 Shutting down Streamlit UI...")
+        print("\nShutting down Streamlit UI...")
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error launching Streamlit: {e}")
+        print(f"Error launching Streamlit: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

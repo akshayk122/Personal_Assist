@@ -99,19 +99,19 @@ def list_meetings(
             meetings = [m for m in meetings if m["status"] == status]
         
         if not meetings:
-            return "📅 No meetings found for the specified criteria."
+            return "No meetings found for the specified criteria."
         
         # Format meetings list
-        result = f"📅 Found {len(meetings)} meeting(s):\n\n"
+        result = f"Found {len(meetings)} meeting(s):\n\n"
         for meeting in meetings:
             attendees_str = ", ".join(meeting.get("attendees", []))
-            result += f"🕐 **{meeting['title']}**\n"
-            result += f"   📅 {meeting['date']} at {meeting['time']} ({meeting['duration_minutes']} min)\n"
-            result += f"   📍 {meeting['location']}\n"
-            result += f"   👥 Attendees: {attendees_str}\n"
-            result += f"   📝 {meeting['description']}\n"
-            result += f"   🏷️ Status: {meeting['status']}\n"
-            result += f"   🆔 ID: {meeting['meeting_id']}\n\n"
+            result += f"**{meeting['title']}**\n"
+            result += f"{meeting['date']} at {meeting['time']} ({meeting['duration_minutes']} min)\n"
+            result += f"{meeting['location']}\n"
+            result += f"Attendees: {attendees_str}\n"
+            result += f"{meeting['description']}\n"
+            result += f"Status: {meeting['status']}\n"
+            result += f"{meeting['meeting_id']}\n\n"
         
         return result
         
@@ -159,10 +159,10 @@ def search_meetings(query: str, search_type: str = "title") -> str:
                 matching_meetings.append(meeting)
         
         if not matching_meetings:
-            return f"🔍 No meetings found matching '{query}' in {search_type}."
+            return f"No meetings found matching '{query}' in {search_type}."
         
         # Format results
-        result = f"🔍 Found {len(matching_meetings)} meeting(s) matching '{query}':\n\n"
+        result = f"Found {len(matching_meetings)} meeting(s) matching '{query}':\n\n"
         for meeting in matching_meetings:
             result += f"**{meeting['title']}** on {meeting['date']} at {meeting['time']}\n"
             result += f"{meeting['location']} | 🆔 {meeting['meeting_id']}\n\n"
@@ -219,12 +219,12 @@ def delete_meeting(meeting_id: str) -> str:
         success = data_manager.delete_meeting(meeting_id)
         
         if success:
-            return f"✅ Meeting {meeting_id} deleted successfully."
+            return f"Meeting {meeting_id} deleted successfully."
         else:
-            return f"❌ Meeting {meeting_id} not found."
+            return f"Meeting {meeting_id} not found."
             
     except Exception as e:
-        return f"❌ Error deleting meeting: {str(e)}"
+        return f"Error deleting meeting: {str(e)}"
 
 @mcp.tool()
 def get_meeting_conflicts(date: str, time: str, duration_minutes: int = 60) -> str:
@@ -260,18 +260,18 @@ def get_meeting_conflicts(date: str, time: str, duration_minutes: int = 60) -> s
                     conflicts.append(meeting)
         
         if not conflicts:
-            return f"✅ No conflicts found for {date} at {time}."
+            return f"No conflicts found for {date} at {time}."
         
-        result = f"⚠️ Found {len(conflicts)} conflict(s) for {date} at {time}:\n\n"
+        result = f"Found {len(conflicts)} conflict(s) for {date} at {time}:\n\n"
         for conflict in conflicts:
-            result += f"🕐 **{conflict['title']}**\n"
-            result += f"   📅 {conflict['date']} {conflict['time']} - {conflict['duration_minutes']} min\n"
-            result += f"   📍 {conflict['location']}\n\n"
+            result += f"**{conflict['title']}**\n"
+            result += f"{conflict['date']} {conflict['time']} - {conflict['duration_minutes']} min\n"
+            result += f"{conflict['location']}\n\n"
         
         return result
         
     except Exception as e:
-        return f"❌ Error checking conflicts: {str(e)}"
+        return f"Error checking conflicts: {str(e)}"
 
 if __name__ == "__main__":
     mcp.run(transport="stdio") 

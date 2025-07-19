@@ -40,36 +40,36 @@ install-dev:
 
 # Testing
 test:
-	@echo "🧪 Running test suite..."
+	@echo " Running test suite..."
 	uv run pytest tests/ -v
 
 test-coverage:
-	@echo "🧪 Running test suite with coverage..."
+	@echo "Running test suite with coverage..."
 	uv run pytest --cov=personal_assistant --cov-report=term-missing --cov-report=html
 
 test-fast:
-	@echo "🧪 Running fast tests only..."
+	@echo "Running fast tests only..."
 	uv run pytest -m "not slow" -v
 
 # Code Quality
 lint:
-	@echo "🔍 Running code linting..."
+	@echo " Running code linting..."
 	uv run flake8 personal_assistant tests
 	uv run mypy personal_assistant
 
 format:
-	@echo "✨ Formatting code..."
+	@echo " Formatting code..."
 	uv run black personal_assistant tests
 	uv run isort personal_assistant tests
 
 format-check:
-	@echo "🔍 Checking code formatting..."
+	@echo " Checking code formatting..."
 	uv run black --check personal_assistant tests
 	uv run isort --check-only personal_assistant tests
 
 # Development Environment
 clean:
-	@echo "🧹 Cleaning cache and build files..."
+	@echo " Cleaning cache and build files..."
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
@@ -82,77 +82,77 @@ clean:
 
 # Server Management
 servers:
-	@echo "🚀 Starting all servers..."
-	@echo "⚠️  This requires 3 separate terminals:"
+	@echo " Starting all servers..."
+	@echo " This requires 3 separate terminals:"
 	@echo "   Terminal 1: make meeting"
 	@echo "   Terminal 2: make expense" 
 	@echo "   Terminal 3: make orchestrator"
 
 meeting:
-	@echo "🕐 Starting Meeting Manager Server (port 8100)..."
+	@echo " Starting Meeting Manager Server (port 8100)..."
 	uv run python servers/meeting_server.py
 
 expense:
-	@echo "💰 Starting Expense Tracker Server (port 8200)..."
+	@echo " Starting Expense Tracker Server (port 8200)..."
 	uv run python servers/expense_server.py
 
 orchestrator:
-	@echo "🤖 Starting Orchestrator Server (port 8300)..."
+	@echo " Starting Orchestrator Server (port 8300)..."
 	uv run python servers/orchestrator_server.py
 
 streamlit:
-	@echo "💻 Starting Streamlit UI (port 8501)..."
+	@echo " Starting Streamlit UI (port 8501)..."
 	uv run python run_streamlit.py
 
 demo:
-	@echo "🧪 Running Personal Assistant Demo..."
+	@echo " Running Personal Assistant Demo..."
 	uv run python demo.py
 
 test-supabase:
-	@echo "🔗 Testing Supabase Connection..."
+	@echo " Testing Supabase Connection..."
 	uv run python test_supabase.py
 
 # Alternative server commands using project scripts
 meeting-script:
-	@echo "🕐 Starting Meeting Manager via script..."
+	@echo " Starting Meeting Manager via script..."
 	uv run meeting-server
 
 expense-script:
-	@echo "💰 Starting Expense Tracker via script..."
+	@echo " Starting Expense Tracker via script..."
 	uv run expense-server
 
 orchestrator-script:
-	@echo "🤖 Starting Orchestrator via script..."
+	@echo " Starting Orchestrator via script..."
 	uv run orchestrator-server
 
 # Development workflow
 dev-setup: install-dev
-	@echo "🛠️  Development environment setup complete!"
-	@echo "📝 Next steps:"
+	@echo "  Development environment setup complete!"
+	@echo " Next steps:"
 	@echo "   1. Copy env.example to .env and add your GOOGLE_API_KEY"
 	@echo "   2. Run 'make servers' to start all servers"
 	@echo "   3. Run 'make test' to verify everything works"
 
 # Quick development check
 check: format-check lint test-fast
-	@echo "✅ Development checks passed!"
+	@echo " Development checks passed!"
 
 # Full development check
 check-full: format-check lint test
-	@echo "✅ Full development checks passed!"
+	@echo " Full development checks passed!"
 
 # Build and package
 build:
-	@echo "📦 Building package..."
+	@echo " Building package..."
 	uv build
 
 # Documentation
 docs:
-	@echo "📚 Building documentation..."
+	@echo " Building documentation..."
 	uv sync --extra docs
 	uv run mkdocs build
 
 docs-serve:
-	@echo "📚 Serving documentation locally..."
+	@echo " Serving documentation locally..."
 	uv sync --extra docs
 	uv run mkdocs serve 

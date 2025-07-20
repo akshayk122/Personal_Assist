@@ -119,17 +119,6 @@ def extract_date_from_text(text: str) -> str:
 
 @server.agent(name="expense_tracker")
 async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
-    """
-    Expense Tracker Agent
-    
-    Handles all expense-related queries and operations including:
-    - Recording new expenses
-    - Listing and filtering expenses
-    - Generating spending summaries and analytics
-    - Budget tracking and analysis
-    - Expense categorization and management
-    """
-    
     try:
         # Extract user query
         user_query = input[0].parts[0].content.lower()
@@ -137,11 +126,11 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         
         try:
             # Handle expense listing and summary queries first
-            if any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats"]):
+            if any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats", "my"]):
                 # Check for specific categories in query
                 categories = {
                     "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
-                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe"],
+                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe", "kfc"],
                     "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
                     "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
                     "utilities": ["utility", "electricity", "water", "internet", "phone bill", "gas", "broadband"],
@@ -151,16 +140,34 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 
                 # Find category from query
                 found_category = None
-                for cat, keywords in categories.items():
-                    if any(keyword in user_query for keyword in keywords):
+                print(f"[Expense Server] Looking for category in query: '{user_query}'")
+                
+                # First try exact category matches
+                for cat in categories.keys():
+                    if cat in user_query:
                         found_category = cat
+                        print(f"[Expense Server] Found exact category match: {cat}")
                         break
+                
+                # If no exact match, try keywords
+                if not found_category:
+                    for cat, keywords in categories.items():
+                        if any(keyword in user_query for keyword in keywords):
+                            found_category = cat
+                            matching_keywords = [k for k in keywords if k in user_query]
+                            print(f"[Expense Server] Found category {cat} via keywords: {matching_keywords}")
+                            break
                 
                 # List expenses with category filter if found
                 if found_category:
-                    result = list_expenses(category=found_category)
+                    print(f"[Expense Server] Filtering expenses by category: {found_category}")
+                    result = list_expenses(category=found_category.lower())  # Ensure lowercase for consistency
+                    # Add category filter info to response
+                    result = f"Showing expenses for category: {found_category.title()}\n\n" + result
                 else:
+                    print("[Expense Server] No specific category found, listing all expenses")
                     result = list_expenses()
+                
                 yield Message(parts=[MessagePart(content=result)])
                 return
             
@@ -187,7 +194,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 # Look for category keywords
                 categories = {
                     "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
-                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe"],
+                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe", "kfc"],
                     "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
                     "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
                     "utilities": ["utility", "electricity", "water", "internet", "phone bill", "gas", "broadband"],
@@ -196,13 +203,22 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 }
                 print("[Expense Server] Looking for category keywords...")
                 
-                # Find category from text
+                # Find category from text - first try exact matches
                 found_category = None
-                for cat, keywords in categories.items():
-                    if any(keyword in text_without_amount for keyword in keywords):
+                for cat in categories.keys():
+                    if cat in text_without_amount:
                         found_category = cat
-                        print(f"[Expense Server] Found category: {cat} (matched keywords: {[k for k in keywords if k in text_without_amount]})")
+                        print(f"[Expense Server] Found exact category match: {cat}")
                         break
+                
+                # If no exact match, try keywords
+                if not found_category:
+                    for cat, keywords in categories.items():
+                        if any(keyword in text_without_amount for keyword in keywords):
+                            found_category = cat
+                            matching_keywords = [k for k in keywords if k in text_without_amount]
+                            print(f"[Expense Server] Found category {cat} via keywords: {matching_keywords}")
+                            break
                 
                 category = found_category or "other"
                 # Clean up description - remove extra whitespace and normalize

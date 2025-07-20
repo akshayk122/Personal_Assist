@@ -110,12 +110,15 @@ class SupabaseManager:
             
             # Apply filters if provided
             if filters:
+                print(f"[Supabase] Applying filters: {filters}")
                 if "start_date" in filters:
                     query = query.gte("date", filters["start_date"])
                 if "end_date" in filters:
                     query = query.lte("date", filters["end_date"])
                 if "category" in filters:
-                    query = query.eq("category", filters["category"])
+                    category = filters["category"].lower().strip()  # Ensure lowercase and no whitespace
+                    print(f"[Supabase] Filtering by category: '{category}'")
+                    query = query.eq("category", category)
                 if "min_amount" in filters:
                     query = query.gte("amount", filters["min_amount"])
                 if "max_amount" in filters:
@@ -125,15 +128,26 @@ class SupabaseManager:
             query = query.order("date", desc=True)
             
             result = query.execute()
+            print(f"[Supabase] Query executed, checking results...")
             
             if result.data:
-                logger.info(f"Retrieved {len(result.data)} expenses from Supabase")
+                count = len(result.data)
+                print(f"[Supabase] Retrieved {count} expense(s)")
+                if "category" in filters:
+                    category = filters["category"].lower().strip()
+                    matching = sum(1 for e in result.data if e["category"].lower().strip() == category)
+                    print(f"[Supabase] {matching} expense(s) match category '{category}'")
+                    # Print all unique categories found
+                    unique_categories = set(e["category"].lower().strip() for e in result.data)
+                    print(f"[Supabase] Categories found in results: {unique_categories}")
                 return result.data
             else:
+                print("[Supabase] No expenses found")
                 return []
                 
         except Exception as e:
             logger.error(f"Error retrieving expenses from Supabase: {str(e)}")
+            print(f"[Supabase] Error: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
     
     def update_expense(self, expense_id: str, updates: Dict[str, Any]) -> bool:

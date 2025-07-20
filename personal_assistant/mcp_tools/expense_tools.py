@@ -208,6 +208,68 @@ def list_expenses(
         return f"Error listing expenses: {str(e)}"
 
 @mcp.tool()
+def filter_expenses(category: str) -> str:
+    """Filter expenses by category
+    
+    Args:
+        category: Category to filter by (food|transportation|entertainment|utilities|healthcare|shopping|electronics|other)
+    
+    Returns:
+        str: Formatted list of filtered expenses
+    
+    Example:
+        filter_expenses("food")
+    """
+    try:
+        # Try to get from Supabase first, fallback to JSON if needed
+        try:
+            if supabase_manager.is_connected():
+                # Build filters for category
+                filters = {"category": category.lower()}
+                print(f"[MCP Tool] Filtering expenses by category: {category}")
+                
+                expenses = supabase_manager.get_expenses(filters)
+                data_source = "Supabase"
+            else:
+                # Fallback to JSON file
+                expenses = data_manager.get_expenses()
+                # Apply category filter manually
+                expenses = [e for e in expenses if e["category"].lower() == category.lower()]
+                data_source = "Local Storage"
+        except Exception as db_error:
+            # Fallback to JSON file if Supabase fails
+            expenses = data_manager.get_expenses()
+            # Apply category filter manually
+            expenses = [e for e in expenses if e["category"].lower() == category.lower()]
+            data_source = f"Local Storage (DB Error: {str(db_error)})"
+        
+        if not expenses:
+            return f"No expenses found for category: {category}"
+        
+        # Calculate total
+        total_amount = sum(e["amount"] for e in expenses)
+        
+        # Sort by date (newest first)
+        expenses.sort(key=lambda x: x["date"], reverse=True)
+        
+        # Format expenses list
+        result = f"Found {len(expenses)} expense(s) for category '{category}' | Total: ${total_amount:.2f} | Source: {data_source}\n\n"
+        
+        for expense in expenses:
+            tags_str = ", ".join(expense.get("tags", []))
+            result += f"${expense['amount']:.2f} - {expense['description']}\n"
+            result += f"Date: {expense['date']}\n"
+            result += f"Payment: {expense['payment_method'].title()}\n"
+            if tags_str:
+                result += f"Tags: {tags_str}\n"
+            result += f"ID: {expense['expense_id']}\n\n"
+        
+        return result
+        
+    except Exception as e:
+        return f"Error filtering expenses: {str(e)}"
+
+@mcp.tool()
 def get_expense_summary(period: str = "month", group_by: str = "category") -> str:
     """Get expense summary and analytics
     

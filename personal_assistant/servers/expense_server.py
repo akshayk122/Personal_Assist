@@ -22,6 +22,7 @@ from datetime import datetime, timedelta
 import re
 from dateutil import parser
 from dateutil.relativedelta import relativedelta
+import json
 
 # Load environment variables
 load_dotenv()
@@ -40,7 +41,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.gemini_config import get_llm
 from mcp_tools.expense_tools import (
     add_expense, list_expenses, get_expense_summary,
-    update_expense, delete_expense, get_budget_status
+    update_expense, delete_expense, get_budget_status,
+    filter_expenses
 )
 
 # Apply asyncio patch for Jupyter compatibility
@@ -125,11 +127,69 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         logger.debug(f"Processing user query: {user_query}")
         
         try:
-            # Handle expense listing and summary queries first
-            if any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats", "my"]):
-                # Check for specific categories in query
+            # Handle expense updates
+            if "update" in user_query or "change" in user_query or "fix" in user_query:
+                # Look for expense ID
+                import re
+                id_match = re.search(r'(?:id|ID):\s*([a-f0-9-]+)', user_query)
+                if id_match:
+                    expense_id = id_match.group(1)
+                    print(f"[Expense Server] Found expense ID: {expense_id}")
+                    
+                    # Look for category keywords
+                    categories = {
+                        "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
+                        "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe", "kfc"],
+                        "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
+                        "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
+                        "utilities": ["utility", "electricity", "water", "internet", "phone bill", "gas", "broadband"],
+                        "healthcare": ["health", "medical", "doctor", "medicine", "pharmacy", "hospital", "clinic"],
+                        "shopping": ["shopping", "clothes", "clothing", "shoes", "accessories", "fashion"]
+                    }
+                    
+                    # Find category from text - first try exact matches
+                    found_category = None
+                    for cat in categories.keys():
+                        if cat in user_query:
+                            found_category = cat
+                            print(f"[Expense Server] Found exact category match: {cat}")
+                            break
+                    
+                    # If no exact match, try keywords
+                    if not found_category:
+                        for cat, keywords in categories.items():
+                            if any(keyword in user_query for keyword in keywords):
+                                found_category = cat
+                                matching_keywords = [k for k in keywords if k in user_query]
+                                print(f"[Expense Server] Found category {cat} via keywords: {matching_keywords}")
+                                break
+                    
+                    if found_category:
+                        # Update the expense
+                        updates = {
+                            "category": found_category.lower(),
+                            "date": datetime.now().strftime("%Y-%m-%d")  # Also fix the date
+                        }
+                        try:
+                            result = update_expense(expense_id, json.dumps(updates))
+                            yield Message(parts=[MessagePart(content=f"Updated expense {expense_id} to category: {found_category}")])
+                            return
+                        except Exception as e:
+                            logger.error(f"Error updating expense: {str(e)}")
+                            yield Message(parts=[MessagePart(content=f"Error updating expense: {str(e)}")])
+                            return
+                    else:
+                        yield Message(parts=[MessagePart(content="Could not determine which category to update to. Please specify a category.")])
+                        return
+                else:
+                    yield Message(parts=[MessagePart(content="Please provide the expense ID to update (e.g., 'update expense ID: xxx to transportation')")])
+                    return
+            
+            # Handle expense listing and filtering queries
+            elif any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats", "my", "filter"]):
+                # Define categories with their variations
                 categories = {
-                    "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
+                    "transportation": ["transport", "tranport", "tranportation", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
                     "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe", "kfc"],
                     "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
                     "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
@@ -149,21 +209,32 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                         print(f"[Expense Server] Found exact category match: {cat}")
                         break
                 
-                # If no exact match, try keywords
+                # If no exact match, try keywords and variations
                 if not found_category:
                     for cat, keywords in categories.items():
-                        if any(keyword in user_query for keyword in keywords):
+                        # Check for exact keyword matches first
+                        if any(keyword == word for keyword in keywords for word in user_query.split()):
+                            found_category = cat
+                            print(f"[Expense Server] Found exact keyword match for category {cat}")
+                            break
+                        # Then check for partial matches
+                        elif any(keyword in user_query for keyword in keywords):
                             found_category = cat
                             matching_keywords = [k for k in keywords if k in user_query]
                             print(f"[Expense Server] Found category {cat} via keywords: {matching_keywords}")
                             break
                 
-                # List expenses with category filter if found
+                # Use the filter_expenses tool if category found
                 if found_category:
-                    print(f"[Expense Server] Filtering expenses by category: {found_category}")
-                    result = list_expenses(category=found_category.lower())  # Ensure lowercase for consistency
-                    # Add category filter info to response
-                    result = f"Showing expenses for category: {found_category.title()}\n\n" + result
+                    print(f"[Expense Server] Using filter_expenses tool for category: {found_category}")
+                    try:
+                        result = filter_expenses(found_category)
+                        # Add a header to make the filtering more clear
+                        result = f"Filtering expenses for category: {found_category.title()}\n\n{result}"
+                    except Exception as e:
+                        logger.error(f"Error using filter_expenses: {str(e)}")
+                        # Fallback to list_expenses with filter if filter_expenses fails
+                        result = list_expenses(category=found_category.lower())
                 else:
                     print("[Expense Server] No specific category found, listing all expenses")
                     result = list_expenses()
@@ -250,8 +321,15 @@ Please use one of these formats:
    - "Add $50 for electronics" (uses today's date)
    - "Spent $25 on food yesterday"
    - "Add $100 for shopping on March 15th"
-2. List expenses: "Show my expenses" or "List expenses"
-3. Get summary: "Show expense summary"
+2. View expenses:
+   - "Show my food expenses"
+   - "Filter transportation expenses"
+   - "List expenses in transportation category"
+   - "Show all expenses" (no category filter)
+3. Update expense:
+   - "Update expense ID: xxx to transportation"
+   - "Change expense ID: xxx to food"
+4. Get summary: "Show expense summary"
 
 Available categories: electronics, food, transportation, entertainment, utilities, healthcare, shopping"""
                 yield Message(parts=[MessagePart(content=help_message)])

@@ -18,6 +18,10 @@ Following the pattern from acp_demo.py
 import os
 from dotenv import load_dotenv
 from collections.abc import AsyncGenerator
+from datetime import datetime, timedelta
+import re
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
 
 # Load environment variables
 load_dotenv()
@@ -72,6 +76,40 @@ expense_tools = [
     ExpenseTool(get_budget_status, "get_budget_status", "Get budget status and spending analysis")
 ]
 
+def extract_date_from_text(text: str) -> str:
+    """Extract date from natural language text"""
+    text = text.lower()
+    today = datetime.now()
+    
+    # Handle relative dates
+    if "yesterday" in text:
+        return (today - timedelta(days=1)).strftime("%Y-%m-%d")
+    elif "today" in text:
+        return today.strftime("%Y-%m-%d")
+    elif "tomorrow" in text:
+        return (today + timedelta(days=1)).strftime("%Y-%m-%d")
+    elif "last week" in text:
+        return (today - timedelta(days=7)).strftime("%Y-%m-%d")
+    elif "next week" in text:
+        return (today + timedelta(days=7)).strftime("%Y-%m-%d")
+    
+    # Try to find date patterns
+    try:
+        # Look for dates like "March 15", "15th March", "03/15", "15-03", etc.
+        date_match = re.search(r'\b(\d{1,2}[-/]\d{1,2}(?:[-/]\d{2,4})?|\d{1,2}(?:st|nd|rd|th)?\s+(?:of\s+)?(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)|(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:st|nd|rd|th)?(?:\s+\d{2,4})?)\b', text)
+        
+        if date_match:
+            parsed_date = parser.parse(date_match.group(0), fuzzy=True)
+            # If year is not specified, use current year
+            if parsed_date.year == 1900:
+                parsed_date = parsed_date.replace(year=today.year)
+            return parsed_date.strftime("%Y-%m-%d")
+    except Exception:
+        pass
+    
+    # Default to today if no date found
+    return today.strftime("%Y-%m-%d")
+
 @server.agent(name="expense_tracker")
 async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     """
@@ -107,6 +145,10 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 text_without_amount = user_query.replace(amount_match.group(0), "").strip()
                 print(f"[Expense Server] Processing text: '{text_without_amount}'")
                 
+                # Extract date from text
+                expense_date = extract_date_from_text(text_without_amount)
+                print(f"[Expense Server] Extracted date: {expense_date}")
+                
                 # Look for category keywords
                 categories = {
                     "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop"],
@@ -131,14 +173,15 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 description = text_without_amount
                 print(f"[Expense Server] Final category: {category}")
                 
-                logger.debug(f"Extracted: amount={amount}, category={category}, description={description}")
+                logger.debug(f"Extracted: amount={amount}, category={category}, description={description}, date={expense_date}")
                 
                 # Add the expense
                 try:
                     expense_result = add_expense(
                         amount=amount,
                         category=category,
-                        description=description
+                        description=description,
+                        date=expense_date
                     )
                     yield Message(parts=[MessagePart(content=expense_result)])
                     return
@@ -163,7 +206,10 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 help_message = """💰 **Expense Tracker Help**
 
 Please use one of these formats:
-1. Add expense: "Add $X for Y" (e.g., "Add $50 for electronics")
+1. Add expense: 
+   - "Add $50 for electronics" (uses today's date)
+   - "Spent $25 on food yesterday"
+   - "Add $100 for shopping on March 15th"
 2. List expenses: "Show my expenses" or "List expenses"
 3. Get summary: "Show expense summary"
 

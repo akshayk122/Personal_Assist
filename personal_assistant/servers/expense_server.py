@@ -87,11 +87,13 @@ def extract_date_from_text(text: str) -> str:
     elif "today" in text:
         return today.strftime("%Y-%m-%d")
     elif "tomorrow" in text:
-        return (today + timedelta(days=1)).strftime("%Y-%m-%d")
+        # Don't allow future dates
+        return today.strftime("%Y-%m-%d")
     elif "last week" in text:
         return (today - timedelta(days=7)).strftime("%Y-%m-%d")
     elif "next week" in text:
-        return (today + timedelta(days=7)).strftime("%Y-%m-%d")
+        # Don't allow future dates
+        return today.strftime("%Y-%m-%d")
     
     # Try to find date patterns
     try:
@@ -103,6 +105,11 @@ def extract_date_from_text(text: str) -> str:
             # If year is not specified, use current year
             if parsed_date.year == 1900:
                 parsed_date = parsed_date.replace(year=today.year)
+            # Don't allow future dates
+            if parsed_date > today:
+                parsed_date = parsed_date.replace(year=today.year)
+                if parsed_date > today:
+                    return today.strftime("%Y-%m-%d")
             return parsed_date.strftime("%Y-%m-%d")
     except Exception:
         pass
@@ -129,8 +136,36 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         logger.debug(f"Processing user query: {user_query}")
         
         try:
-            # Direct expense operations without AI analysis
-            if "$" in user_query or "spent" in user_query or "add" in user_query:
+            # Handle expense listing and summary queries first
+            if any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats"]):
+                # Check for specific categories in query
+                categories = {
+                    "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
+                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe"],
+                    "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
+                    "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
+                    "utilities": ["utility", "electricity", "water", "internet", "phone bill", "gas", "broadband"],
+                    "healthcare": ["health", "medical", "doctor", "medicine", "pharmacy", "hospital", "clinic"],
+                    "shopping": ["shopping", "clothes", "clothing", "shoes", "accessories", "fashion"]
+                }
+                
+                # Find category from query
+                found_category = None
+                for cat, keywords in categories.items():
+                    if any(keyword in user_query for keyword in keywords):
+                        found_category = cat
+                        break
+                
+                # List expenses with category filter if found
+                if found_category:
+                    result = list_expenses(category=found_category)
+                else:
+                    result = list_expenses()
+                yield Message(parts=[MessagePart(content=result)])
+                return
+            
+            # Handle adding new expenses
+            elif "$" in user_query or "add" in user_query or "spent" in user_query:
                 # Extract amount
                 import re
                 amount_match = re.search(r'\$?(\d+\.?\d*)', user_query)
@@ -151,13 +186,13 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 
                 # Look for category keywords
                 categories = {
-                    "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop"],
-                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery"],
-                    "transportation": ["transport", "gas", "fuel", "bus", "train", "taxi", "uber"],
-                    "entertainment": ["entertainment", "movie", "game", "concert", "show"],
-                    "utilities": ["utility", "electricity", "water", "internet", "phone bill"],
-                    "healthcare": ["health", "medical", "doctor", "medicine", "pharmacy"],
-                    "shopping": ["shopping", "clothes", "clothing", "shoes", "accessories"]
+                    "transportation": ["transport", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
+                    "food": ["food", "lunch", "dinner", "breakfast", "meal", "restaurant", "grocery", "snack", "cafe"],
+                    "electronics": ["electronics", "gadget", "device", "computer", "phone", "laptop", "tv", "television"],
+                    "entertainment": ["entertainment", "movie", "game", "concert", "show", "theatre", "sports"],
+                    "utilities": ["utility", "electricity", "water", "internet", "phone bill", "gas", "broadband"],
+                    "healthcare": ["health", "medical", "doctor", "medicine", "pharmacy", "hospital", "clinic"],
+                    "shopping": ["shopping", "clothes", "clothing", "shoes", "accessories", "fashion"]
                 }
                 print("[Expense Server] Looking for category keywords...")
                 
@@ -170,7 +205,8 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                         break
                 
                 category = found_category or "other"
-                description = text_without_amount
+                # Clean up description - remove extra whitespace and normalize
+                description = ' '.join(text_without_amount.split())
                 print(f"[Expense Server] Final category: {category}")
                 
                 logger.debug(f"Extracted: amount={amount}, category={category}, description={description}, date={expense_date}")
@@ -188,18 +224,6 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 except Exception as e:
                     logger.error(f"Error adding expense: {str(e)}")
                     yield Message(parts=[MessagePart(content=f"Error adding expense: {str(e)}")])
-            
-            # Handle list/show expenses
-            elif "list" in user_query or "show" in user_query:
-                result = list_expenses()
-                yield Message(parts=[MessagePart(content=result)])
-                return
-            
-            # Handle summary requests
-            elif "summary" in user_query:
-                result = get_expense_summary()
-                yield Message(parts=[MessagePart(content=result)])
-                return
             
             # Default help message
             else:

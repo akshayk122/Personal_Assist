@@ -119,7 +119,26 @@ def extract_date_from_text(text: str) -> str:
     # Default to today if no date found
     return today.strftime("%Y-%m-%d")
 
-@server.agent(name="expense_tracker")
+@server.agent(
+    name="expense_tracker",
+    description="""I am the Expense Tracking Agent, specialized in managing your personal and business expenses.
+
+Capabilities:
+1. Add new expenses with categories (food, transportation, electronics, etc.)
+2. List and filter expenses by category, date, or amount
+3. Generate expense summaries and analytics
+4. Update or delete existing expenses
+5. Track budget status and spending patterns
+
+Example queries:
+- "I spent $25 on lunch today"
+- "Show my food expenses this month"
+- "How much did I spend on transportation?"
+- "Update expense ID:123 to electronics category"
+- "What's my total spending this month?"
+
+I handle natural language date inputs and maintain accurate categorization of expenses."""
+)
 async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:
         # Extract user query

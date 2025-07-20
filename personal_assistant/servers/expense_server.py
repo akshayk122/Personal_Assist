@@ -186,7 +186,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                     return
             
             # Handle expense listing and filtering queries
-            elif any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats", "my", "filter"]):
+            elif any(word in user_query for word in ["show", "list", "spent", "how much", "what's", "whats", "my", "filter", "retrieve", "get"]):
                 # Define categories with their variations
                 categories = {
                     "transportation": ["transport", "tranport", "tranportation", "cab", "taxi", "uber", "lyft", "ride", "auto", "rickshaw"],
@@ -211,18 +211,37 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
                 
                 # If no exact match, try keywords and variations
                 if not found_category:
+                    # Split query into words and clean them
+                    query_words = set(word.strip('.,?!') for word in user_query.split())
+                    print(f"[Expense Server] Query words: {query_words}")
+                    
                     for cat, keywords in categories.items():
-                        # Check for exact keyword matches first
-                        if any(keyword == word for keyword in keywords for word in user_query.split()):
+                        # Check for exact word matches first
+                        if any(keyword in query_words for keyword in keywords):
                             found_category = cat
-                            print(f"[Expense Server] Found exact keyword match for category {cat}")
+                            matching_keywords = [k for k in keywords if k in query_words]
+                            print(f"[Expense Server] Found category {cat} via exact word match: {matching_keywords}")
                             break
                         # Then check for partial matches
                         elif any(keyword in user_query for keyword in keywords):
                             found_category = cat
                             matching_keywords = [k for k in keywords if k in user_query]
-                            print(f"[Expense Server] Found category {cat} via keywords: {matching_keywords}")
+                            print(f"[Expense Server] Found category {cat} via partial match: {matching_keywords}")
                             break
+                
+                # Also check if the orchestrator mentioned a category
+                if not found_category and "retrieve" in user_query and "on" in user_query:
+                    # Look for "on {category}" pattern
+                    parts = user_query.split(" on ")
+                    if len(parts) > 1:
+                        category_part = parts[1].strip('.,?! ')
+                        print(f"[Expense Server] Checking orchestrator category: {category_part}")
+                        # Check if this matches any category
+                        for cat, keywords in categories.items():
+                            if cat == category_part or any(keyword == category_part for keyword in keywords):
+                                found_category = cat
+                                print(f"[Expense Server] Found category from orchestrator: {cat}")
+                                break
                 
                 # Use the filter_expenses tool if category found
                 if found_category:
@@ -323,8 +342,7 @@ Please use one of these formats:
    - "Add $100 for shopping on March 15th"
 2. View expenses:
    - "Show my food expenses"
-   - "Filter transportation expenses"
-   - "List expenses in transportation category"
+   - "List expenses in food category"
    - "Show all expenses" (no category filter)
 3. Update expense:
    - "Update expense ID: xxx to transportation"

@@ -24,6 +24,27 @@ CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);
 CREATE INDEX IF NOT EXISTS idx_expenses_amount ON expenses(amount);
 CREATE INDEX IF NOT EXISTS idx_expenses_expense_id ON expenses(expense_id);
 
+-- Create meetings table
+CREATE TABLE IF NOT EXISTS meetings (
+    id BIGSERIAL PRIMARY KEY,
+    meeting_id TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL,
+    date DATE NOT NULL,
+    time TIME NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    attendees JSONB DEFAULT '[]'::jsonb,
+    location TEXT DEFAULT '',
+    description TEXT DEFAULT '',
+    status TEXT DEFAULT 'scheduled',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create indexes for meetings
+CREATE INDEX IF NOT EXISTS idx_meetings_date ON meetings(date);
+CREATE INDEX IF NOT EXISTS idx_meetings_meeting_id ON meetings(meeting_id);
+CREATE INDEX IF NOT EXISTS idx_meetings_status ON meetings(status);
+
 -- Create a function to automatically update the updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -33,23 +54,36 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Create trigger to automatically update updated_at
+-- Create trigger to automatically update updated_at for expenses
 CREATE TRIGGER update_expenses_updated_at 
     BEFORE UPDATE ON expenses 
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Create trigger to automatically update updated_at for meetings
+CREATE TRIGGER update_meetings_updated_at 
+    BEFORE UPDATE ON meetings 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE meetings ENABLE ROW LEVEL SECURITY;
 
 -- For development, enable anonymous access
 -- In production, you should use proper authentication
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
+DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON meetings;
+
 CREATE POLICY "Allow all operations for anonymous users" ON expenses FOR ALL USING (true);
+CREATE POLICY "Allow all operations for anonymous users" ON meetings FOR ALL USING (true);
 
 -- Later, for production, you can switch to authenticated users only:
 -- DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
+-- DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON meetings;
 -- CREATE POLICY "Allow all operations for authenticated users" ON expenses
+--     FOR ALL USING (auth.role() = 'authenticated');
+-- CREATE POLICY "Allow all operations for authenticated users" ON meetings
 --     FOR ALL USING (auth.role() = 'authenticated');
 
 -- Create some sample data (optional)
@@ -66,9 +100,26 @@ INSERT INTO expenses (
      '2024-12-14', 'credit', false, '["dinner", "italian", "date-night"]'::jsonb)
 ON CONFLICT (expense_id) DO NOTHING;
 
+-- Insert sample meetings
+INSERT INTO meetings (
+    meeting_id, title, date, time, duration_minutes, attendees,
+    location, description, status
+) VALUES 
+    ('sample-m001', 'Team Standup', '2024-12-16', '09:00', 30, 
+     '["john@company.com", "sarah@company.com"]'::jsonb,
+     'Conference Room A', 'Daily team sync', 'scheduled'),
+    ('sample-m002', 'Client Presentation', '2024-12-16', '14:00', 60, 
+     '["client@external.com"]'::jsonb,
+     'Virtual - Zoom', 'Q4 results presentation', 'scheduled')
+ON CONFLICT (meeting_id) DO NOTHING;
+
 -- Grant necessary permissions
 -- These are typically handled automatically in Supabase, but included for completeness
 GRANT ALL ON expenses TO authenticated;
 GRANT ALL ON expenses TO anon;
+GRANT ALL ON meetings TO authenticated;
+GRANT ALL ON meetings TO anon;
 GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon; 
+GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO anon; 

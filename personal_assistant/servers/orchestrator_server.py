@@ -134,6 +134,7 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
             """,
             expected_output="""
             A comprehensive response that addresses the user's request by:
+            - Filter expenses by category when applicable
             - Clearly identifying what type of assistance was requested
             - Coordinating with appropriate specialized agents as needed
             - Providing integrated results from multiple agents when applicable

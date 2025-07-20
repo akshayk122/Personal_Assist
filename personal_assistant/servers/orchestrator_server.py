@@ -61,7 +61,24 @@ class SubAgentCommunicator:
 # Initialize communicator
 sub_agent_comm = SubAgentCommunicator()
 
-@server.agent(name="personal_assistant")
+@server.agent(
+    name="personal_assistant",
+    description="""I am your Personal Assistant Orchestrator, coordinating between specialized agents to help manage your schedule and finances.
+
+Capabilities:
+1. Route queries to appropriate specialized agents:
+   - Meeting Manager for calendar and scheduling
+   - Expense Tracker for financial management
+2. Handle combined queries that need multiple agents
+3. Provide integrated responses
+
+Example queries:
+- "Schedule a meeting tomorrow at 2 PM"
+- "Show my food expenses this month"
+- "What meetings do I have and what did I spend this week?"
+
+I ensure seamless coordination between different aspects of your personal and professional life."""
+)
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:
         # Extract user query

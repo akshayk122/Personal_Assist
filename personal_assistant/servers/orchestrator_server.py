@@ -63,103 +63,12 @@ sub_agent_comm = SubAgentCommunicator()
 
 @server.agent(name="personal_assistant")
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
-    """
-    Personal Assistant Orchestrator Agent
-    
-    Acts as the central hub that:
-    - Analyzes user queries to determine which specialized agents to consult
-    - Coordinates between meeting and expense management agents
-    - Combines results from multiple agents for comprehensive responses
-    - Handles complex queries requiring multiple agent interactions
-    """
-    
     try:
         # Extract user query
         user_query = input[0].parts[0].content
-        
-        # Create orchestrator agent
-        orchestrator = Agent(
-            role="Personal Assistant Orchestrator",
-            goal="Intelligently coordinate between specialized agents to provide comprehensive personal assistance",
-            backstory="""You are an intelligent personal assistant coordinator with expertise in 
-            understanding user needs and efficiently routing requests to specialized services. You excel at:
-            - Analyzing user queries to identify meeting-related, expense-related, or combined needs
-            - Coordinating between multiple specialized agents (Meeting Manager and Expense Tracker)
-            - Synthesizing information from different sources into coherent, actionable responses
-            - Handling complex requests that span multiple domains (meetings and expenses)
-            - Providing proactive suggestions and insights based on combined data
-            
-            You have access to two specialized agents:
-            1. Meeting Manager: Handles all meeting-related operations (scheduling, conflicts, etc.)
-            2. Expense Tracker: Handles all expense-related operations (tracking, budgets, etc.)
-            
-            You can query these agents individually or in combination to provide comprehensive assistance.""",
-            verbose=True,
-            allow_delegation=False,
-            llm=llm,
-            max_retry_limit=3
-        )
-        
-        # Create orchestration task
-        orchestration_task = Task(
-            description=f"""
-            Analyze this user request and coordinate appropriate responses: "{user_query}"
-            
-            Your responsibilities:
-            1. ANALYZE the query to determine if it relates to:
-               - Meetings only (schedule, conflicts, attendees, etc.)
-               - Expenses only (spending, budgets, categories, etc.)
-               - Both meetings and expenses (combined queries)
-               - General personal assistant tasks
-            
-            2. DETERMINE the appropriate agent(s) to consult:
-               - Meeting-related queries → Meeting Manager Agent
-               - Expense-related queries → Expense Tracker Agent  
-               - Combined queries → Both agents
-               - General queries → Provide general assistance
-            
-            3. COORDINATE responses from multiple agents if needed and synthesize them into a 
-               coherent, comprehensive response.
-            
-            4. PROVIDE additional context, insights, or suggestions that add value beyond 
-               individual agent responses.
-            
-            Examples of query types:
-            - "Schedule a meeting with John tomorrow" → Meeting Manager only
-            - "How much did I spend on food this month?" → Expense Tracker only
-            - "Do I have any meetings during lunch time and what did I spend on lunch yesterday?" → Both agents
-            - "What's my schedule and spending summary for this week?" → Both agents
-            
-            Always aim to provide the most helpful and complete response possible.
-            """,
-            expected_output="""
-            A comprehensive response that addresses the user's request by:
-            - Filter expenses by category when applicable
-            - Clearly identifying what type of assistance was requested
-            - Coordinating with appropriate specialized agents as needed
-            - Providing integrated results from multiple agents when applicable
-            - Adding contextual insights and proactive suggestions
-            - Ensuring the response is coherent and actionable
-            - Offering next steps or related assistance when appropriate
-            """,
-            agent=orchestrator,
-            verbose=True,
-            max_retry_limit=3
-        )
-        
-        # Execute the orchestration task
-        crew = Crew(
-            agents=[orchestrator],
-            tasks=[orchestration_task],
-            verbose=True
-        )
-        
-        # Get the AI analysis first
-        analysis_result = await crew.kickoff_async()
-        
-        # Now determine which agents to query based on keywords and context
         query_lower = user_query.lower()
         
+        # Determine which agents to query based on keywords and context
         needs_meeting_agent = any(keyword in query_lower for keyword in [
             'meeting', 'schedule', 'calendar', 'appointment', 'conflict', 
             'attendee', 'reschedule', 'cancel', 'book', 'available'
@@ -167,7 +76,9 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         
         needs_expense_agent = any(keyword in query_lower for keyword in [
             'expense', 'spend', 'spent', 'cost', 'money', 'budget', 'pay', 
-            'paid', 'purchase', 'buy', 'bought', 'price', 'dollar', '$'
+            'paid', 'purchase', 'buy', 'bought', 'price', 'dollar', '$',
+            'food', 'transportation', 'electronics', 'entertainment', 'utilities',
+            'healthcare', 'shopping'
         ])
         
         # Query appropriate agents
@@ -178,77 +89,46 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
             agent_responses.append(("Meeting Manager", meeting_response))
         
         if needs_expense_agent:
+            # Forward the query directly to expense agent
             expense_response = await sub_agent_comm.query_expense_agent(user_query)
             agent_responses.append(("Expense Tracker", expense_response))
+            yield Message(parts=[MessagePart(content=expense_response)])
+            return
         
-        # Compile comprehensive response
-        if agent_responses:
-            response = f"""**Personal Assistant Orchestrator**
+        # If no specific agent needed, provide help
+        if not agent_responses:
+            help_message = """**Personal Assistant Help**
 
-**Query Analysis:** {str(analysis_result)}
+I can help you with:
 
----
+1. Meeting Management:
+   - "Schedule a team meeting tomorrow at 9 AM"
+   - "Show my meetings for this week"
+   - "Check for conflicts on Friday"
 
-"""
-            # Add responses from specialized agents
-            for agent_name, agent_response in agent_responses:
-                response += f"""## {agent_name} Response:
+2. Expense Tracking:
+   - "Show my food expenses"
+   - "I spent $25 on lunch"
+   - "List my transportation expenses"
+   - "How much did I spend on electronics?"
 
-{agent_response}
+3. Combined Queries:
+   - "What meetings do I have and what did I spend this week?"
+   - "Show my schedule and food expenses"
 
----
-
-"""
+Available expense categories: food, transportation, electronics, entertainment, utilities, healthcare, shopping"""
+            yield Message(parts=[MessagePart(content=help_message)])
+            return
+        
+        # For multiple agent responses, combine them
+        if len(agent_responses) > 1:
+            response = "\n\n".join(f"## {name} Response:\n{resp}" for name, resp in agent_responses)
+            response += "\n\n🔗 Integrated Summary: The above responses have been coordinated to provide comprehensive assistance."
+            yield Message(parts=[MessagePart(content=response)])
+            return
             
-            response += """
-🔗 **Integrated Summary:**
-The above responses from specialized agents have been coordinated to provide comprehensive assistance. Each agent focuses on its area of expertise while I ensure the overall coherence and completeness of the response.
-
-**Next Steps:**
-- For meeting operations: Contact the Meeting Manager directly
-- For expense operations: Contact the Expense Tracker directly  
-- For complex queries: Continue using this orchestrator for coordinated responses
-
-**Tip:** You can ask questions that span both domains, like "What meetings do I have this week and how much did I spend on client dinners?" for integrated insights.
-"""
-        else:
-            # General query not requiring specialized agents
-            response = f"""**Personal Assistant Orchestrator**
-
-**Analysis:** {str(analysis_result)}
-
----
-
-**Available Services:**
-I coordinate between two specialized agents to help you:
-
-**Meeting Management:**
-- Schedule and manage meetings
-- Check for conflicts  
-- Update meeting details
-- Search meetings by various criteria
-
-**Expense Tracking:**
-- Record and categorize expenses
-- Generate spending summaries
-- Analyze budgets and spending patterns
-- Track expenses across time periods
-
-**Integrated Assistance:**
-- Combine meeting and expense information
-- Provide comprehensive personal assistance
-- Coordinate complex multi-domain queries
-
-**How to Use:**
-- Ask meeting questions like: "Schedule a team standup tomorrow at 9 AM"
-- Ask expense questions like: "How much did I spend on food this month?"
-- Ask combined questions like: "What meetings do I have and what's my spending this week?"
-"""
-        
-        yield Message(parts=[MessagePart(content=response)])
-        
     except Exception as e:
-        error_response = f"Error in Personal Assistant Orchestrator: {str(e)}"
+        error_response = f"Error in Personal Assistant: {str(e)}"
         yield Message(parts=[MessagePart(content=error_response)])
 
 if __name__ == "__main__":

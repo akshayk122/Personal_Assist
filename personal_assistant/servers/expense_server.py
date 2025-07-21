@@ -1,3 +1,10 @@
+"""
+Expense Tracker Server
+Port: 8200
+
+Handles expense tracking and management
+"""
+
 import logging
 import os
 from dotenv import load_dotenv
@@ -14,7 +21,6 @@ from dotenv import load_dotenv
 from typing import Optional, Any
 
 # Configure logging
-import logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -32,8 +38,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.gemini_config import get_llm
 from mcp_tools.expense_tools import (
     add_expense, list_expenses, get_expense_summary,
-    update_expense, delete_expense, get_budget_status,
-    filter_expenses
+    update_expense, delete_expense, filter_expenses
 )
 
 # Apply asyncio patch for Jupyter compatibility
@@ -46,52 +51,78 @@ llm = get_llm()
 # Create proper CrewAI tools
 class AddExpenseTool(BaseTool):
     name: str = "add_expense"
-    description: str = "Add a new expense with amount, category, description, date, and payment method"
+    description: str = """ONLY use this tool when the user wants to add a new expense.
+    Examples: 
+    - "I spent $20 on lunch"
+    - "Add expense: $50 for gas"
+    - "Record $100 for electronics"
+    DO NOT use this tool for viewing or listing expenses."""
 
     def _run(self, amount: float, category: str, description: str, date: str = "", payment_method: str = "credit") -> str:
         return add_expense(amount=amount, category=category, description=description, date=date, payment_method=payment_method)
 
 class ListExpensesTool(BaseTool):
     name: str = "list_expenses"
-    description: str = "List all expenses with optional filters for date range and category"
+    description: str = """ONLY use this tool for simple list/show/display expense requests.
+    Examples:
+    - "list my expenses"
+    - "show my expenses"
+    - "display expenses"
+    - "what are my expenses"
+    DO NOT use this tool for summaries or analytics.
+    DO NOT use this tool after using other tools."""
 
-    def _run(self, start_date: str = "", end_date: str = "", category: str = "all") -> str:
-        return list_expenses(start_date=start_date, end_date=end_date, category=category)
+    def _run(self, start_date: str = "", end_date: str = "", category: str = "all", list_all: bool = True) -> str:
+        # For simple list requests, use list_all=True to show all expenses
+        return list_expenses(start_date=start_date, end_date=end_date, category=category, list_all=list_all)
 
 class FilterExpensesTool(BaseTool):
     name: str = "filter_expenses"
-    description: str = "Filter expenses by specific category"
+    description: str = """ONLY use this tool for category-specific expense queries.
+    Examples:
+    - "show food expenses"
+    - "list transportation costs"
+    - "what did I spend on electronics"
+    DO NOT use this tool for general expense listing."""
 
     def _run(self, category: str) -> str:
         return filter_expenses(category=category)
 
 class GetExpenseSummaryTool(BaseTool):
     name: str = "get_expense_summary"
-    description: str = "Get summary statistics and analytics for expenses"
+    description: str = """ONLY use this tool for summary/analytics requests.
+    Examples:
+    - "summarize my expenses"
+    - "give me a spending summary"
+    - "analyze my expenses"
+    DO NOT use this tool for simple expense listing.
+    DO NOT use this tool unless explicitly asked for a summary."""
 
     def _run(self, period: str = "month", group_by: str = "category") -> str:
         return get_expense_summary(period=period, group_by=group_by)
 
 class UpdateExpenseTool(BaseTool):
     name: str = "update_expense"
-    description: str = "Update an existing expense's details"
+    description: str = """ONLY use this tool to modify existing expenses.
+    Examples:
+    - "update expense ABC123"
+    - "change expense details"
+    - "modify expense amount"
+    DO NOT use this tool for viewing expenses."""
 
     def _run(self, expense_id: str, updates: str) -> str:
         return update_expense(expense_id=expense_id, updates=updates)
 
 class DeleteExpenseTool(BaseTool):
     name: str = "delete_expense"
-    description: str = "Delete an expense by ID"
+    description: str = """ONLY use this tool to remove expenses.
+    Examples:
+    - "delete expense ABC123"
+    - "remove expense"
+    DO NOT use this tool for viewing expenses."""
 
     def _run(self, expense_id: str) -> str:
         return delete_expense(expense_id=expense_id)
-
-class GetBudgetStatusTool(BaseTool):
-    name: str = "get_budget_status"
-    description: str = "Get budget status and spending analysis"
-
-    def _run(self, category: str = "all", period: str = "month") -> str:
-        return get_budget_status(category=category, period=period)
 
 # Initialize tools
 expense_tools = [
@@ -100,8 +131,7 @@ expense_tools = [
     FilterExpensesTool(),
     GetExpenseSummaryTool(),
     UpdateExpenseTool(),
-    DeleteExpenseTool(),
-    GetBudgetStatusTool()
+    DeleteExpenseTool()
 ]
 
 @server.agent(name="expense_tracker")
@@ -113,9 +143,29 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
         role="Expense Management Expert",
         goal="Help users track, manage, and analyze their expenses efficiently",
         backstory="""You are an expert financial assistant specializing in expense management.
-        You understand various expense categories, can process natural language queries about spending,
-        and provide detailed financial insights. You're skilled at categorizing expenses, tracking spending patterns,
-        and helping users maintain their budget.""",
+        You follow these STRICT rules when choosing tools:
+
+        1. For viewing expenses, ONLY use ONE of these tools (never both):
+           - list_expenses: for simple "show/list/display expenses" requests
+           - filter_expenses: for category-specific requests
+           - get_expense_summary: ONLY when explicitly asked for summary/analysis
+        
+        2. For modifying expenses:
+           - add_expense: ONLY for new expenses
+           - update_expense: ONLY for modifying existing expenses
+           - delete_expense: ONLY for removing expenses
+
+        You MUST:
+        - Choose exactly ONE tool based on the query type
+        - Use list_expenses for any general expense viewing request
+        - Never combine get_expense_summary with list_expenses
+        - Never try multiple tools for the same query
+
+        Example mappings:
+        - "list expenses" → list_expenses
+        - "show food expenses" → filter_expenses
+        - "summarize spending" → get_expense_summary
+        - "I spent $20" → add_expense""",
         llm=llm,
         tools=expense_tools,
         allow_delegation=False,
@@ -124,8 +174,8 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
 
     # Create the task for handling the user's expense query
     task = Task(
-        description=f"Process the user's expense-related query: {input[0].parts[0].content}",
-        expected_output="Clear and concise response to the user's expense query with relevant financial information.",
+        description=f"Choose ONE appropriate tool to handle: {input[0].parts[0].content}",
+        expected_output="Direct response using exactly one tool - no combinations or retries.",
         agent=expense_manager,
         verbose=True
     )
@@ -150,5 +200,6 @@ if __name__ == "__main__":
     print("\nExample queries:")
     print("  - 'Show my food expenses this month'")
     print("  - 'I spent $25 on lunch today'")
-    print("  - 'What's my total spending in electronics?'")
+    print("  - 'List my expenses'")
+    print("  - 'Show me what I spent'")
     server.run(port=8200) 

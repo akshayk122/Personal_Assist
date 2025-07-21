@@ -1,6 +1,6 @@
 """
 MCP Tools for Expense Management
-Following the pattern from the existing MCP server setup
+Simplified version with Supabase storage
 """
 
 from mcp.server.fastmcp import FastMCP
@@ -41,9 +41,6 @@ def add_expense(
     
     Returns:
         str: Success message with expense ID
-    
-    Example:
-        add_expense(12.50, "food", "Subway sandwich", "2024-01-15", "credit", "lunch", "quick-meal")
     """
     print(f"[MCP Tool] add_expense called with: amount={amount}, category={category}, description={description}")
     try:
@@ -83,9 +80,10 @@ def list_expenses(
     end_date: str = "",
     category: str = "all",
     min_amount: float = 0,
-    max_amount: float = 999999
+    max_amount: float = 999999,
+    list_all: bool = False
 ) -> str:
-    """List expenses within specified filters
+    """List expenses within specified filters. If list_all is True, ignores other filters.
     
     Args:
         start_date: Start date in YYYY-MM-DD format (optional)
@@ -93,34 +91,36 @@ def list_expenses(
         category: Filter by category or 'all' (default: all)
         min_amount: Minimum amount filter (default: 0)
         max_amount: Maximum amount filter (default: 999999)
+        list_all: If True, lists all expenses ignoring other filters (default: False)
     
     Returns:
         str: Formatted list of expenses
-    
-    Example:
-        list_expenses("2024-01-01", "2024-01-31", "food", 10, 50)
     """
     try:
         if not supabase_manager.is_connected():
             raise Exception("Database not available. Please check your Supabase configuration.")
             
-        # Build filters for Supabase
-        filters = {}
-        if start_date:
-            filters["start_date"] = start_date
-        if end_date:
-            filters["end_date"] = end_date
-        if category != "all":
-            filters["category"] = category.lower()
-        if min_amount > 0:
-            filters["min_amount"] = min_amount
-        if max_amount < 999999:
-            filters["max_amount"] = max_amount
+        # If list_all is True, don't apply any filters
+        if list_all:
+            filters = {}
+        else:
+            # Build filters for Supabase
+            filters = {}
+            if start_date:
+                filters["start_date"] = start_date
+            if end_date:
+                filters["end_date"] = end_date
+            if category != "all":
+                filters["category"] = category.lower()
+            if min_amount > 0:
+                filters["min_amount"] = min_amount
+            if max_amount < 999999:
+                filters["max_amount"] = max_amount
         
         expenses = supabase_manager.get_expenses(filters)
         
         if not expenses:
-            return "💰 No expenses found for the specified criteria."
+            return "💰 No expenses found."
         
         # Calculate total
         total_amount = sum(e["amount"] for e in expenses)
@@ -155,9 +155,6 @@ def filter_expenses(category: str) -> str:
     
     Returns:
         str: Formatted list of filtered expenses
-    
-    Example:
-        filter_expenses("food")
     """
     try:
         if not supabase_manager.is_connected():
@@ -202,9 +199,6 @@ def get_expense_summary(period: str = "month", group_by: str = "category") -> st
     
     Returns:
         str: Formatted expense summary
-    
-    Example:
-        get_expense_summary("month", "category")
     """
     try:
         if not supabase_manager.is_connected():
@@ -260,9 +254,6 @@ def update_expense(expense_id: str, updates: str) -> str:
     
     Returns:
         str: Success or error message
-    
-    Example:
-        update_expense("e001", '{"amount": 15.75, "description": "Updated lunch cost"}')
     """
     try:
         if not supabase_manager.is_connected():
@@ -292,9 +283,6 @@ def delete_expense(expense_id: str) -> str:
     
     Returns:
         str: Success or error message
-    
-    Example:
-        delete_expense("e001")
     """
     try:
         if not supabase_manager.is_connected():

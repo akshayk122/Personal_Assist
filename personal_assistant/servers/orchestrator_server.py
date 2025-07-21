@@ -80,15 +80,15 @@ orchestrator_tools = [
 
 Capabilities:
 1. Route queries to appropriate specialized agents:
-   - Meeting Manager for calendar and scheduling
-   - Expense Tracker for financial management
+   - Meeting Manager for calendar and scheduling (meetings, appointments, schedule)
+   - Expense Tracker for financial management (expenses, spending, money, costs)
 2. Handle combined queries that need multiple agents
 3. Provide integrated responses
 
 Example queries:
-- "Schedule a meeting tomorrow at 2 PM"
-- "Show my food expenses this month"
-- "What meetings do I have and what did I spend this week?"
+- "Schedule a meeting tomorrow at 2 PM" → Meeting Manager
+- "Show my food expenses this month" → Expense Tracker
+- "What meetings do I have and what did I spend this week?" → Both agents
 
 I ensure seamless coordination between different aspects of your personal and professional life."""
 )
@@ -97,10 +97,29 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         # Create the orchestrator agent
         coordinator = Agent(
             role="Personal Assistant Coordinator",
-            goal="Coordinate between meeting and expense management systems to provide comprehensive assistance",
-            backstory="""You are an expert personal assistant coordinator who specializes in managing both scheduling 
-            and financial aspects of users' lives. You understand how to route queries to appropriate specialized agents 
-            and can combine their responses into coherent, integrated answers.""",
+            goal="Route queries to the appropriate specialized agent and coordinate responses",
+            backstory="""You are an expert personal assistant coordinator who routes queries to specialized agents.
+            
+            You follow these strict rules for routing:
+            1. Meeting-related keywords (ONLY use Meeting Manager):
+               - meeting, schedule, appointment, calendar, availability
+               - book, reschedule, cancel (when about meetings)
+               - conflict, attendee, room, zoom
+            
+            2. Expense-related keywords (ONLY use Expense Tracker):
+               - expense, spend, spent, cost, money, budget
+               - pay, paid, purchase, buy, bought
+               - price, dollar, $, bill
+               - food, transportation, electronics (when about spending)
+            
+            3. Combined queries (Use BOTH agents):
+               - Only when the query explicitly asks about both meetings AND expenses
+               - Example: "What meetings do I have and what did I spend this week?"
+            
+            You NEVER:
+            - Try multiple agents unless explicitly needed for combined queries
+            - Use Meeting Manager for expense queries or vice versa
+            - Make multiple attempts with the same agent""",
             llm=llm,
             tools=orchestrator_tools,
             allow_delegation=False,
@@ -112,8 +131,8 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         
         # Create task for handling the query
         task = Task(
-            description=f"Process and coordinate the user's request: {user_query}",
-            expected_output="Clear and integrated response combining relevant information from specialized agents",
+            description=f"Route this query to the appropriate agent(s): {user_query}",
+            expected_output="Direct response from the appropriate specialized agent(s) without multiple attempts",
             agent=coordinator,
             verbose=True
         )

@@ -53,23 +53,23 @@ class AddExpenseTool(BaseTool):
     name: str = "add_expense"
     description: str = """Help users record their spending.
 
-    ✓ Perfect for:
+    ##Perfect for:
     - "I spent $20 on lunch today"
     - "Add my $50 gas expense"
     - "Record my shopping expense"
 
-    💡 What you'll need:
+    ## What you'll need:
     - Amount spent
     - What it was for
     - When it happened (defaults to today)
     - How they paid (defaults to credit)
 
-    ❌ Not for:
+    ## Not for:
     - Viewing past expenses
     - Getting summaries
     - Checking budgets
 
-    Remember: Be encouraging when users track their spending!"""
+    Remember: Be specific when users track their spending!"""
 
     def _run(self, amount: float, category: str, description: str, date: str = "", payment_method: str = "credit") -> str:
         return add_expense(amount=amount, category=category, description=description, date=date, payment_method=payment_method)
@@ -78,18 +78,18 @@ class ListExpensesTool(BaseTool):
     name: str = "list_expenses"
     description: str = """Show users their expense history in a friendly way.
 
-    ✓ Perfect for:
+    ## Perfect for:
     - "Show me my expenses"
     - "What have I spent?"
     - "List my recent expenses"
     - "Display my spending"
 
-    💡 Features:
+    ## Features:
     - Shows all expenses clearly organized
     - Includes helpful totals
     - Easy to read format
 
-    ❌ Not for:
+    ## Not for:
     - Adding new expenses
     - Category filtering
     - Getting summaries
@@ -104,18 +104,18 @@ class FilterExpensesTool(BaseTool):
     name: str = "filter_expenses"
     description: str = """Help users understand specific categories of spending.
 
-    ✓ Perfect for:
+    ## Perfect for:
     - "Show my food expenses"
     - "What did I spend on transportation?"
     - "How much on electronics?"
     - "Display my shopping expenses"
 
-    💡 Features:
+    ## Features:
     - Focus on one category
     - Show category total
     - List related expenses
 
-    ❌ Not for:
+    ## Not for:
     - Showing all expenses
     - Adding expenses
     - Getting overall summaries
@@ -129,24 +129,24 @@ class GetExpenseSummaryTool(BaseTool):
     name: str = "get_expense_summary"
     description: str = """Provide friendly insights about spending patterns.
 
-    ✓ Perfect for:
+    ## Perfect for:
     - "Summarize my spending"
     - "How are my expenses looking?"
     - "Give me a spending overview"
     - "Analyze my expenses"
 
-    💡 Features:
+    ## Features:
     - Show spending patterns
     - Provide helpful totals
     - Break down by category
     - Offer gentle insights
 
-    ❌ Not for:
+    ## Not for:
     - Listing specific expenses
     - Adding new expenses
     - Category filtering
 
-    Remember: Be supportive when showing spending patterns!"""
+    Remember: Be specific and clear when showing spending patterns!"""
 
     def _run(self, period: str = "month", group_by: str = "category") -> str:
         return get_expense_summary(period=period, group_by=group_by)
@@ -155,18 +155,18 @@ class UpdateExpenseTool(BaseTool):
     name: str = "update_expense"
     description: str = """Help users fix or update their expense records.
 
-    ✓ Perfect for:
+    ## Perfect for:
     - "Fix this expense amount"
     - "Update the category"
     - "Change the payment method"
     - "Correct an expense"
 
-    💡 What you'll need:
+    ## What you'll need:
     - Expense ID
     - What to update
     - New correct values
 
-    ❌ Not for:
+    ## Not for:
     - Adding new expenses
     - Viewing expenses
     - Getting summaries
@@ -180,15 +180,15 @@ class DeleteExpenseTool(BaseTool):
     name: str = "delete_expense"
     description: str = """Help users remove unwanted expense records.
 
-    ✓ Perfect for:
+    ## Perfect for:
     - "Remove this expense"
     - "Delete the duplicate entry"
     - "Take out this record"
 
-    💡 What you'll need:
+    ## What you'll need:
     - Expense ID to remove
 
-    ❌ Not for:
+    ## Not for:
     - Updating expenses
     - Viewing expenses
     - Adding expenses

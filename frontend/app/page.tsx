@@ -13,12 +13,26 @@ export default function Home() {
     
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:8400/query/${encodeURIComponent(input)}`);
-      const data = await res.text();
-      setResponse(data);
+      const res = await fetch('http://localhost:8400/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: input  // This matches the API's QueryRequest model
+        })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ detail: 'Unknown error' }));
+        throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      setResponse(data.message || 'No response received');
     } catch (error) {
       console.error('Error:', error);
-      setResponse('Error: Failed to get response');
+      setResponse(`Error: ${error instanceof Error ? error.message : 'Failed to get response'}`);
     } finally {
       setIsLoading(false);
     }

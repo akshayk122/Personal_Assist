@@ -86,19 +86,19 @@ export default function Home() {
                     id="user-message"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className="h-40 md:h-64 text-blue-900 bg-blue-50/60 placeholder:text-blue-300 font-medium transition-all duration-200 shadow-inner border-blue-200 focus:ring-blue-400 focus:border-blue-400"
+                    className="h-40 md:h-64 text-blue-900 bg-white/60 placeholder:text-blue-400 font-medium transition-all duration-200 border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-300 focus:outline-none rounded-2xl shadow-xl backdrop-blur-md hover:border-blue-400 hover:shadow-2xl px-5 py-4 text-lg"
                     placeholder="Type your message here..."
                     disabled={isLoading}
                   />
                   <Button
                     type="submit"
                     disabled={isLoading || !input.trim()}
-                    className="mt-auto w-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg hover:scale-[1.03] transition-transform duration-150"
+                    className="mt-auto w-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg rounded-xl bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 hover:scale-[1.04] focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-150 group"
                     size="lg"
                   >
                     {isLoading ? (
                       <span className="flex items-center gap-2"><Loader2 className="animate-spin h-5 w-5" />Processing...</span>
-                    ) : <><Send className="w-5 h-5" /> Submit</>}
+                    ) : <><span className="group-hover:translate-x-1 transition-transform duration-150"><Send className="w-5 h-5" /></span> Submit</>}
                   </Button>
                 </form>
               </CardContent>

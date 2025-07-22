@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Bot, Send, Lightbulb, Loader2, Pencil } from 'lucide-react';
+import { Sparkles, Send, Lightbulb, Loader2, Pencil } from 'lucide-react';
 
 export default function Home() {
   const [input, setInput] = useState('');
@@ -55,10 +55,10 @@ export default function Home() {
       {/* Sticky Header */}
       <header className="sticky top-0 z-30 w-full bg-white/80 backdrop-blur border-b border-blue-100 shadow-sm animate-fade-in-down">
         <div className="max-w-5xl mx-auto flex items-center gap-3 py-3 px-4">
-          <span className="bg-blue-100 rounded-full p-2 shadow">
-            <Bot className="w-7 h-7 text-blue-700" />
+          <span className="bg-gradient-to-tr from-blue-400 via-blue-300 to-blue-100 rounded-full p-2 shadow-lg">
+            <Sparkles className="w-7 h-7 text-blue-700" />
           </span>
-          <span className="text-2xl font-bold text-blue-900 tracking-tight">Personal Assistant</span>
+          <span className="text-2xl font-extrabold text-blue-900 tracking-tight font-serif drop-shadow-sm">Personal Assistant</span>
           <span className="ml-auto text-xs text-blue-400 font-mono tracking-widest">v1.0</span>
         </div>
       </header>
@@ -68,7 +68,7 @@ export default function Home() {
         <div className="w-full max-w-5xl mx-auto rounded-2xl shadow-2xl bg-white/90 backdrop-blur-md p-6 md:p-12 border border-blue-100">
           <div className="flex flex-col items-center mb-8">
             <h1 className="text-4xl md:text-5xl font-extrabold text-blue-900 mb-1 text-center tracking-tight drop-shadow-sm">
-              Welcome to <span className="text-blue-600">Personal Assistant</span>
+              <span className="text-blue-600">My Assistant</span>
             </h1>
             <p className="text-center text-lg text-blue-700 font-medium">Your smart meeting & expense companion</p>
           </div>
@@ -132,7 +132,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="w-full py-4 text-center text-xs text-blue-400 bg-white/80 border-t border-blue-100 mt-8 animate-fade-in-up">
-        &copy; {new Date().getFullYear()} Personal Assistant &mdash; Built with <span className="text-blue-500">Next.js</span> & <span className="text-blue-500">shadcn/ui</span>
+        &copy; {new Date().getFullYear()} Astra Assistant &mdash; Built with <span className="text-blue-500">Next.js</span> & <span className="text-blue-500">shadcn/ui</span>
       </footer>
 
       {/* Animations */}

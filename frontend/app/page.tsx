@@ -1,6 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Bot, Send, Lightbulb, Loader2, Pencil } from 'lucide-react';
 
 export default function Home() {
   const [input, setInput] = useState('');
@@ -10,7 +15,6 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
     setIsLoading(true);
     try {
       const res = await fetch('http://localhost:8400/query', {
@@ -19,15 +23,13 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: input  // This matches the API's QueryRequest model
+          message: input
         })
       });
-
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ detail: 'Unknown error' }));
         throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
       }
-      
       const data = await res.json();
       setResponse(data.message || 'No response received');
     } catch (error) {
@@ -39,62 +41,113 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-          AI Assistant
-        </h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Input Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Your Message
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                placeholder="Type your message here..."
-              />
-              <button
-                type="submit"
-                disabled={isLoading || !input.trim()}
-                className={`w-full py-3 px-4 rounded-lg text-white font-medium ${
-                  isLoading || !input.trim()
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                {isLoading ? 'Processing...' : 'Submit'}
-              </button>
-            </form>
-          </div>
+    <div className="min-h-screen flex flex-col relative">
+      {/* Background image with overlay */}
+      <div className="fixed inset-0 -z-10">
+        <img
+          src="/personal_assistant.png"
+          alt="Personal Assistant Background"
+          className="w-full h-full object-cover object-center opacity-60"
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-white/70 to-blue-200/80" />
+      </div>
 
-          {/* Response Section */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Response
-            </h2>
-            <div className={`h-64 p-4 bg-gray-50 rounded-lg overflow-auto ${
-              isLoading ? 'animate-pulse' : ''
-            }`}>
-              {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-gray-500">Processing your request...</div>
+      {/* Sticky Header */}
+      <header className="sticky top-0 z-30 w-full bg-white/80 backdrop-blur border-b border-blue-100 shadow-sm animate-fade-in-down">
+        <div className="max-w-5xl mx-auto flex items-center gap-3 py-3 px-4">
+          <span className="bg-blue-100 rounded-full p-2 shadow">
+            <Bot className="w-7 h-7 text-blue-700" />
+          </span>
+          <span className="text-2xl font-bold text-blue-900 tracking-tight">Personal Assistant</span>
+          <span className="ml-auto text-xs text-blue-400 font-mono tracking-widest">v1.0</span>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center py-8 px-2 md:px-0 animate-fade-in-up">
+        <div className="w-full max-w-5xl mx-auto rounded-2xl shadow-2xl bg-white/90 backdrop-blur-md p-6 md:p-12 border border-blue-100">
+          <div className="flex flex-col items-center mb-8">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-blue-900 mb-1 text-center tracking-tight drop-shadow-sm">
+              Welcome to <span className="text-blue-600">Personal Assistant</span>
+            </h1>
+            <p className="text-center text-lg text-blue-700 font-medium">Your smart meeting & expense companion</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            {/* Input Section */}
+            <Card className="bg-white/95 rounded-xl shadow-md flex flex-col border border-blue-100 hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="flex flex-row items-center gap-2 pb-2">
+                <Pencil className="text-blue-400 w-5 h-5" />
+                <CardTitle className="text-xl font-semibold text-blue-800">Your Message</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col flex-1 gap-4">
+                <form onSubmit={handleSubmit} className="flex flex-col flex-1 gap-4">
+                  <Label htmlFor="user-message" className="sr-only">Message</Label>
+                  <Textarea
+                    id="user-message"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="h-40 md:h-64 text-blue-900 bg-blue-50/60 placeholder:text-blue-300 font-medium transition-all duration-200 shadow-inner border-blue-200 focus:ring-blue-400 focus:border-blue-400"
+                    placeholder="Type your message here..."
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !input.trim()}
+                    className="mt-auto w-full text-lg font-semibold flex items-center justify-center gap-2 shadow-lg hover:scale-[1.03] transition-transform duration-150"
+                    size="lg"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center gap-2"><Loader2 className="animate-spin h-5 w-5" />Processing...</span>
+                    ) : <><Send className="w-5 h-5" /> Submit</>}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Response Section */}
+            <Card className="bg-white/95 rounded-xl shadow-md flex flex-col border border-blue-100 hover:shadow-lg transition-shadow duration-200">
+              <CardHeader className="flex flex-row items-center gap-2 pb-2">
+                <Lightbulb className="text-yellow-400 w-5 h-5" />
+                <CardTitle className="text-xl font-semibold text-blue-800">Response</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 h-40 md:h-64 p-0">
+                <div className={`h-full p-4 bg-blue-50/60 rounded-lg overflow-auto border-2 border-blue-200 transition-all duration-200 ${isLoading ? 'animate-pulse' : ''}`}>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <span className="flex items-center gap-2 text-blue-400 font-medium"><Loader2 className="animate-spin h-5 w-5" />Processing your request...</span>
+                    </div>
+                  ) : response ? (
+                    <pre className="whitespace-pre-wrap text-blue-900 font-medium text-base animate-fade-in-up" style={{minHeight: '2rem'}}>{response}</pre>
+                  ) : (
+                    <div className="text-blue-300 text-center h-full flex items-center justify-center font-medium">
+                      Response will appear here
+                    </div>
+                  )}
                 </div>
-              ) : response ? (
-                <pre className="whitespace-pre-wrap text-gray-700">{response}</pre>
-              ) : (
-                <div className="text-gray-500 text-center h-full flex items-center justify-center">
-                  Response will appear here
-                </div>
-              )}
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full py-4 text-center text-xs text-blue-400 bg-white/80 border-t border-blue-100 mt-8 animate-fade-in-up">
+        &copy; {new Date().getFullYear()} Personal Assistant &mdash; Built with <span className="text-blue-500">Next.js</span> & <span className="text-blue-500">shadcn/ui</span>
+      </footer>
+
+      {/* Animations */}
+      <style jsx global>{`
+        @keyframes fade-in-up {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fade-in-down {
+          0% { opacity: 0; transform: translateY(-20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up { animation: fade-in-up 0.7s cubic-bezier(.4,0,.2,1) both; }
+        .animate-fade-in-down { animation: fade-in-down 0.7s cubic-bezier(.4,0,.2,1) both; }
+      `}</style>
+    </div>
   );
 } 

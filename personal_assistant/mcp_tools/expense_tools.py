@@ -100,7 +100,6 @@ def list_expenses(
         if not supabase_manager.is_connected():
             raise Exception("Database not available. Please check your Supabase configuration.")
             
-        # If list_all is True, don't apply any filters
         if list_all:
             filters = {}
         else:

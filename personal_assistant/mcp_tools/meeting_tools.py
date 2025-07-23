@@ -17,7 +17,7 @@ mcp = FastMCP()
 SAMPLE_MEETINGS = [
     {
         "meeting_id": "m001",
-        "title": "Team Standup",
+        "title": "Team Daily Standup",
         "date": "2024-12-16",
         "time": "09:00",
         "duration_minutes": 30,

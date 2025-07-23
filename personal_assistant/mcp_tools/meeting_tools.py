@@ -74,7 +74,6 @@ def add_meeting(
     Returns:
         str: Success message with meeting ID
     """
-    # Generate a demo meeting ID
     meeting_id = f"m{len(SAMPLE_MEETINGS) + 1:03d}"
     return f"Meeting '{title}' would be scheduled with ID: {meeting_id} (Demo Mode)"
 

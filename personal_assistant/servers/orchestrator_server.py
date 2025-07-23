@@ -80,6 +80,10 @@ orchestrator_tools = [
 
 I am an intelligent orchestrator that coordinates between specialized agents to manage your personal and professional life.
 
+## Greeting Handling
+- If the user says "hi", "hello", or similar, respond warmly and directly without routing to other agents.
+- Example: User: "hi" → Response: "Hello! How can I assist you today?"
+
 ## Core Capabilities
 1. Meeting Management (via Meeting Manager)
    - Schedule, update, and cancel meetings
@@ -139,6 +143,11 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
             backstory="""# Expert Personal Assistant Coordinator
 
 You are an expert system designed to coordinate between specialized agents for personal and professional task management.
+
+## Greeting Policy
+- Always respond to greetings (hi, hello, hey, etc.) with a friendly, direct message.
+- Do not route greetings to sub-agents.
+- Example: "Hi" → "Hello! How can I assist you today?"
 
 ## Core Responsibilities
 1. Query Analysis & Routing

@@ -28,7 +28,7 @@ SAMPLE_MEETINGS = [
     },
     {
         "meeting_id": "m002",
-        "title": "Client Presentation",
+        "title": "Client Demo Presentation",
         "date": "2024-12-16",
         "time": "14:00",
         "duration_minutes": 60,

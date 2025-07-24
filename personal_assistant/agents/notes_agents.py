@@ -47,7 +47,8 @@ class NotesAgentTool(BaseTool):
     """
     
     def _run(self, query: str) -> str:
-        return list_notes(query)
+        note_id='sample-n001'
+        return list_notes(note_id)
 
 notes_tools = [
     NotesAgentTool()

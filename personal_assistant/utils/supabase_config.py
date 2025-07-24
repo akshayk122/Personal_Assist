@@ -225,7 +225,7 @@ class SupabaseManager:
             "date_range": date_range
         }
     
-    def get_notes(self) -> List[Dict[str, Any]]:
+    def get_notes(self,note_id:str) -> List[Dict[str, Any]]:
         """Get notes from Supabase"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")

@@ -16,8 +16,7 @@ mcp=FastMCP()
 
 @mcp.tool()
 def list_notes(
-    search_query: str = "",
-    note_id: str = "sample-n003"
+    note_id: str = 'sample-n001'
 ) -> str:
     """List notes from Supabase"""
     try:
@@ -26,6 +25,7 @@ def list_notes(
         return json.dumps(notes, indent=2)
     
     except Exception as e:
+        print(f"Error listing notes: {e}")  # Log the real error
         return f"Error listing notes: {str(e)}"
     
 if __name__ == "__main__":

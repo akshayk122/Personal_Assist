@@ -17,14 +17,14 @@ mcp=FastMCP()
 @mcp.tool()
 def list_notes(
     search_query: str = "",
-    is_completed: bool = False,
-    limit: int = 10,
-    offset: int = 0
+    note_id: str = "sample-n003"
 ) -> str:
     """List notes from Supabase"""
     try:
-        notes = supabase_manager.get_notes(search_query, is_completed, limit, offset)
+        notes = supabase_manager.get_notes(note_id)
+        print(notes)
         return json.dumps(notes, indent=2)
+    
     except Exception as e:
         return f"Error listing notes: {str(e)}"
     

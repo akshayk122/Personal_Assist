@@ -18,6 +18,16 @@ CREATE TABLE IF NOT EXISTS expenses (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Create notes table
+CREATE TABLE IF NOT EXISTS notes (
+    id BIGSERIAL PRIMARY KEY,
+    note_id TEXT UNIQUE NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    isCompleted BOOLEAN DEFAULT FALSE
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
 CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);

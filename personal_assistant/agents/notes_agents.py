@@ -21,6 +21,38 @@ from mcp_tools.notes_tool import list_notes
 
 llm = get_llm()
 
+class NotesAgentTool(BaseTool):
+    name: str = "notes_agent"
+    description: str = """Show users their notes in a friendly way.
+    
+    ## Perfect for:
+    - "Show me my notes"
+    - "What do I have to do?"
+    - "List my recent notes"
+    - "Display my notes"
+
+    ## Features:
+    - Shows all notes clearly organized
+    - Includes helpful totals
+    - Easy to read format
+
+    ## Not for:
+    - Adding new notes
+    - Deleting notes
+    - Updating notes
+    - Searching notes
+    - Filtering notes
+    - Sorting notes
+    - Grouping notes
+    """
+    
+    def _run(self, query: str) -> str:
+        return list_notes(query)
+
+notes_tools = [
+    NotesAgentTool()
+]
+
 class NotesAgent:
     def __init__(self):
         self.agent = Agent(
@@ -28,6 +60,7 @@ class NotesAgent:
             goal="Help users manage their notes (add, list, delete)",
             backstory="You are a helpful assistant for personal note-taking and reminders.",
             llm=llm,
+            tools=notes_tools,
             verbose=False,
             allow_delegation=False
         )
@@ -49,9 +82,3 @@ class NotesAgent:
         result = await crew.kickoff_async()
         return str(result)
     
-class NotesAgentTool(BaseTool):
-    name: str = "notes_agent"
-    description: str = "Handle note-taking and management queries"
-    
-    def _run(self, query: str) -> str:
-        return list_notes(query)

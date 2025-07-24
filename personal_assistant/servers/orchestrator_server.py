@@ -18,6 +18,7 @@ import nest_asyncio
 import sys
 import os
 import asyncio
+from agents.notes_agents import NotesAgent
 
 # Configure logging
 logging.basicConfig(
@@ -68,10 +69,21 @@ class QueryExpenseAgentTool(BaseTool):
         except Exception as e:
             return f"Unable to contact Expense Tracker: {str(e)}"
 
+class QueryNotesAgentTool(BaseTool):
+    name: str = "query_notes_agent"
+    description: str = "Query the notes agent for note-taking tasks"
+    
+    async def _run(self, query: str) -> str:
+        try:
+            return NotesAgent().handle(query)
+        except Exception as e:
+            return f"Unable to contact Notes Agent: {str(e)}"
+
 # Initialize tools
 orchestrator_tools = [
     QueryMeetingAgentTool(),
-    QueryExpenseAgentTool()
+    QueryExpenseAgentTool(),
+    QueryNotesAgentTool()
 ]
 
 @server.agent(
@@ -95,8 +107,13 @@ I am an intelligent orchestrator that coordinates between specialized agents to 
    - Track spending patterns
    - Generate financial reports
 
-3. Integrated Services
-   - Handle queries that need both meeting and expense info
+3. Notes Management (via NotesAgent)
+   - Take notes and manage notes
+   - Search and retrieve notes
+   - Organize notes into categories
+
+4. Integrated Services
+   - Handle queries that need both meeting, expense, and notes info
    - Provide unified responses
    - Maintain context across services
 
@@ -111,7 +128,12 @@ I am an intelligent orchestrator that coordinates between specialized agents to 
    - "Show my spending"
    - "List expenses"
 
-3. Combined Queries → Both Agents
+3. Notes-Only Queries → NotesAgent
+   - "Take a note"
+   - "Search my notes"
+   - "Organize notes"
+
+4. Combined Queries → Both Agents
    - "What meetings and expenses do I have today?"
    - "Schedule client meeting and record lunch expense"
 
@@ -132,7 +154,16 @@ Response: Filtered expense list
 
 User: "What meetings do I have and what did I spend this week?"
 Action: Query both agents and combine responses
-Response: Integrated schedule and expense summary"""
+Response: Integrated schedule and expense summary
+
+User: "Take a note about the meeting"
+Action: Route to NotesAgent
+Response: Note taken and confirmation
+
+User: "Search my notes"
+Action: Route to NotesAgent
+Response: Search results"""
+
 )
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:

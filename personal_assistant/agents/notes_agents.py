@@ -20,7 +20,7 @@ from utils.gemini_config import get_llm
 
 llm = get_llm()
 
-class TaskAgent:
+class NotesAgent:
     def __init__(self):
         self.agent = Agent(
             role="Task Manager",

@@ -75,7 +75,7 @@ class QueryNotesAgentTool(BaseTool):
     
     async def _run(self, query: str) -> str:
         try:
-            return NotesAgent().handle(query)
+            return await NotesAgent().handle(query)
         except Exception as e:
             return f"Unable to contact Notes Agent: {str(e)}"
 

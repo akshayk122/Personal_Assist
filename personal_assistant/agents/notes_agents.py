@@ -34,8 +34,8 @@ class NotesAgent:
     async def handle(self, query: str) -> str:
         # Create a CrewAI Task
         task = Task(
-            description=f"Process this note-related request: '{query}'",
-            expected_output="A clear, actionable response to the user's note management request.",
+            description=f"Process this note-related request: '{query}' and return the result with most professional and concise manner",
+            expected_output="A clear, actionable response to the user's note management request in a professional and concise manner.",
             agent=self.agent,
             verbose=False
         )

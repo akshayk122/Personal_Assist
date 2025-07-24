@@ -123,6 +123,13 @@ INSERT INTO meetings (
      'Virtual - Zoom', 'Q4 results presentation', 'scheduled')
 ON CONFLICT (meeting_id) DO NOTHING;
 
+-- Insert sample notes
+INSERT INTO notes (
+    note_id, content, isCompleted
+) VALUES 
+    ('sample-n001', 'Meeting with John about the project', false),
+    ('sample-n002', 'Review the expense report for the month', false)
+ON CONFLICT (note_id) DO NOTHING;
 -- Grant necessary permissions
 -- These are typically handled automatically in Supabase, but included for completeness
 GRANT ALL ON expenses TO authenticated;

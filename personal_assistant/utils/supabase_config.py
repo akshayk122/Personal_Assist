@@ -53,6 +53,7 @@ class SupabaseManager:
     def is_connected(self) -> bool:
         """Check if Supabase client is available"""
         return self.client is not None
+
     
     def add_expense(self, expense_data: Dict[str, Any]) -> str:
         """Add a new expense to Supabase"""
@@ -223,6 +224,18 @@ class SupabaseManager:
             "average_expense": round(total_amount / total_expenses, 2) if total_expenses > 0 else 0.0,
             "date_range": date_range
         }
+    
+    def get_notes(self) -> List[Dict[str, Any]]:
+        """Get notes from Supabase"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            result = self.client.table("notes").select("*").execute()
+            return result.data
+        except Exception as e:
+            logger.error(f"Error retrieving notes from Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
 
 # Global instance
 supabase_manager = SupabaseManager() 

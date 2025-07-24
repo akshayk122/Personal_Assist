@@ -17,6 +17,7 @@ llm = get_llm()
 
 from crewai import Agent, Task, Crew
 from utils.gemini_config import get_llm
+from mcp_tools.notes_tool import list_notes
 
 llm = get_llm()
 
@@ -47,3 +48,10 @@ class NotesAgent:
         )
         result = await crew.kickoff_async()
         return str(result)
+    
+class NotesAgentTool(BaseTool):
+    name: str = "notes_agent"
+    description: str = "Handle note-taking and management queries"
+    
+    def _run(self, query: str) -> str:
+        return list_notes(query)

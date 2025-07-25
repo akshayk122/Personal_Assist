@@ -125,7 +125,7 @@ ON CONFLICT (meeting_id) DO NOTHING;
 
 -- Insert sample notes
 INSERT INTO notes (
-    note_id, content, isCompleted
+    note_id, content, iscompleted
 ) VALUES 
     ('sample-n001', 'Meeting with John about the project', false),
     ('sample-n002', 'Review the expense report for the month', false)

@@ -256,7 +256,7 @@ class SupabaseManager:
             supabase_data = {
                 "note_id": note_id,
                 "content": note_data["content"],
-                "isCompleted": note_data.get("isCompleted", False),
+                "iscompleted": note_data.get("iscompleted", False),
                 "created_at": datetime.now().isoformat()
             }
 

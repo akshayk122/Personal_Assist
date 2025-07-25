@@ -17,41 +17,26 @@ llm = get_llm()
 
 from crewai import Agent, Task, Crew
 from utils.gemini_config import get_llm
-from mcp_tools.notes_tool import list_notes
+from mcp_tools.notes_tool import list_notes, add_note
+from crewai.tools import BaseTool
 
 llm = get_llm()
 
 class NotesAgentTool(BaseTool):
     name: str = "notes_agent"
-    description: str = """Show users their notes in a friendly way.
-    
-    ## Perfect for:
-    - "Show me my notes"
-    - "What do I have to do?"
-    - "List my recent notes"
-    - "Display my notes"
-
-    ## Features:
-    - Shows all notes clearly organized
-    - Includes helpful totals
-    - Easy to read format
-
-    ## Not for:
-    - Adding new notes
-    - Deleting notes
-    - Updating notes
-    - Searching notes
-    - Filtering notes
-    - Sorting notes
-    - Grouping notes
-    """
-    
+    description: str = "Show users their notes in a friendly way."
     def _run(self, query: str) -> str:
-        note_id='sample-n001'
-        return list_notes(note_id)
+        return list_notes(query)
+
+class AddNoteTool(BaseTool):
+    name: str = "add_note"
+    description: str = "Add a new note to your notes database."
+    def _run(self, content: str, is_completed: bool = False) -> str:
+        return add_note(content, is_completed)
 
 notes_tools = [
-    NotesAgentTool()
+    NotesAgentTool(),
+    AddNoteTool()
 ]
 
 class NotesAgent:

@@ -237,5 +237,44 @@ class SupabaseManager:
             logger.error(f"Error retrieving notes from Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
+    def add_note(self, note_data: Dict[str, Any]) -> str:
+        """Add a new note to Supabase"""
+        print("[Supabase] Starting note addition...")
+        print(f"[Supabase] Note data: {note_data}")
+
+        if not self.is_connected():
+            print("[Supabase] ERROR: Client not initialized")
+            print(f"[Supabase] URL Status: {'SET' if self.supabase_url else 'MISSING'}")
+            print(f"[Supabase] API Key Status: {'SET' if self.supabase_key else 'MISSING'}")
+            raise Exception("Supabase client not initialized. Check your credentials.")
+
+        try:
+            # Generate UUID for note
+            note_id = str(uuid.uuid4())
+
+            # Prepare data for Supabase
+            supabase_data = {
+                "note_id": note_id,
+                "content": note_data["content"],
+                "isCompleted": note_data.get("isCompleted", False),
+                "created_at": datetime.now().isoformat()
+            }
+
+            print("[Supabase] Attempting note database insertion...")
+            # Insert into Supabase
+            result = self.client.table("notes").insert(supabase_data).execute()
+
+            if result.data:
+                print(f"[Supabase] SUCCESS: Note {note_id} added to database")
+                print(f"[Supabase] Response data: {result.data}")
+                return note_id
+            else:
+                print("[Supabase] ERROR: Insert returned no data")
+                raise Exception("Failed to insert note into Supabase")
+
+        except Exception as e:
+            logger.error(f"Error adding note to Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
 # Global instance
 supabase_manager = SupabaseManager() 

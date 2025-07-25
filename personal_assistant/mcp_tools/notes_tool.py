@@ -27,6 +27,23 @@ def list_notes(
     except Exception as e:
         print(f"Error listing notes: {e}")  # Log the real error
         return f"Error listing notes: {str(e)}"
+
+@mcp.tool()
+def add_note(
+    content: str,
+    is_completed: bool = False
+) -> str:
+    """Add a new note to Supabase"""
+    try:
+        note_data = {
+            "content": content,
+            "isCompleted": is_completed
+        }
+        note_id = supabase_manager.add_note(note_data)
+        return f"Note added with ID: {note_id}"
+    except Exception as e:
+        print(f"Error adding note: {e}")
+        return f"Error adding note: {str(e)}"
     
 if __name__ == "__main__":
     mcp.run(transport="stdio")

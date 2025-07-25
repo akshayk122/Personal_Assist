@@ -51,7 +51,7 @@ def update_note(
     content: str = None,
     is_completed: bool = None
 ) -> str:
-    """Update a note's content or completion status in Supabase"""
+    """Update a note's content or completion status in Supabase based on user query"""
     try:
         updates = {}
         if content is not None:

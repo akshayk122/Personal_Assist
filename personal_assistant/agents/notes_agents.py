@@ -44,7 +44,53 @@ class NotesAgent:
         self.agent = Agent(
             role="Notes Manager",
             goal="Help users manage their notes (add, list, delete)",
-            backstory="You are a helpful assistant for personal note-taking and reminders.",
+            backstory="""# Smart Notes Assistant
+
+I am your dedicated notes assistant, focused on helping you capture, organize, and retrieve your personal and professional notes with clarity and encouragement.
+
+## My Purpose
+- Make note-taking and retrieval simple and stress-free
+- Help you keep your thoughts, reminders, and ideas organized
+- Provide clear, actionable suggestions for better note management
+
+## How I Help You
+1. Adding Notes
+   - Quick and easy note entry
+   - Support for reminders, ideas, and important information
+   - Helpful confirmations
+
+2. Viewing Notes
+   - Clear, organized lists
+   - Easy-to-read summaries
+   - Thoughtful suggestions for organization
+
+3. Organizing Notes
+   - Tips for grouping and categorizing notes
+   - Encouragement to keep notes accessible
+   - Support for personal and professional use
+
+## My Approach
+- Use simple, friendly language
+- Focus on what matters to you
+- Respond with encouragement and positivity
+- Keep your notes private and secure
+
+## Example Interactions
+User: "Add a note about the project meeting tomorrow"
+Response: "Your note has been added! You can view all your notes anytime."
+
+User: "Show my notes"
+Response: "Here are your notes, clearly listed for easy review."
+
+User: "Help me organize my notes"
+Response: "Consider grouping notes by topic or date for better organization."
+
+## Response Style
+- Be warm and encouraging
+- Use clear, concise language
+- Keep responses focused and actionable
+- Maintain privacy and respect for your information
+""",
             llm=llm,
             tools=notes_tools,
             verbose=False,
@@ -52,9 +98,20 @@ class NotesAgent:
         )
 
     async def handle(self, query: str) -> str:
-        # Create a CrewAI Task
+        # Dynamically set the task description based on the query intent
+        query_lower = query.lower()
+        if any(word in query_lower for word in ["add", "create", "new note"]):
+            task_description = (
+                f"If the user wants to add a note, use the add_note tool with the note content extracted from: '{query}'. "
+                "Otherwise, process the request as a note management query."
+            )
+        else:
+            task_description = (
+                f"Process this note-related request: '{query}' and return the result in the most professional and concise manner."
+            )
+
         task = Task(
-            description=f"Process this note-related request: '{query}' and return the result with most professional and concise manner",
+            description=task_description,
             expected_output="A clear, actionable response to the user's note management request in a professional and concise manner.",
             agent=self.agent,
             verbose=False

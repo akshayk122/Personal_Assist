@@ -22,7 +22,7 @@ from crewai.tools import BaseTool
 
 llm = get_llm()
 
-class NotesAgentTool(BaseTool):
+class ListNotesTool(BaseTool):
     name: str = "notes_agent"
     description: str = "Show users their notes in a friendly way."
     def _run(self, query: str) -> str:
@@ -35,7 +35,7 @@ class AddNoteTool(BaseTool):
         return add_note(content, is_completed)
 
 notes_tools = [
-    NotesAgentTool(),
+    ListNotesTool(),
     AddNoteTool()
 ]
 

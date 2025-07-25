@@ -37,7 +37,7 @@ def add_note(
     try:
         note_data = {
             "content": content,
-            "isCompleted": is_completed
+            "iscompleted": is_completed
         }
         note_id = supabase_manager.add_note(note_data)
         return f"Note added with ID: {note_id}"
@@ -57,7 +57,7 @@ def update_note(
         if content is not None:
             updates["content"] = content
         if is_completed is not None:
-            updates["isCompleted"] = is_completed
+            updates["iscompleted"] = is_completed
         if not updates:
             return "No updates provided. Specify content or is_completed."
         from utils.supabase_config import supabase_manager

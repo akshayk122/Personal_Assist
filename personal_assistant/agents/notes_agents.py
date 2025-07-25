@@ -17,12 +17,12 @@ llm = get_llm()
 
 from crewai import Agent, Task, Crew
 from utils.gemini_config import get_llm
-from mcp_tools.notes_tool import list_notes, add_note
+from mcp_tools.notes_tool import list_notes, add_note, update_note
 from crewai.tools import BaseTool
 
 llm = get_llm()
 
-class ListNotesTool(BaseTool):
+class NotesAgentTool(BaseTool):
     name: str = "notes_agent"
     description: str = "Show users their notes in a friendly way."
     def _run(self, query: str) -> str:
@@ -34,22 +34,29 @@ class AddNoteTool(BaseTool):
     def _run(self, content: str, is_completed: bool = False) -> str:
         return add_note(content, is_completed)
 
+class UpdateNoteTool(BaseTool):
+    name: str = "update_note"
+    description: str = "Update a note's content or completion status."
+    def _run(self, note_id: str, content: str = None, is_completed: bool = None) -> str:
+        return update_note(note_id, content, is_completed)
+
 notes_tools = [
-    ListNotesTool(),
-    AddNoteTool()
+    NotesAgentTool(),
+    AddNoteTool(),
+    UpdateNoteTool()
 ]
 
 class NotesAgent:
     def __init__(self):
         self.agent = Agent(
             role="Notes Manager",
-            goal="Help users manage their notes (add, list, delete)",
+            goal="Help users manage their notes (add, list, delete, update)",
             backstory="""# Smart Notes Assistant
 
-I am your dedicated notes assistant, focused on helping you capture, organize, and retrieve your personal and professional notes with clarity and encouragement.
+I am your dedicated notes assistant, focused on helping you capture, organize, update, and retrieve your personal and professional notes with clarity and encouragement.
 
 ## My Purpose
-- Make note-taking and retrieval simple and stress-free
+- Make note-taking, updating, and retrieval simple and stress-free
 - Help you keep your thoughts, reminders, and ideas organized
 - Provide clear, actionable suggestions for better note management
 
@@ -64,7 +71,12 @@ I am your dedicated notes assistant, focused on helping you capture, organize, a
    - Easy-to-read summaries
    - Thoughtful suggestions for organization
 
-3. Organizing Notes
+3. Updating Notes
+   - Mark notes as completed or in progress
+   - Edit note content or details
+   - Confirm updates with clear feedback
+
+4. Organizing Notes
    - Tips for grouping and categorizing notes
    - Encouragement to keep notes accessible
    - Support for personal and professional use
@@ -81,6 +93,12 @@ Response: "Your note has been added! You can view all your notes anytime."
 
 User: "Show my notes"
 Response: "Here are your notes, clearly listed for easy review."
+
+User: "Mark the note about the project meeting as complete"
+Response: "The note has been marked as complete!"
+
+User: "Update the note about the project meeting to say 'Project meeting moved to Friday'"
+Response: "Your note has been updated!"
 
 User: "Help me organize my notes"
 Response: "Consider grouping notes by topic or date for better organization."

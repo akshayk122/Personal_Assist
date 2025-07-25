@@ -276,5 +276,21 @@ class SupabaseManager:
             logger.error(f"Error adding note to Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
+    def update_note(self, note_id: str, updates: Dict[str, Any]) -> bool:
+        """Update a note in Supabase"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        try:
+            result = self.client.table("notes").update(updates).eq("note_id", note_id).execute()
+            if result.data:
+                logger.info(f"Note {note_id} updated successfully in Supabase")
+                return True
+            else:
+                logger.warning(f"No data returned when updating note {note_id}")
+                return False
+        except Exception as e:
+            logger.error(f"Error updating note in Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
 # Global instance
 supabase_manager = SupabaseManager() 

@@ -44,6 +44,31 @@ def add_note(
     except Exception as e:
         print(f"Error adding note: {e}")
         return f"Error adding note: {str(e)}"
+
+@mcp.tool()
+def update_note(
+    note_id: str,
+    content: str = None,
+    is_completed: bool = None
+) -> str:
+    """Update a note's content or completion status in Supabase"""
+    try:
+        updates = {}
+        if content is not None:
+            updates["content"] = content
+        if is_completed is not None:
+            updates["isCompleted"] = is_completed
+        if not updates:
+            return "No updates provided. Specify content or is_completed."
+        from utils.supabase_config import supabase_manager
+        success = supabase_manager.update_note(note_id, updates)
+        if success:
+            return f"Note {note_id} updated successfully."
+        else:
+            return f"Failed to update note {note_id}."
+    except Exception as e:
+        print(f"Error updating note: {e}")
+        return f"Error updating note: {str(e)}"
     
 if __name__ == "__main__":
     mcp.run(transport="stdio")

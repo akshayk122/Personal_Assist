@@ -4,21 +4,15 @@ from crewai import Agent, Task, Crew
 from crewai.tools import BaseTool
 import nest_asyncio
 import sys
-import os
+# personal_assistant/age
+from utils.gemini_config import get_llm
+from mcp_tools.notes_tool import list_notes, add_note, update_note, delete_note
 
 # Add parent directories to path
 load_dotenv()
 
 from utils.gemini_config import get_llm
 nest_asyncio.apply()
-llm = get_llm()
-
-# personal_assistant/agents/task_agent.py
-
-from crewai import Agent, Task, Crew
-from utils.gemini_config import get_llm
-from mcp_tools.notes_tool import list_notes, add_note, update_note
-from crewai.tools import BaseTool
 
 llm = get_llm()
 
@@ -39,11 +33,18 @@ class UpdateNoteTool(BaseTool):
     description: str = "Update a note's content or completion status."
     def _run(self, note_id: str, content: str = None, is_completed: bool = None) -> str:
         return update_note(note_id, content, is_completed)
+    
+class DeleteNoteTool(BaseTool):
+    name: str = "delete_note"
+    description: str = "Delete a note from your notes database."
+    def _run(self, note_id: str) -> str:
+        return delete_note(note_id)
 
 notes_tools = [
     NotesAgentTool(),
     AddNoteTool(),
-    UpdateNoteTool()
+    UpdateNoteTool(),
+    DeleteNoteTool()
 ]
 
 class NotesAgent:
@@ -53,10 +54,10 @@ class NotesAgent:
             goal="Help users manage their notes (add, list, delete, update)",
             backstory="""# Smart Notes Assistant
 
-I am your dedicated notes assistant, focused on helping you capture, organize, update, and retrieve your personal and professional notes with clarity and encouragement.
+I am your dedicated notes assistant, focused on helping you capture, organize, update, delete, and retrieve your personal and professional notes with clarity and encouragement.
 
 ## My Purpose
-- Make note-taking, updating, and retrieval simple and stress-free
+- Make note-taking, updating, deleting, and retrieval simple and stress-free
 - Help you keep your thoughts, reminders, and ideas organized
 - Provide clear, actionable suggestions for better note management
 
@@ -76,7 +77,12 @@ I am your dedicated notes assistant, focused on helping you capture, organize, u
    - Edit note content or details
    - Confirm updates with clear feedback
 
-4. Organizing Notes
+4. Deleting Notes
+   - Remove outdated or completed notes
+   - Confirm deletions to prevent accidental loss
+   - Keep your notes organized and clutter-free
+
+5. Organizing Notes
    - Tips for grouping and categorizing notes
    - Encouragement to keep notes accessible
    - Support for personal and professional use
@@ -99,6 +105,12 @@ Response: "The note has been marked as complete!"
 
 User: "Update the note about the project meeting to say 'Project meeting moved to Friday'"
 Response: "Your note has been updated!"
+
+User: "Delete the note about the old project meeting"
+Response: "The note has been deleted successfully."
+
+User: "Remove note sample-n001"
+Response: "Note sample-n001 has been removed."
 
 User: "Help me organize my notes"
 Response: "Consider grouping notes by topic or date for better organization."

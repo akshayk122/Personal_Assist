@@ -69,6 +69,22 @@ def update_note(
     except Exception as e:
         print(f"Error updating note: {e}")
         return f"Error updating note: {str(e)}"
+
+@mcp.tool()
+def delete_note(
+    note_id: str
+) -> str:
+    """Delete a note from Supabase"""
+    try:
+        from utils.supabase_config import supabase_manager
+        success = supabase_manager.delete_note(note_id)
+        if success:
+            return f"Note {note_id} deleted successfully."
+        else:
+            return f"Failed to delete note {note_id}."
+    except Exception as e:
+        print(f"Error deleting note: {e}")
+        return f"Error deleting note: {str(e)}"
     
 if __name__ == "__main__":
     mcp.run(transport="stdio")

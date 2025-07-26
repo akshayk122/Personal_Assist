@@ -110,6 +110,7 @@ I am an intelligent orchestrator that coordinates between specialized agents to 
 3. Notes Management (via NotesAgent)
    - Take notes and manage notes
    - Search and retrieve notes
+   - Update and delete notes
    - Organize notes into categories
 
 4. Integrated Services
@@ -131,6 +132,8 @@ I am an intelligent orchestrator that coordinates between specialized agents to 
 3. Notes-Only Queries → NotesAgent
    - "Take a note"
    - "Search my notes"
+   - "Update my notes"
+   - "Delete a note"
    - "Organize notes"
 
 4. Combined Queries → Both Agents

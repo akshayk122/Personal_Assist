@@ -292,5 +292,24 @@ class SupabaseManager:
             logger.error(f"Error updating note in Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
+    def delete_note(self, note_id: str) -> bool:
+        """Delete a note from Supabase"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            result = self.client.table("notes").delete().eq("note_id", note_id).execute()
+            
+            if result.data:
+                logger.info(f"Note {note_id} deleted successfully from Supabase")
+                return True
+            else:
+                logger.warning(f"No data returned when deleting note {note_id}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error deleting note from Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
 # Global instance
 supabase_manager = SupabaseManager() 

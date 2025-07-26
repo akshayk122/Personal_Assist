@@ -229,14 +229,32 @@ You are an expert system designed to coordinate between specialized agents for p
    Example: "Meetings and expenses this week"
 
 ## Response Format
-1. Single Agent Response
-   - Direct pass-through from specialized agent
-   - No additional processing needed
+1. **Meeting Manager Responses**
+   - Use structured calendar format with clear headers
+   - Include meeting details: Title, Date/Time, Duration, Attendees, Location
+   - Show status indicators: ✓ Scheduled, ⚠️ Conflict, ❌ Cancelled
+   - Format dates as "Day, Month Date, Year at Time"
+   - Example: "📅 **Meeting Scheduled**\n\n**Title**: Team Standup\n**Date**: Monday, December 16, 2024 at 9:00 AM"
 
-2. Combined Response
-   - Clear section headers
-   - Logical organization
-   - Integrated summary if helpful""",
+2. **Expense Tracker Responses**
+   - Use financial formatting with currency symbols
+   - Include categories with icons: 🍽️ Food, 🚗 Transportation, 🏠 Utilities
+   - Show totals and summaries with clear breakdowns
+   - Format amounts as "$XX.XX" with proper decimal places
+   - Example: "💰 **Expense Summary**\n\n**Total**: $245.50\n**Categories**: 🍽️ Food ($120.00), 🚗 Transportation ($85.50)"
+
+3. **Notes Agent Responses**
+   - Use JSON format for note lists: {"content": "...", "iscompleted": true/false, "created_at": "..."}
+   - Include status indicators: ✓ Completed, ⏳ Pending
+   - Show timestamps in readable format
+   - Example: "📋 **Notes List**\n\n[{\"content\": \"Meeting notes\", \"iscompleted\": false, \"created_at\": \"2024-12-16T10:00:00\"}]"
+
+4. **Combined Responses**
+   - Use clear section headers for each agent type
+   - Separate sections with horizontal lines (---)
+   - Provide integrated summary at the end
+   - Example: "📅 **Meetings**\n[Meeting details]\n\n💰 **Expenses**\n[Expense details]\n\n📋 **Summary**: 3 meetings, $150 in expenses"
+""",
             llm=llm,
             tools=orchestrator_tools,
             allow_delegation=False,

@@ -251,10 +251,12 @@ You are an expert system designed to coordinate between specialized agents for p
    - Format: "💰 **[Category] Expenses for [Period]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
 
 4. **Notes Agent Responses**
-   - Filter by completion status when requested
-   - Group by date ranges
-   - Consolidate similar notes
-   - Format: "📋 **Notes for [Criteria]**\n\n**Total**: X notes\n**Details**: [Filtered list]"
+   - **Filter by Status**: "completed notes", "pending notes", "all notes"
+   - **Filter by Date Ranges**: "notes from last week", "today's notes", "this month"
+   - **Filter by Content**: "meeting notes", "project notes", "personal notes"
+   - **Consolidate Similar Notes**: Group notes by topic or category
+   - **Show Completion Summary**: Count of completed vs pending notes
+   - Format: "📋 **[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed, ⏳ Z pending)\n**Details**: [Filtered and grouped list]"
 
 ### **Response Processing Examples**
 - **User**: "Show my food expenses for last month"
@@ -265,10 +267,23 @@ You are an expert system designed to coordinate between specialized agents for p
 - **Process**: Filter meetings by date range="this week"
 - **Output**: "📅 **Meetings This Week**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
 
+- **User**: "Show my completed notes from last week"
+- **Process**: Filter notes by status="completed" AND date="last week"
+- **Output**: "📋 **Completed Notes from Last Week**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
+
+- **User**: "List all my meeting notes"
+- **Process**: Filter notes by content containing "meeting"
+- **Output**: "📋 **Meeting Notes**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
+
 ### **Data Consolidation Rules**
 1. **Expenses**: Group identical descriptions, sum amounts, show visit count
 2. **Meetings**: Group by type, show frequency for recurring meetings
-3. **Notes**: Group by topic, show completion status summary
+3. **Notes**: 
+   - Group by topic/category (meeting notes, project notes, personal notes)
+   - Show completion status summary (completed vs pending)
+   - Consolidate similar content under common themes
+   - Filter by date ranges when specified
+   - Count notes by type and status
 """,
             llm=llm,
             tools=orchestrator_tools,
@@ -284,13 +299,16 @@ You are an expert system designed to coordinate between specialized agents for p
             description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
 
 IMPORTANT: After receiving the agent response, analyze the user's intent and:
-1. Filter the data based on user criteria (e.g., "last month", "food expenses")
+1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes")
 2. Consolidate duplicate or similar entries
 3. Group related items intelligently
 4. Calculate totals and summaries
 5. Present the refined, filtered result instead of raw data
 
-Example: If user asks "food expenses last month" and agent returns multiple identical entries, consolidate them into a single line with visit count.""",
+Examples:
+- If user asks "food expenses last month" and agent returns multiple identical entries, consolidate them into a single line with visit count
+- If user asks "meeting notes" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
+- If user asks "completed notes from last week", filter by completion status and date range, then group by topic""",
             expected_output="Intelligently filtered and processed response based on user criteria, not raw agent data",
             agent=coordinator,
             verbose=True

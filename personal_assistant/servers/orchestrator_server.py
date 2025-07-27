@@ -228,32 +228,47 @@ You are an expert system designed to coordinate between specialized agents for p
    Pattern: Explicitly asks for both types of info
    Example: "Meetings and expenses this week"
 
-## Response Format
-1. **Meeting Manager Responses**
-   - Use structured calendar format with clear headers
-   - Include meeting details: Title, Date/Time, Duration, Attendees, Location
-   - Show status indicators: ✓ Scheduled, ⚠️ Conflict, ❌ Cancelled
-   - Format dates as "Day, Month Date, Year at Time"
-   - Example: "📅 **Meeting Scheduled**\n\n**Title**: Team Standup\n**Date**: Monday, December 16, 2024 at 9:00 AM"
+## Response Format & Processing Rules
 
-2. **Expense Tracker Responses**
-   - Use financial formatting with currency symbols
-   - Include categories with icons: 🍽️ Food, 🚗 Transportation, 🏠 Utilities
-   - Show totals and summaries with clear breakdowns
-   - Format amounts as "$XX.XX" with proper decimal places
-   - Example: "💰 **Expense Summary**\n\n**Total**: $245.50\n**Categories**: 🍽️ Food ($120.00), 🚗 Transportation ($85.50)"
+### **Intelligent Response Processing**
+1. **Filter and Refine Raw Data**
+   - Analyze user intent (e.g., "last month", "this week", "food expenses")
+   - Filter agent responses based on user criteria
+   - Consolidate duplicate or similar entries
+   - Group related items intelligently
 
-3. **Notes Agent Responses**
-   - Use JSON format for note lists: {"content": "...", "iscompleted": true/false, "created_at": "..."}
-   - Include status indicators: ✓ Completed, ⏳ Pending
-   - Show timestamps in readable format
-   - Example: "📋 **Notes List**\n\n[{\"content\": \"Meeting notes\", \"iscompleted\": false, \"created_at\": \"2024-12-16T10:00:00\"}]"
+2. **Meeting Manager Responses**
+   - Filter by date ranges when specified
+   - Group meetings by day/week/month
+   - Consolidate recurring meetings
+   - Format: "📅 **Meetings for [Period]**\n\n**Total**: X meetings\n**Details**: [Filtered list]"
 
-4. **Combined Responses**
-   - Use clear section headers for each agent type
-   - Separate sections with horizontal lines (---)
-   - Provide integrated summary at the end
-   - Example: "📅 **Meetings**\n[Meeting details]\n\n💰 **Expenses**\n[Expense details]\n\n📋 **Summary**: 3 meetings, $150 in expenses"
+3. **Expense Tracker Responses**
+   - **Filter by Time Periods**: "last month", "this week", "last 30 days"
+   - **Filter by Categories**: "food", "transportation", "utilities"
+   - **Consolidate Similar Expenses**: Group identical descriptions
+   - **Calculate Totals**: Show filtered totals, not raw data
+   - Format: "💰 **[Category] Expenses for [Period]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
+
+4. **Notes Agent Responses**
+   - Filter by completion status when requested
+   - Group by date ranges
+   - Consolidate similar notes
+   - Format: "📋 **Notes for [Criteria]**\n\n**Total**: X notes\n**Details**: [Filtered list]"
+
+### **Response Processing Examples**
+- **User**: "Show my food expenses for last month"
+- **Process**: Filter expenses by category="food" AND date="last month"
+- **Output**: "💰 **Food Expenses for Last Month**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
+
+- **User**: "What meetings do I have this week?"
+- **Process**: Filter meetings by date range="this week"
+- **Output**: "📅 **Meetings This Week**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
+
+### **Data Consolidation Rules**
+1. **Expenses**: Group identical descriptions, sum amounts, show visit count
+2. **Meetings**: Group by type, show frequency for recurring meetings
+3. **Notes**: Group by topic, show completion status summary
 """,
             llm=llm,
             tools=orchestrator_tools,
@@ -266,8 +281,17 @@ You are an expert system designed to coordinate between specialized agents for p
         
         # Create task for handling the query
         task = Task(
-            description=f"Route this query to the appropriate agent(s): {user_query}",
-            expected_output="Direct response from the appropriate specialized agent(s) without multiple attempts",
+            description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
+
+IMPORTANT: After receiving the agent response, analyze the user's intent and:
+1. Filter the data based on user criteria (e.g., "last month", "food expenses")
+2. Consolidate duplicate or similar entries
+3. Group related items intelligently
+4. Calculate totals and summaries
+5. Present the refined, filtered result instead of raw data
+
+Example: If user asks "food expenses last month" and agent returns multiple identical entries, consolidate them into a single line with visit count.""",
+            expected_output="Intelligently filtered and processed response based on user criteria, not raw agent data",
             agent=coordinator,
             verbose=True
         )

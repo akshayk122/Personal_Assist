@@ -333,7 +333,7 @@ Examples:
 
 if __name__ == "__main__":
     print("Starting Personal Assistant Orchestrator on port 8300...")
-    print("Available endpoints:")
+    print("Available endpoints(ACP Server 3):")
     print("  - POST /runs (agent: personal_assistant)")
     print("Coordinates between:")
     print("  - Meeting Manager (port 8100)")

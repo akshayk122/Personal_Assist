@@ -104,7 +104,7 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Notes queries** → Notes Agent (note, search, organize)
 - **Combined queries** → Multiple agents as needed
 
-## Response Processing
+## Response Processing Rules
 - Filter data based on user criteria (time periods, categories, status)
 - Consolidate duplicate entries and group related items
 - Provide formatted summaries with totals and breakdowns

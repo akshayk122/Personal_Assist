@@ -65,7 +65,7 @@ Manages personal and professional notes with clear, organized responses.
 ## Response Style
 - **Professional Formatting**: Use clear headers, bullet points, structured layouts
 - **Concise Language**: Provide direct, actionable responses
-- **Status Indicators**: Use ✓ Success, ⚠️ Warning, ❌ Error
+- **Status Indicators**: Use ✓ Success, Warning, Error
 - **Data Presentation**: Present notes in organized lists with proper spacing
 - **Action Confirmation**: Provide clear confirmation messages
 - **Error Handling**: Give helpful error messages with suggestions
@@ -80,10 +80,10 @@ Manages personal and professional notes with clear, organized responses.
 - **Search Results**: Highlight matching content with context
 
 ## Professional Response Templates
-- **Success**: "✓ [Operation] completed successfully. [Details]"
-- **Error**: "❌ [Operation] failed: [Error]. [Suggestion]"
-- **Information**: "📋 [Information type]: [Details]"
-- **Warning**: "⚠️ [Warning message]. [Recommendation]"
+- **Success**: "[Operation] completed successfully. [Details]"
+- **Error**: "[Operation] failed: [Error]. [Suggestion]"
+- **Information**: "[Information type]: [Details]"
+- **Warning**: "[Warning message]. [Recommendation]"
 """,
             llm=llm,
             tools=notes_tools,

@@ -19,6 +19,7 @@ import sys
 import os
 import asyncio
 from agents.notes_agents import NotesAgent
+from agents.health_diet_agent import HealthDietAgent
 
 # Configure logging
 logging.basicConfig(
@@ -78,12 +79,20 @@ class QueryNotesAgentTool(BaseTool):
             return await NotesAgent().handle(query)
         except Exception as e:
             return f"Unable to contact Notes Agent: {str(e)}"
+        
+class QueryHealthDietAgentTool(BaseTool):
+    name: str = "query_health_diet_agent"
+    description: str = "Query the health and diet agent for health and diet related tasks"
+    
+    async def _run(self, query: str) -> str:
+        return await HealthDietAgent().handle(query)
 
 # Initialize tools
 orchestrator_tools = [
     QueryMeetingAgentTool(),
     QueryExpenseAgentTool(),
-    QueryNotesAgentTool()
+    QueryNotesAgentTool(),
+    QueryHealthDietAgentTool()
 ]
 
 @server.agent(
@@ -102,6 +111,7 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
 - **Expense queries** → Expense Tracker (expense, spend, money, budget)
 - **Notes queries** → Notes Agent (note, search, organize)
+- **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food)
 - **Combined queries** → Multiple agents as needed
 
 ## Response Processing Rules
@@ -135,6 +145,7 @@ Coordinates between specialized agents for personal and professional task manage
 - **Meeting queries**: meeting, schedule, calendar, appointment
 - **Expense queries**: expense, spend, cost, money, budget  
 - **Notes queries**: note, search, organize, complete
+- **Health and Diet queries**: health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, measurement, symptom, vital, medication, sleep
 - **Combined queries**: Explicitly asks for multiple types of info
 
 ## Response Format & Processing Rules
@@ -167,6 +178,15 @@ Coordinates between specialized agents for personal and professional task manage
    - **Show Completion Summary**: Count of completed vs pending notes
    - Format: "[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed, ⏳ Z pending)\n**Details**: [Filtered and grouped list]"
 
+5. **Health and Diet Agent Responses**
+   - **Filter by Health Metrics**: "weight", "measurements", "symptoms", "vitals", "medications", "exercise", "sleep"
+   - **Filter by Diet Metrics**: "meals", "calories", "food items", "water intake", "supplements"
+   - **Filter by Date Ranges**: "last week", "this month", "today", "yesterday"
+   - **Filter by Goals**: "weight loss progress", "fitness goals", "nutrition targets"
+   - **Consolidate Trends**: Group similar health/diet patterns
+   - **Show Progress Summary**: Track goal progress and trends
+   - Format: "[Type] Health/Diet Summary for [Period]**\n\n**Progress**: [Trend analysis]\n**Goals**: [Current status]\n**Details**: [Filtered and grouped data]"
+
 ### **Response Processing Examples**
 - **User**: "Show my food expenses for last month"
 - **Process**: Filter expenses by category="food" AND date="last month"
@@ -184,6 +204,14 @@ Coordinates between specialized agents for personal and professional task manage
 - **Process**: Filter notes by content containing "meeting"
 - **Output**: "**Meeting Notes**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
 
+- **User**: "Show my weight progress this month"
+- **Process**: Filter health records by type="weight" AND date="this month"
+- **Output**: "**Weight Progress This Month**\n\n**Progress**: Down 2.5 lbs (trending downward)\n**Current**: 175 lbs\n**Goal**: 170 lbs (5 lbs remaining)\n**Details**:\n• Weekly average: 175.2 lbs\n• Best day: 174.8 lbs\n• Trend: Consistent downward progress"
+
+- **User**: "What did I eat today?"
+- **Process**: Filter diet records by date="today"
+- **Output**: "**Today's Diet Summary**\n\n**Total Calories**: 1,850 (Goal: 2,000)\n**Meals**:\n• Breakfast: Oatmeal with berries (320 cal)\n• Lunch: Grilled chicken salad (450 cal)\n• Dinner: Salmon with vegetables (680 cal)\n• Snacks: Apple and nuts (400 cal)"
+
 ### **Data Consolidation Rules**
 1. **Expenses**: Group identical descriptions, sum amounts, show visit count
 2. **Meetings**: Group by type, show frequency for recurring meetings
@@ -193,6 +221,18 @@ Coordinates between specialized agents for personal and professional task manage
    - Consolidate similar content under common themes
    - Filter by date ranges when specified
    - Count notes by type and status
+4. **Health Records**:
+   - Group by metric type (weight, measurements, symptoms, vitals)
+   - Show trends and averages over time periods
+   - Track goal progress and milestones
+   - Consolidate similar health patterns
+   - Filter by date ranges and health categories
+5. **Diet Records**:
+   - Group by meal type (breakfast, lunch, dinner, snacks)
+   - Calculate daily calorie totals and nutritional breakdown
+   - Track water intake and supplement consumption
+   - Show meal patterns and nutritional trends
+   - Filter by date ranges and food categories
 """,
             llm=llm,
             tools=orchestrator_tools,
@@ -208,7 +248,7 @@ Coordinates between specialized agents for personal and professional task manage
             description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
 
 IMPORTANT: After receiving the agent response, analyze the user's intent and:
-1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes")
+1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes", "weight progress", "today's meals")
 2. Consolidate duplicate or similar entries
 3. Group related items intelligently
 4. Calculate totals and summaries
@@ -217,7 +257,9 @@ IMPORTANT: After receiving the agent response, analyze the user's intent and:
 Examples:
 - If user asks "food expenses last month" and agent returns multiple identical entries, consolidate them into a single line with visit count
 - If user asks "meeting notes" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
-- If user asks "completed notes from last week", filter by completion status and date range, then group by topic""",
+- If user asks "completed notes from last week", filter by completion status and date range, then group by topic
+- If user asks "weight progress this month", filter health records by type="weight" and date range, show trends and goal progress
+- If user asks "what did I eat today", filter diet records by date="today", group by meal type, calculate total calories""",
             expected_output="Intelligently filtered and processed response based on user criteria, not raw agent data",
             agent=coordinator,
             verbose=True
@@ -247,9 +289,15 @@ if __name__ == "__main__":
     print("Coordinates between:")
     print("  - Meeting Manager (port 8100)")
     print("  - Expense Tracker (port 8200)")
+    print("  - Notes Agent (local)")
+    print("  - Health & Diet Agent (local)")
     print("\nExample queries:")
     print("  - 'Schedule a meeting with John tomorrow at 2 PM'")
     print("  - 'I spent $25 on lunch today'")
-    print("  - 'What meetings do I have this week and my food expenses?'")
+    print("  - 'Add a note about the project meeting'")
+    print("  - 'Record my weight as 175 lbs today'")
+    print("  - 'I ate oatmeal for breakfast, 320 calories'")
+    print("  - 'Show my weight progress this month'")
+    print("  - 'What did I eat today?'")
     
     server.run(port=8300) 

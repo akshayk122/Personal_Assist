@@ -150,14 +150,14 @@ Coordinates between specialized agents for personal and professional task manage
    - Filter by date ranges when specified
    - Group meetings by day/week/month
    - Consolidate recurring meetings
-   - Format: "📅 **Meetings for [Period]**\n\n**Total**: X meetings\n**Details**: [Filtered list]"
+   - Format: "**Meetings for [Period]**\n\n**Total**: X meetings\n**Details**: [Filtered list]"
 
 3. **Expense Tracker Responses**
    - **Filter by Time Periods**: "last month", "this week", "last 30 days"
    - **Filter by Categories**: "food", "transportation", "utilities"
    - **Consolidate Similar Expenses**: Group identical descriptions
    - **Calculate Totals**: Show filtered totals, not raw data
-   - Format: "💰 **[Category] Expenses for [Period]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
+   - Format: "**[Category] Expenses for [Period]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
 
 4. **Notes Agent Responses**
    - **Filter by Status**: "completed notes", "pending notes", "all notes"
@@ -165,24 +165,24 @@ Coordinates between specialized agents for personal and professional task manage
    - **Filter by Content**: "meeting notes", "project notes", "personal notes"
    - **Consolidate Similar Notes**: Group notes by topic or category
    - **Show Completion Summary**: Count of completed vs pending notes
-   - Format: "📋 **[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed, ⏳ Z pending)\n**Details**: [Filtered and grouped list]"
+   - Format: "[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed, ⏳ Z pending)\n**Details**: [Filtered and grouped list]"
 
 ### **Response Processing Examples**
 - **User**: "Show my food expenses for last month"
 - **Process**: Filter expenses by category="food" AND date="last month"
-- **Output**: "💰 **Food Expenses for Last Month**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
+- **Output**: "Food Expenses for Last Month**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
 
 - **User**: "What meetings do I have this week?"
 - **Process**: Filter meetings by date range="this week"
-- **Output**: "📅 **Meetings This Week**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
+- **Output**: "**Meetings This Week**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
 
 - **User**: "Show my completed notes from last week"
 - **Process**: Filter notes by status="completed" AND date="last week"
-- **Output**: "📋 **Completed Notes from Last Week**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
+- **Output**: "**Completed Notes from Last Week**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
 
 - **User**: "List all my meeting notes"
 - **Process**: Filter notes by content containing "meeting"
-- **Output**: "📋 **Meeting Notes**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
+- **Output**: "**Meeting Notes**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
 
 ### **Data Consolidation Rules**
 1. **Expenses**: Group identical descriptions, sum amounts, show visit count

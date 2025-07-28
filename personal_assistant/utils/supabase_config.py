@@ -98,8 +98,19 @@ class SupabaseManager:
                 raise Exception("Failed to insert expense into Supabase")
                 
         except Exception as e:
-            logger.error(f"Error adding expense to Supabase: {str(e)}")
-            raise Exception(f"Database error: {str(e)}")
+            error_msg = str(e)
+            print(f"[Supabase] ERROR: {error_msg}")
+            
+            # Check for specific RLS policy violations
+            if "security policy violation" in error_msg.lower() or "row level security" in error_msg.lower():
+                print("[Supabase] RLS Policy Error Detected!")
+                print("[Supabase] This indicates a Row Level Security policy issue.")
+                print("[Supabase] Please check your Supabase RLS policies in the dashboard.")
+                print("[Supabase] Run the database_setup.sql script again to fix RLS policies.")
+                raise Exception("Database security policy violation. Please run database_setup.sql in Supabase SQL Editor to fix RLS policies.")
+            
+            logger.error(f"Error adding expense to Supabase: {error_msg}")
+            raise Exception(f"Database error: {error_msg}")
     
     def get_expenses(self, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Get expenses from Supabase with optional filters"""
@@ -261,6 +272,8 @@ class SupabaseManager:
             }
 
             print("[Supabase] Attempting note database insertion...")
+            print(f"[Supabase] Inserting data: {supabase_data}")
+            
             # Insert into Supabase
             result = self.client.table("notes").insert(supabase_data).execute()
 
@@ -273,8 +286,19 @@ class SupabaseManager:
                 raise Exception("Failed to insert note into Supabase")
 
         except Exception as e:
-            logger.error(f"Error adding note to Supabase: {str(e)}")
-            raise Exception(f"Database error: {str(e)}")
+            error_msg = str(e)
+            print(f"[Supabase] ERROR: {error_msg}")
+            
+            # Check for specific RLS policy violations
+            if "security policy violation" in error_msg.lower() or "row level security" in error_msg.lower():
+                print("[Supabase] RLS Policy Error Detected!")
+                print("[Supabase] This indicates a Row Level Security policy issue.")
+                print("[Supabase] Please check your Supabase RLS policies in the dashboard.")
+                print("[Supabase] Run the database_setup.sql script again to fix RLS policies.")
+                raise Exception("Database security policy violation. Please run database_setup.sql in Supabase SQL Editor to fix RLS policies.")
+            
+            logger.error(f"Error adding note to Supabase: {error_msg}")
+            raise Exception(f"Database error: {error_msg}")
 
     def update_note(self, note_id: str, updates: Dict[str, Any]) -> bool:
         """Update a note in Supabase"""

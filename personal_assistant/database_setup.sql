@@ -78,23 +78,45 @@ CREATE TRIGGER update_meetings_updated_at
 
 -- Enable Row Level Security (RLS)
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meetings ENABLE ROW LEVEL SECURITY;
 
--- For development, enable anonymous access
--- In production, you should use proper authentication
+-- Drop existing policies to avoid conflicts
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
+DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON notes;
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON meetings;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON expenses;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON notes;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON meetings;
 
-CREATE POLICY "Allow all operations for anonymous users" ON expenses FOR ALL USING (true);
-CREATE POLICY "Allow all operations for anonymous users" ON meetings FOR ALL USING (true);
+-- Create comprehensive policies for development (allows both anonymous and authenticated access)
+-- For expenses table
+CREATE POLICY "Allow all operations for all users" ON expenses 
+    FOR ALL USING (true) WITH CHECK (true);
 
--- Later, for production, you can switch to authenticated users only:
--- DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
--- DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON meetings;
--- CREATE POLICY "Allow all operations for authenticated users" ON expenses
---     FOR ALL USING (auth.role() = 'authenticated');
--- CREATE POLICY "Allow all operations for authenticated users" ON meetings
---     FOR ALL USING (auth.role() = 'authenticated');
+-- For notes table  
+CREATE POLICY "Allow all operations for all users" ON notes 
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- For meetings table
+CREATE POLICY "Allow all operations for all users" ON meetings 
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- Grant necessary permissions
+GRANT ALL ON expenses TO authenticated;
+GRANT ALL ON expenses TO anon;
+GRANT ALL ON notes TO authenticated;
+GRANT ALL ON notes TO anon;
+GRANT ALL ON meetings TO authenticated;
+GRANT ALL ON meetings TO anon;
+
+-- Grant sequence permissions
+GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE notes_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE notes_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO anon;
 
 -- Create some sample data (optional)
 -- This matches the structure of your existing JSON data
@@ -129,14 +151,4 @@ INSERT INTO notes (
 ) VALUES 
     ('sample-n001', 'Meeting with John about the project', false),
     ('sample-n002', 'Review the expense report for the month', false)
-ON CONFLICT (note_id) DO NOTHING;
--- Grant necessary permissions
--- These are typically handled automatically in Supabase, but included for completeness
-GRANT ALL ON expenses TO authenticated;
-GRANT ALL ON expenses TO anon;
-GRANT ALL ON meetings TO authenticated;
-GRANT ALL ON meetings TO anon;
-GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon;
-GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO authenticated;
-GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO anon; 
+ON CONFLICT (note_id) DO NOTHING; 

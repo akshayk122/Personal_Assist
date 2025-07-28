@@ -16,15 +16,19 @@ uv sync
 cp env.example .env
 # Edit .env and add your GOOGLE_API_KEY
 
-# 4. Start servers (3 separate terminals)
+# 4. (Optional) Set up Supabase for database storage
+# See SUPABASE_SETUP.md for detailed instructions
+# If you encounter "Database security policy violation" errors, see RLS_TROUBLESHOOTING.md
+
+# 5. Start servers (3 separate terminals)
 make meeting      # Terminal 1: Meeting Manager (port 8100)
 make expense      # Terminal 2: Expense Tracker (port 8200) 
 make orchestrator # Terminal 3: Orchestrator (port 8300)
 
-# 5. Launch Streamlit UI (4th terminal - optional)
+# 6. Launch Streamlit UI (4th terminal - optional)
 make streamlit    # Terminal 4: Web UI (port 8501)
 
-# 6. Test the system
+# 7. Test the system
 uv run python -c "
 import asyncio
 from acp_sdk.client import Client
@@ -100,12 +104,17 @@ personal_assistant/
 │   └── expense_tools.py        # Expense operations
 ├── utils/                       # Utility modules
 │   ├── gemini_config.py        # Gemini AI configuration
+│   ├── supabase_config.py      # Supabase database configuration
 │   ├── data_manager.py         # JSON data operations
 │   └── validators.py           # Input validation
-└── tests/                       # Test suite
-    ├── test_meetings.py
-    ├── test_expenses.py
-    └── test_orchestrator.py
+├── tests/                       # Test suite
+│   ├── test_meetings.py
+│   ├── test_expenses.py
+│   └── test_orchestrator.py
+├── SUPABASE_SETUP.md           # Supabase setup instructions
+├── RLS_TROUBLESHOOTING.md      # RLS policy troubleshooting guide
+├── fix_rls_policies.sql        # SQL script to fix RLS policies
+└── test_supabase_fix.py        # Test script for Supabase setup
 ```
 
 ## 🛠️ Setup Instructions
@@ -366,6 +375,22 @@ uv run pytest -m "not slow"
 
 ## 🚨 Troubleshooting
 
+### Database Security Policy Violation
+
+If you encounter the error "Database security policy violation":
+
+1. **Quick Fix**: Run the RLS fix script in your Supabase SQL Editor:
+   ```sql
+   -- Copy and paste the contents of fix_rls_policies.sql
+   ```
+
+2. **Verify the fix**: Run the test script:
+   ```bash
+   uv run python test_supabase_fix.py
+   ```
+
+3. **Detailed instructions**: See `RLS_TROUBLESHOOTING.md` for comprehensive troubleshooting steps.
+
 ### Common Issues
 
 1. **Port Already in Use**
@@ -400,6 +425,16 @@ uv run pytest -m "not slow"
    ```bash
    # Ensure data directory is writable
    chmod 755 data/
+   ```
+
+5. **Supabase Connection Issues**
+   ```bash
+   # Check environment variables
+   echo $SUPABASE_URL
+   echo $SUPABASE_API_KEY
+   
+   # Test Supabase connection
+   uv run python test_supabase_fix.py
    ```
 
 ### Performance Tips

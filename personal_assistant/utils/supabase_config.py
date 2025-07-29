@@ -335,5 +335,168 @@ class SupabaseManager:
             logger.error(f"Error deleting note from Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
+    # Health Goals Methods
+    def add_health_goal(self, goal_data: Dict[str, Any]) -> str:
+        """Add a new health goal to Supabase"""
+        print("[Supabase] Starting health goal addition...")
+        print(f"[Supabase] Goal data: {goal_data}")
+        
+        if not self.is_connected():
+            print("[Supabase] ERROR: Client not initialized")
+            print(f"[Supabase] URL Status: {'SET' if self.supabase_url else 'MISSING'}")
+            print(f"[Supabase] API Key Status: {'SET' if self.supabase_key else 'MISSING'}")
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            # Generate UUID for goal
+            goal_id = str(uuid.uuid4())
+            
+            # Prepare data for Supabase
+            supabase_data = {
+                "goal_id": goal_id,
+                "goal_type": goal_data["goal_type"],
+                "target_value": goal_data["target_value"],
+                "current_value": goal_data.get("current_value", 0.0),
+                "description": goal_data.get("description", ""),
+                "is_active": goal_data.get("is_active", True),
+                "created_at": datetime.now().isoformat()
+            }
+            
+            print("[Supabase] Attempting health goal database insertion...")
+            # Insert into Supabase
+            result = self.client.table("health_goals").insert(supabase_data).execute()
+            
+            if result.data:
+                print(f"[Supabase] SUCCESS: Health goal {goal_id} added to database")
+                print(f"[Supabase] Response data: {result.data}")
+                return goal_id
+            else:
+                print("[Supabase] ERROR: Insert returned no data")
+                raise Exception("Failed to insert health goal into Supabase")
+                
+        except Exception as e:
+            error_msg = str(e)
+            print(f"[Supabase] ERROR: {error_msg}")
+            
+            # Check for specific RLS policy violations
+            if "security policy violation" in error_msg.lower() or "row level security" in error_msg.lower():
+                print("[Supabase] RLS Policy Error Detected!")
+                print("[Supabase] This indicates a Row Level Security policy issue.")
+                print("[Supabase] Please check your Supabase RLS policies in the dashboard.")
+                print("[Supabase] Run the database_setup.sql script again to fix RLS policies.")
+                raise Exception("Database security policy violation. Please run database_setup.sql in Supabase SQL Editor to fix RLS policies.")
+            
+            logger.error(f"Error adding health goal to Supabase: {error_msg}")
+            raise Exception(f"Database error: {error_msg}")
+
+    def update_health_goal(self, goal_id: str, updates: Dict[str, Any]) -> bool:
+        """Update a health goal in Supabase"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            result = self.client.table("health_goals").update(updates).eq("goal_id", goal_id).execute()
+            
+            if result.data:
+                logger.info(f"Health goal {goal_id} updated successfully in Supabase")
+                return True
+            else:
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error updating health goal in Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
+    def get_health_goals(self) -> List[Dict[str, Any]]:
+        """Get all health goals from Supabase"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            result = self.client.table("health_goals").select("*").eq("is_active", True).execute()
+            return result.data if result.data else []
+                
+        except Exception as e:
+            logger.error(f"Error retrieving health goals from Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
+    # Food Logging Methods
+    def add_food_log(self, food_data: Dict[str, Any]) -> str:
+        """Add a new food log to Supabase"""
+        print("[Supabase] Starting food log addition...")
+        print(f"[Supabase] Food data: {food_data}")
+        
+        if not self.is_connected():
+            print("[Supabase] ERROR: Client not initialized")
+            print(f"[Supabase] URL Status: {'SET' if self.supabase_url else 'MISSING'}")
+            print(f"[Supabase] API Key Status: {'SET' if self.supabase_key else 'MISSING'}")
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            # Generate UUID for food log
+            food_id = str(uuid.uuid4())
+            
+            # Prepare data for Supabase
+            supabase_data = {
+                "food_id": food_id,
+                "meal_type": food_data["meal_type"],
+                "food_item": food_data["food_item"],
+                "calories": food_data.get("calories"),
+                "date": food_data["date"],
+                "created_at": datetime.now().isoformat()
+            }
+            
+            print("[Supabase] Attempting food log database insertion...")
+            # Insert into Supabase
+            result = self.client.table("food_logs").insert(supabase_data).execute()
+            
+            if result.data:
+                print(f"[Supabase] SUCCESS: Food log {food_id} added to database")
+                print(f"[Supabase] Response data: {result.data}")
+                return food_id
+            else:
+                print("[Supabase] ERROR: Insert returned no data")
+                raise Exception("Failed to insert food log into Supabase")
+                
+        except Exception as e:
+            error_msg = str(e)
+            print(f"[Supabase] ERROR: {error_msg}")
+            
+            # Check for specific RLS policy violations
+            if "security policy violation" in error_msg.lower() or "row level security" in error_msg.lower():
+                print("[Supabase] RLS Policy Error Detected!")
+                print("[Supabase] This indicates a Row Level Security policy issue.")
+                print("[Supabase] Please check your Supabase RLS policies in the dashboard.")
+                print("[Supabase] Run the database_setup.sql script again to fix RLS policies.")
+                raise Exception("Database security policy violation. Please run database_setup.sql in Supabase SQL Editor to fix RLS policies.")
+            
+            logger.error(f"Error adding food log to Supabase: {error_msg}")
+            raise Exception(f"Database error: {error_msg}")
+
+    def get_food_logs(self, date: str = None) -> List[Dict[str, Any]]:
+        """Get food logs from Supabase with optional date filter"""
+        if not self.is_connected():
+            raise Exception("Supabase client not initialized. Check your credentials.")
+        
+        try:
+            query = self.client.table("food_logs").select("*")
+            
+            if date:
+                query = query.eq("date", date)
+            
+            # Order by date descending, then by meal type
+            query = query.order("date", desc=True).order("meal_type")
+            
+            result = query.execute()
+            
+            if result.data:
+                return result.data
+            else:
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error retrieving food logs from Supabase: {str(e)}")
+            raise Exception(f"Database error: {str(e)}")
+
 # Global instance
 supabase_manager = SupabaseManager() 

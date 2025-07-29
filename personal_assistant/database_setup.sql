@@ -28,11 +28,45 @@ CREATE TABLE IF NOT EXISTS notes (
     isCompleted BOOLEAN DEFAULT FALSE
 );
 
+-- Create health_goals table
+CREATE TABLE IF NOT EXISTS health_goals (
+    id BIGSERIAL PRIMARY KEY,
+    goal_id TEXT UNIQUE NOT NULL,
+    goal_type TEXT NOT NULL,
+    target_value DECIMAL(10,2) NOT NULL,
+    current_value DECIMAL(10,2) DEFAULT 0.0,
+    description TEXT DEFAULT '',
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create food_logs table
+CREATE TABLE IF NOT EXISTS food_logs (
+    id BIGSERIAL PRIMARY KEY,
+    food_id TEXT UNIQUE NOT NULL,
+    meal_type TEXT NOT NULL,
+    food_item TEXT NOT NULL,
+    calories INTEGER,
+    date DATE NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_expenses_date ON expenses(date);
 CREATE INDEX IF NOT EXISTS idx_expenses_category ON expenses(category);
 CREATE INDEX IF NOT EXISTS idx_expenses_amount ON expenses(amount);
 CREATE INDEX IF NOT EXISTS idx_expenses_expense_id ON expenses(expense_id);
+
+-- Create indexes for health_goals
+CREATE INDEX IF NOT EXISTS idx_health_goals_goal_type ON health_goals(goal_type);
+CREATE INDEX IF NOT EXISTS idx_health_goals_is_active ON health_goals(is_active);
+CREATE INDEX IF NOT EXISTS idx_health_goals_goal_id ON health_goals(goal_id);
+
+-- Create indexes for food_logs
+CREATE INDEX IF NOT EXISTS idx_food_logs_date ON food_logs(date);
+CREATE INDEX IF NOT EXISTS idx_food_logs_meal_type ON food_logs(meal_type);
+CREATE INDEX IF NOT EXISTS idx_food_logs_food_id ON food_logs(food_id);
 
 -- Create meetings table
 CREATE TABLE IF NOT EXISTS meetings (
@@ -76,18 +110,35 @@ CREATE TRIGGER update_meetings_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
+-- Create trigger to automatically update updated_at for health_goals
+CREATE TRIGGER update_health_goals_updated_at 
+    BEFORE UPDATE ON health_goals 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE health_goals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE food_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meetings ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies to avoid conflicts
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON expenses;
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON notes;
+DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON health_goals;
+DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON food_logs;
 DROP POLICY IF EXISTS "Allow all operations for anonymous users" ON meetings;
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON expenses;
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON notes;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON health_goals;
+DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON food_logs;
 DROP POLICY IF EXISTS "Allow all operations for authenticated users" ON meetings;
+DROP POLICY IF EXISTS "Allow all operations for all users" ON expenses;
+DROP POLICY IF EXISTS "Allow all operations for all users" ON notes;
+DROP POLICY IF EXISTS "Allow all operations for all users" ON health_goals;
+DROP POLICY IF EXISTS "Allow all operations for all users" ON food_logs;
+DROP POLICY IF EXISTS "Allow all operations for all users" ON meetings;
 
 -- Create comprehensive policies for development (allows both anonymous and authenticated access)
 -- For expenses table
@@ -96,6 +147,14 @@ CREATE POLICY "Allow all operations for all users" ON expenses
 
 -- For notes table  
 CREATE POLICY "Allow all operations for all users" ON notes 
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- For health_goals table
+CREATE POLICY "Allow all operations for all users" ON health_goals 
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- For food_logs table
+CREATE POLICY "Allow all operations for all users" ON food_logs 
     FOR ALL USING (true) WITH CHECK (true);
 
 -- For meetings table
@@ -107,6 +166,10 @@ GRANT ALL ON expenses TO authenticated;
 GRANT ALL ON expenses TO anon;
 GRANT ALL ON notes TO authenticated;
 GRANT ALL ON notes TO anon;
+GRANT ALL ON health_goals TO authenticated;
+GRANT ALL ON health_goals TO anon;
+GRANT ALL ON food_logs TO authenticated;
+GRANT ALL ON food_logs TO anon;
 GRANT ALL ON meetings TO authenticated;
 GRANT ALL ON meetings TO anon;
 
@@ -115,6 +178,10 @@ GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE expenses_id_seq TO anon;
 GRANT USAGE, SELECT ON SEQUENCE notes_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE notes_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE health_goals_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE health_goals_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE food_logs_id_seq TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE food_logs_id_seq TO anon;
 GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO authenticated;
 GRANT USAGE, SELECT ON SEQUENCE meetings_id_seq TO anon;
 
@@ -151,4 +218,21 @@ INSERT INTO notes (
 ) VALUES 
     ('sample-n001', 'Meeting with John about the project', false),
     ('sample-n002', 'Review the expense report for the month', false)
-ON CONFLICT (note_id) DO NOTHING; 
+ON CONFLICT (note_id) DO NOTHING;
+
+-- Insert sample health goals
+INSERT INTO health_goals (
+    goal_id, goal_type, target_value, current_value, description
+) VALUES 
+    ('sample-g001', 'weight', 170.0, 175.0, 'Target weight loss goal'),
+    ('sample-g002', 'calories', 2000.0, 0.0, 'Daily calorie target')
+ON CONFLICT (goal_id) DO NOTHING;
+
+-- Insert sample food logs
+INSERT INTO food_logs (
+    food_id, meal_type, food_item, calories, date
+) VALUES 
+    ('sample-f001', 'breakfast', 'Oatmeal with berries', 320, '2024-12-16'),
+    ('sample-f002', 'lunch', 'Grilled chicken salad', 450, '2024-12-16'),
+    ('sample-f003', 'dinner', 'Salmon with vegetables', 680, '2024-12-16')
+ON CONFLICT (food_id) DO NOTHING; 

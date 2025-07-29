@@ -1,8 +1,8 @@
 # Personal Assistant System
 
-A multi-agent personal assistant system using Agent Communication Protocol (ACP) servers that manages meetings and expenses through specialized agents and a central orchestrator.
+A multi-agent personal assistant system using Agent Communication Protocol (ACP) servers that manages meetings, expenses, notes, and health tracking through specialized agents and a central orchestrator.
 
-## 🚀 Quick Start with UV
+## Quick Start with UV
 
 ```bash
 # 1. Install uv (modern Python package manager)
@@ -45,7 +45,7 @@ asyncio.run(test())
 "
 ```
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The system consists of three main ACP servers:
 
@@ -53,38 +53,52 @@ The system consists of three main ACP servers:
 - **Server 2 (Port 8200)**: Expense Tracker Agent - Manages expense tracking and budget analysis  
 - **Server 3 (Port 8300)**: Personal Assistant Orchestrator - Coordinates between the specialized agents
 
-## 🚀 Features
+## Features
 
 ### Meeting Management
-- ✅ Schedule new meetings with conflict detection
-- 📅 List meetings by date range and status
-- 🔍 Search meetings by various criteria
-- ✏️ Update meeting details and attendees
-- ❌ Cancel or delete meetings
-- ⚠️ Automatic conflict checking
+- Schedule new meetings with conflict detection
+- List meetings by date range and status
+- Search meetings by various criteria
+- Update meeting details and attendees
+- Cancel or delete meetings
+- Automatic conflict checking
 
 ### Expense Tracking
-- 💰 Record expenses with automatic categorization
-- 📊 Generate spending summaries and analytics
-- 🎯 Budget tracking with alerts and recommendations
-- 📈 Spending pattern analysis
-- 💳 Multiple payment method support
-- 🏷️ Tagging and subcategory organization
+- Record expenses with automatic categorization
+- Generate spending summaries and analytics
+- Budget tracking with alerts and recommendations
+- Spending pattern analysis
+- Multiple payment method support
+- Tagging and subcategory organization
+
+### Notes Management
+- Create and organize personal and professional notes
+- Search notes by content, status, or date
+- Mark notes as completed or pending
+- Update note content and status
+- Delete notes with confirmation
+
+### Health and Diet Tracking
+- Set and track health goals (weight, calories, fitness)
+- Log daily meals with calorie tracking
+- View progress towards health goals
+- Track daily food intake and totals
+- Update goal targets and current values
 
 ### Intelligent Orchestration
-- 🤖 Natural language query processing
-- 🔗 Multi-agent coordination for complex queries
-- 📋 Intelligent routing to appropriate specialists
-- 🧠 Context-aware response synthesis
+- Natural language query processing
+- Multi-agent coordination for complex queries
+- Intelligent routing to appropriate specialists
+- Context-aware response synthesis
 
 ### Web Interface
-- 💻 Modern Streamlit-based UI
-- 🎨 Clean, intuitive chat interface
-- 📊 Real-time server status monitoring
-- 💡 Example queries and quick actions
-- 📱 Responsive design for desktop and mobile
+- Modern Streamlit-based UI
+- Clean, intuitive chat interface
+- Real-time server status monitoring
+- Example queries and quick actions
+- Responsive design for desktop and mobile
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 personal_assistant/
@@ -101,7 +115,12 @@ personal_assistant/
 │   └── orchestrator_server.py  # Orchestrator (Port 8300)
 ├── mcp_tools/                   # MCP tool implementations
 │   ├── meeting_tools.py        # Meeting operations
-│   └── expense_tools.py        # Expense operations
+│   ├── expense_tools.py        # Expense operations
+│   ├── notes_tool.py           # Notes operations
+│   └── health_diet_tools.py    # Health and diet operations
+├── agents/                      # Agent implementations
+│   ├── notes_agents.py         # Notes agent
+│   └── health_diet_agent.py    # Health and diet agent
 ├── utils/                       # Utility modules
 │   ├── gemini_config.py        # Gemini AI configuration
 │   ├── supabase_config.py      # Supabase database configuration
@@ -113,11 +132,11 @@ personal_assistant/
 │   └── test_orchestrator.py
 ├── SUPABASE_SETUP.md           # Supabase setup instructions
 ├── RLS_TROUBLESHOOTING.md      # RLS policy troubleshooting guide
-├── fix_rls_policies.sql        # SQL script to fix RLS policies
+├── database_setup.sql          # Database schema and RLS policies
 └── test_supabase_fix.py        # Test script for Supabase setup
 ```
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### 1. Environment Setup
 
@@ -197,7 +216,7 @@ uv run expense-server
 uv run orchestrator-server
 ```
 
-## 📖 Usage Examples
+## Usage Examples
 
 ### Using Streamlit Web UI (Recommended)
 
@@ -218,13 +237,16 @@ uv run orchestrator-server
 4. **Start chatting!** Try these example queries:
    - "Schedule a team standup tomorrow at 9 AM"
    - "I spent $25 on lunch at Subway today"
-   - "What meetings do I have this week and how much did I spend on food?"
+   - "Add a note about the project meeting"
+   - "Add a weight goal of 170 lbs"
+   - "I ate oatmeal for breakfast, 320 calories"
+   - "What did I eat today?"
 
 The web UI provides:
-- 💬 **Interactive chat interface** with your personal assistant
-- 📊 **Real-time server status** monitoring
-- 💡 **Example queries** for quick actions  
-- 📱 **Mobile-friendly** responsive design
+- Interactive chat interface with your personal assistant
+- Real-time server status monitoring
+- Example queries for quick actions  
+- Mobile-friendly responsive design
 
 ### Using ACP SDK Client (Programmatic)
 
@@ -281,12 +303,28 @@ asyncio.run(example_usage())
 - "Give me a budget analysis for entertainment"
 - "What's my total spending this week?"
 
+#### Notes Management
+- "Add a note about the client meeting tomorrow"
+- "Show me all my notes"
+- "Find notes about the project"
+- "Mark note n001 as completed"
+- "Delete the old meeting note"
+
+#### Health and Diet Tracking
+- "Add a weight goal of 170 lbs"
+- "Update my weight goal to 165 lbs"
+- "I ate oatmeal for breakfast, 320 calories"
+- "What did I eat today?"
+- "Show my health goals"
+- "Log my lunch: chicken salad, 450 calories"
+
 #### Combined Queries (via Orchestrator)
 - "What meetings do I have today and what did I spend yesterday?"
 - "Show my schedule for next week and my food budget status"
 - "Do I have any lunch meetings this week and what's my restaurant spending?"
+- "Add a note about the meeting and log my lunch"
 
-## 🔧 API Endpoints
+## API Endpoints
 
 ### Meeting Manager (Port 8100)
 - **POST** `/runs` - Agent: `meeting_manager`
@@ -297,7 +335,7 @@ asyncio.run(example_usage())
 ### Orchestrator (Port 8300)
 - **POST** `/runs` - Agent: `personal_assistant`
 
-## 📊 Data Storage
+## Data Storage
 
 The system uses JSON files for data persistence:
 
@@ -331,7 +369,17 @@ The system uses JSON files for data persistence:
 }
 ```
 
-## 🧪 Testing
+### Supabase Database (Optional)
+
+When configured, the system can use Supabase for persistent storage:
+
+- **meetings** table: Meeting data with RLS policies
+- **expenses** table: Expense data with RLS policies  
+- **notes** table: Notes data with RLS policies
+- **health_goals** table: Health goal tracking
+- **food_logs** table: Daily food logging
+
+## Testing
 
 ```bash
 # Install test dependencies
@@ -352,7 +400,7 @@ uv run pytest --cov=personal_assistant --cov-report=html
 uv run pytest -m "not slow"
 ```
 
-## 🔮 Future Enhancements
+## Future Enhancements
 
 ### Integration Opportunities
 - **Calendar Systems**: Google Calendar, Outlook integration
@@ -373,7 +421,7 @@ uv run pytest -m "not slow"
 - **Monitoring**: Comprehensive logging and metrics
 - **Security**: Enhanced authentication and authorization
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Database Security Policy Violation
 
@@ -381,7 +429,7 @@ If you encounter the error "Database security policy violation":
 
 1. **Quick Fix**: Run the RLS fix script in your Supabase SQL Editor:
    ```sql
-   -- Copy and paste the contents of fix_rls_policies.sql
+   -- Copy and paste the contents of database_setup.sql
    ```
 
 2. **Verify the fix**: Run the test script:
@@ -444,11 +492,11 @@ If you encounter the error "Database security policy violation":
 - Monitor server logs for performance bottlenecks
 - Consider increasing `max_tokens` for complex responses
 
-## 📄 License
+## License
 
 This project is created for educational and demonstration purposes following the ACP (Agent Communication Protocol) patterns.
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -456,7 +504,7 @@ This project is created for educational and demonstration purposes following the
 4. Add tests for new functionality
 5. Submit a pull request
 
-## 📞 Support
+## Support
 
 For issues and questions:
 1. Check the troubleshooting section above
@@ -466,15 +514,15 @@ For issues and questions:
 
 ---
 
-## 🚀 Why UV?
+## Why UV?
 
 This project uses [uv](https://github.com/astral-sh/uv) for dependency management, which provides:
 
-- **⚡ Speed**: 10-100x faster than pip
-- **🔒 Reliability**: Deterministic dependency resolution 
-- **🎯 Simplicity**: Single tool for package management
-- **🔄 Compatibility**: Drop-in replacement for pip/venv
-- **📦 Modern**: Built-in virtual environment management
+- **Speed**: 10-100x faster than pip
+- **Reliability**: Deterministic dependency resolution 
+- **Simplicity**: Single tool for package management
+- **Compatibility**: Drop-in replacement for pip/venv
+- **Modern**: Built-in virtual environment management
 
 ### UV Commands Reference
 
@@ -494,4 +542,4 @@ make lint                 # Check code quality
 make servers              # Start all servers
 ```
 
-**Built with ❤️ using UV, ACP SDK, CrewAI, and Google Gemini AI** 
+**Built with UV, ACP SDK, CrewAI, and Google Gemini AI** 

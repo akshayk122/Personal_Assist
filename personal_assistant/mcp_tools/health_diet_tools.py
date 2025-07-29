@@ -29,8 +29,10 @@ def add_health_goal(
         if supabase_manager.is_connected():
             goal_data = {
                 "goal_type": goal_type.lower(),
-                "target_value": target_value,
-                "description": description
+                "target_value": float(target_value),
+                "current_value": 0.0,
+                "description": description or "",
+                "is_active": True
             }
             goal_id = supabase_manager.add_health_goal(goal_data)
             return f"✅ Health goal added!\n\n**Goal**: {goal_type.title()}\n**Target**: {target_value}\n**Goal ID**: {goal_id}"
@@ -66,9 +68,9 @@ def update_health_goal(
         if supabase_manager.is_connected():
             updates = {}
             if target_value is not None:
-                updates["target_value"] = target_value
+                updates["target_value"] = float(target_value)
             if current_value is not None:
-                updates["current_value"] = current_value
+                updates["current_value"] = float(current_value)
             if description is not None:
                 updates["description"] = description
             
@@ -95,6 +97,50 @@ def update_health_goal(
     
     except Exception as e:
         return f"❌ Error updating health goal: {str(e)}"
+
+@mcp.tool()
+def get_health_goals() -> str:
+    """Get all active health goals"""
+    try:
+        # Try Supabase first
+        if supabase_manager.is_connected():
+            goals = supabase_manager.get_health_goals()
+            
+            if not goals:
+                return "📋 No active health goals found. Add a goal to get started!"
+            
+            result = "📋 **Active Health Goals**\n\n"
+            for goal in goals:
+                progress = (goal.get("current_value", 0) / goal["target_value"]) * 100 if goal["target_value"] > 0 else 0
+                result += f"**{goal['goal_type'].title()}**\n"
+                result += f"• Target: {goal['target_value']}\n"
+                result += f"• Current: {goal.get('current_value', 0)}\n"
+                result += f"• Progress: {progress:.1f}%\n"
+                result += f"• Description: {goal.get('description', 'No description')}\n"
+                result += f"• Goal ID: {goal['goal_id']}\n\n"
+            
+            return result
+        
+        # Fallback to in-memory storage
+        active_goals = [goal for goal in health_goals.values() if goal.get("is_active", True)]
+        
+        if not active_goals:
+            return "📋 No active health goals found. Add a goal to get started! (Local Storage)"
+        
+        result = "📋 **Active Health Goals** (Local Storage)\n\n"
+        for goal in active_goals:
+            progress = (goal.get("current_value", 0) / goal["target_value"]) * 100 if goal["target_value"] > 0 else 0
+            result += f"**{goal['goal_type'].title()}**\n"
+            result += f"• Target: {goal['target_value']}\n"
+            result += f"• Current: {goal.get('current_value', 0)}\n"
+            result += f"• Progress: {progress:.1f}%\n"
+            result += f"• Description: {goal.get('description', 'No description')}\n"
+            result += f"• Goal ID: {goal['goal_id']}\n\n"
+        
+        return result
+    
+    except Exception as e:
+        return f"❌ Error getting health goals: {str(e)}"
 
 @mcp.tool()
 def add_food_log(

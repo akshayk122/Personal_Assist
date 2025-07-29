@@ -10,7 +10,7 @@ load_dotenv()
 
 from utils.gemini_config import get_llm
 from mcp_tools.health_diet_tools import (
-    add_health_goal, update_health_goal,
+    add_health_goal, update_health_goal, get_health_goals,
     add_food_log, get_food_log
 )
 nest_asyncio.apply()
@@ -47,12 +47,19 @@ class GetFoodLogTool(BaseTool):
     def _run(self) -> str:
         return get_food_log()
 
+class GetHealthGoalsTool(BaseTool):
+    name: str = "get_health_goals"
+    description: str = "Get all active health goals"
+    def _run(self) -> str:
+        return get_health_goals()
+
 health_diet_tools = [
     HealthDietAgentTool(),
     AddHealthGoalTool(),
     UpdateHealthGoalTool(),
     AddFoodLogTool(),
-    GetFoodLogTool()
+    GetFoodLogTool(),
+    GetHealthGoalsTool()
 ]
 
 class HealthDietAgent:
@@ -117,6 +124,11 @@ Manages basic health goal tracking and food logging.
             task_description = (
                 f"If the user wants to see their food log, use the get_food_log tool. "
                 "Otherwise, process the request as a general diet query."
+            )
+        elif any(word in query_lower for word in ["show", "view", "see", "list", "get"]) and any(word in query_lower for word in ["goal", "goals"]):
+            task_description = (
+                f"If the user wants to see their health goals, use the get_health_goals tool. "
+                "Otherwise, process the request as a general health query."
             )
         else:
             task_description = (

@@ -79,7 +79,7 @@ Manages basic health goal tracking and food logging.
 ## Response Style
 - **Simple Formatting**: Clear, easy-to-read responses
 - **Direct Language**: Provide straightforward answers
-- **Success Indicators**: Use ✅ for success, ❌ for errors
+- **Success Indicators**: Use clear success/error messages
 - **Data Presentation**: Show totals and summaries clearly
 - **Privacy Focus**: Maintain health data confidentiality
 
@@ -90,10 +90,10 @@ Manages basic health goal tracking and food logging.
 - **Success Messages**: Confirm actions with clear feedback
 
 ## Professional Response Templates
-- **Success**: "✅ [Action] completed successfully. [Details]"
-- **Error**: "❌ [Action] failed: [Error]"
-- **Information**: "📋 [Information type]: [Details]"
-- **Summary**: "📊 [Summary type]: [Key data]"
+- **Success**: "[Action] completed successfully. [Details]"
+- **Error**: "[Action] failed: [Error]"
+- **Information**: "[Information type]: [Details]"
+- **Summary**: "[Summary type]: [Key data]"
 """,
             llm=llm,
             tools=health_diet_tools,

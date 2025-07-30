@@ -111,7 +111,7 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
 - **Expense queries** → Expense Tracker (expense, spend, money, budget)
 - **Notes queries** → Notes Agent (note, search, organize)
-- **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat)
+- **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target, daily)
 - **Combined queries** → Multiple agents as needed
 
 ## Response Processing Rules
@@ -208,13 +208,17 @@ Coordinates between specialized agents for personal and professional task manage
 - **Process**: Filter health records by type="weight" AND date="this month"
 - **Output**: "**Weight Progress This Month**\n\n**Progress**: Down 2.5 lbs (trending downward)\n**Current**: 175 lbs\n**Goal**: 170 lbs (5 lbs remaining)\n**Details**:\n• Weekly average: 175.2 lbs\n• Best day: 174.8 lbs\n• Trend: Consistent downward progress"
 
-- **User**: "What did I eat today?"
-- **Process**: Filter diet records by date="today"
-- **Output**: "**Today's Food Log**\n\n**Breakfast**:\n• Oatmeal with berries (320 cal)\n**Lunch**:\n• Grilled chicken salad (450 cal)\n**Dinner**:\n• Salmon with vegetables (680 cal)\n**Daily Total**: 1,450 calories"
-
 - **User**: "Add a weight goal of 170 lbs"
 - **Process**: Create new health goal for weight
-- **Output**: "✅ Health goal added!\n\n**Goal**: Weight\n**Target**: 170 lbs\n**Goal ID**: [generated_id]"
+- **Output**: "Health goal added!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]"
+
+- **User**: "Add a weight goal of 170 lbs with daily calorie goal of 2000"
+- **Process**: Create new health goal for weight and daily calorie goal
+- **Output**: "Health goal added!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]\n\nDaily Calorie Goal: 2000 calories\nCalorie Goal ID: [generated_id]"
+
+- **User**: "What did I eat today?"
+- **Process**: Filter diet records by date="today"
+- **Output**: "Today's Food Log\n\nBreakfast:\n• Oatmeal with berries (320 cal)\nLunch:\n• Grilled chicken salad (450 cal)\nDinner:\n• Salmon with vegetables (680 cal)\nDaily Total: 1,450 calories\n\nDaily Calorie Goal: 2000 calories\nProgress: 72.5%\nRemaining: 550 calories"
 
 ### **Data Consolidation Rules**
 1. **Expenses**: Group identical descriptions, sum amounts, show visit count
@@ -230,11 +234,14 @@ Coordinates between specialized agents for personal and professional task manage
    - Show progress towards health goals
    - Update current values when new data is added
    - Filter by goal type (weight, calories, fitness)
+   - Include daily calorie goals for food tracking
 5. **Food Logs**:
    - Group by meal type (breakfast, lunch, dinner, snacks)
    - Calculate daily calorie totals
    - Show meal breakdowns with individual items
    - Track daily food intake patterns
+   - Compare against daily calorie goals
+   - Show progress and remaining calories
 """,
             llm=llm,
             tools=orchestrator_tools,
@@ -261,8 +268,9 @@ Examples:
 - If user asks "meeting notes" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
 - If user asks "completed notes from last week", filter by completion status and date range, then group by topic
 - If user asks "add a weight goal of 170 lbs", create a new health goal for weight tracking
-- If user asks "what did I eat today", show today's food log grouped by meal type with daily calorie total
-- If user asks "log my lunch: chicken salad, 450 calories", add the food item and show updated daily totals""",
+- If user asks "add a weight goal of 170 lbs with daily calorie goal of 2000", create both weight and daily calorie goals
+- If user asks "what did I eat today", show today's food log grouped by meal type with daily calorie total and progress against daily calorie goal
+- If user asks "log my lunch: chicken salad, 450 calories", add the food item and show updated daily totals with progress against daily calorie goal""",
             expected_output="Intelligently filtered and processed response based on user criteria, not raw agent data",
             agent=coordinator,
             verbose=True
@@ -299,6 +307,7 @@ if __name__ == "__main__":
     print("  - 'I spent $25 on lunch today'")
     print("  - 'Add a note about the project meeting'")
     print("  - 'Add a weight goal of 170 lbs'")
+    print("  - 'Add a weight goal of 170 lbs with daily calorie goal of 2000'")
     print("  - 'I ate oatmeal for breakfast, 320 calories'")
     print("  - 'What did I eat today?'")
     print("  - 'Update my weight goal to 165 lbs'")

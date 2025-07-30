@@ -21,9 +21,10 @@ food_logs = []
 def add_health_goal(
     goal_type: str,
     target_value: float,
-    description: str = None
+    description: str = None,
+    daily_calorie_goal: int = None
 ) -> str:
-    """Add a new health goal (weight, calories, etc.)"""
+    """Add a new health goal (weight, calories, etc.) with optional daily calorie goal"""
     try:
         # Try Supabase first
         if supabase_manager.is_connected():
@@ -35,7 +36,22 @@ def add_health_goal(
                 "is_active": True
             }
             goal_id = supabase_manager.add_health_goal(goal_data)
-            return f"Health goal added successfully!\n\nGoal: {goal_type.title()}\nTarget: {target_value}\nGoal ID: {goal_id}"
+            
+            result = f"Health goal added successfully!\n\nGoal: {goal_type.title()}\nTarget: {target_value}\nGoal ID: {goal_id}"
+            
+            # If daily calorie goal is provided, add it as a separate goal
+            if daily_calorie_goal:
+                calorie_goal_data = {
+                    "goal_type": "daily_calories",
+                    "target_value": float(daily_calorie_goal),
+                    "current_value": 0.0,
+                    "description": "Daily calorie intake target",
+                    "is_active": True
+                }
+                calorie_goal_id = supabase_manager.add_health_goal(calorie_goal_data)
+                result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories\nCalorie Goal ID: {calorie_goal_id}"
+            
+            return result
         
         # Fallback to in-memory storage
         goal_id = str(uuid.uuid4())
@@ -50,7 +66,23 @@ def add_health_goal(
         
         health_goals[goal_id] = goal_data
         
-        return f"Health goal added successfully! (Local Storage)\n\nGoal: {goal_type.title()}\nTarget: {target_value}\nGoal ID: {goal_id}"
+        result = f"Health goal added successfully! (Local Storage)\n\nGoal: {goal_type.title()}\nTarget: {target_value}\nGoal ID: {goal_id}"
+        
+        # If daily calorie goal is provided, add it as a separate goal
+        if daily_calorie_goal:
+            calorie_goal_id = str(uuid.uuid4())
+            calorie_goal_data = {
+                "goal_id": calorie_goal_id,
+                "goal_type": "daily_calories",
+                "target_value": daily_calorie_goal,
+                "current_value": 0.0,
+                "description": "Daily calorie intake target",
+                "created_at": datetime.now().isoformat()
+            }
+            health_goals[calorie_goal_id] = calorie_goal_data
+            result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories\nCalorie Goal ID: {calorie_goal_id}"
+        
+        return result
     
     except Exception as e:
         return f"Error adding health goal: {str(e)}"
@@ -171,6 +203,27 @@ def add_food_log(
                 result += f"Calories: {calories}\n"
             result += f"\nToday's Total Calories: {total_calories}"
             
+            # Check for daily calorie goal
+            try:
+                goals = supabase_manager.get_health_goals()
+                daily_calorie_goal = None
+                for goal in goals:
+                    if goal.get("goal_type") == "daily_calories" and goal.get("is_active", True):
+                        daily_calorie_goal = goal.get("target_value")
+                        break
+                
+                if daily_calorie_goal:
+                    progress = (total_calories / daily_calorie_goal) * 100
+                    remaining = daily_calorie_goal - total_calories
+                    result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+                    result += f"\nProgress: {progress:.1f}%"
+                    if remaining > 0:
+                        result += f"\nRemaining: {remaining} calories"
+                    else:
+                        result += f"\nOver goal by: {abs(remaining)} calories"
+            except:
+                pass  # If goal check fails, just show the food log
+            
             return result
         
         # Fallback to in-memory storage
@@ -196,6 +249,23 @@ def add_food_log(
             result += f"Calories: {calories}\n"
         result += f"\nToday's Total Calories: {total_calories}"
         
+        # Check for daily calorie goal in local storage
+        daily_calorie_goal = None
+        for goal in health_goals.values():
+            if goal.get("goal_type") == "daily_calories":
+                daily_calorie_goal = goal.get("target_value")
+                break
+        
+        if daily_calorie_goal:
+            progress = (total_calories / daily_calorie_goal) * 100
+            remaining = daily_calorie_goal - total_calories
+            result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+            result += f"\nProgress: {progress:.1f}%"
+            if remaining > 0:
+                result += f"\nRemaining: {remaining} calories"
+            else:
+                result += f"\nOver goal by: {abs(remaining)} calories"
+        
         return result
     
     except Exception as e:
@@ -203,7 +273,7 @@ def add_food_log(
 
 @mcp.tool()
 def get_food_log() -> str:
-    """Get today's food log"""
+    """Get today's food log with calorie goal progress"""
     try:
         today = date.today().isoformat()
         
@@ -243,6 +313,27 @@ def get_food_log() -> str:
             
             result += f"Daily Total: {total_calories} calories"
             
+            # Check for daily calorie goal
+            try:
+                goals = supabase_manager.get_health_goals()
+                daily_calorie_goal = None
+                for goal in goals:
+                    if goal.get("goal_type") == "daily_calories" and goal.get("is_active", True):
+                        daily_calorie_goal = goal.get("target_value")
+                        break
+                
+                if daily_calorie_goal:
+                    progress = (total_calories / daily_calorie_goal) * 100
+                    remaining = daily_calorie_goal - total_calories
+                    result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+                    result += f"\nProgress: {progress:.1f}%"
+                    if remaining > 0:
+                        result += f"\nRemaining: {remaining} calories"
+                    else:
+                        result += f"\nOver goal by: {abs(remaining)} calories"
+            except:
+                pass  # If goal check fails, just show the food log
+            
             return result
         
         # Fallback to in-memory storage
@@ -279,6 +370,23 @@ def get_food_log() -> str:
             total_calories += meal_calories
         
         result += f"Daily Total: {total_calories} calories"
+        
+        # Check for daily calorie goal in local storage
+        daily_calorie_goal = None
+        for goal in health_goals.values():
+            if goal.get("goal_type") == "daily_calories":
+                daily_calorie_goal = goal.get("target_value")
+                break
+        
+        if daily_calorie_goal:
+            progress = (total_calories / daily_calorie_goal) * 100
+            remaining = daily_calorie_goal - total_calories
+            result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+            result += f"\nProgress: {progress:.1f}%"
+            if remaining > 0:
+                result += f"\nRemaining: {remaining} calories"
+            else:
+                result += f"\nOver goal by: {abs(remaining)} calories"
         
         return result
     

@@ -25,9 +25,9 @@ class HealthDietAgentTool(BaseTool):
 
 class AddHealthGoalTool(BaseTool):
     name: str = "add_health_goal"
-    description: str = "Add a new health goal (weight, calories, etc.)"
-    def _run(self, goal_type: str, target_value: float, description: str = None) -> str:
-        return add_health_goal(goal_type, target_value, description)
+    description: str = "Add a new health goal (weight, calories, etc.) with optional daily calorie goal"
+    def _run(self, goal_type: str, target_value: float, description: str = None, daily_calorie_goal: int = None) -> str:
+        return add_health_goal(goal_type, target_value, description, daily_calorie_goal)
 
 class UpdateHealthGoalTool(BaseTool):
     name: str = "update_health_goal"
@@ -73,7 +73,9 @@ Manages basic health goal tracking and food logging.
 
 ## Core Functions
 - **Health Goals**: Set and update health goals (weight, calories, etc.)
+- **Daily Calorie Goals**: Set daily calorie intake targets
 - **Food Logging**: Log daily meals and track calories
+- **Progress Tracking**: Show progress against daily calorie goals
 - **Simple Tracking**: Easy-to-use health and diet management
 
 ## Response Style
@@ -87,6 +89,7 @@ Manages basic health goal tracking and food logging.
 - **Goal Management**: Show goal type, target, and current values
 - **Food Logging**: Display meals by type with calorie totals
 - **Daily Summaries**: Show total calories for the day
+- **Calorie Progress**: Display progress against daily calorie goals
 - **Success Messages**: Confirm actions with clear feedback
 
 ## Professional Response Templates

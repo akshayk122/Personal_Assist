@@ -203,24 +203,31 @@ def add_food_log(
                 result += f"Calories: {calories}\n"
             result += f"\nToday's Total Calories: {total_calories}"
             
-            # Check for daily calorie goal
+            # Check for daily calorie goal and update current value
             try:
                 goals = supabase_manager.get_health_goals()
                 daily_calorie_goal = None
+                daily_goal_id = None
                 for goal in goals:
                     if goal.get("goal_type") == "daily_calories" and goal.get("is_active", True):
                         daily_calorie_goal = goal.get("target_value")
+                        daily_goal_id = goal.get("goal_id")
                         break
                 
-                if daily_calorie_goal:
-                    progress = (total_calories / daily_calorie_goal) * 100
+                if daily_calorie_goal and daily_goal_id:
+                    # Update the current value to reflect today's consumption
+                    supabase_manager.update_health_goal(daily_goal_id, {"current_value": total_calories})
+                    
                     remaining = daily_calorie_goal - total_calories
-                    result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+                    progress = (total_calories / daily_calorie_goal) * 100
+                    
+                    result += f"\n\nDaily Calorie Budget: {daily_calorie_goal} calories"
+                    result += f"\nCalories Consumed: {total_calories} calories"
                     result += f"\nProgress: {progress:.1f}%"
                     if remaining > 0:
-                        result += f"\nRemaining: {remaining} calories"
+                        result += f"\nRemaining Budget: {remaining} calories"
                     else:
-                        result += f"\nOver goal by: {abs(remaining)} calories"
+                        result += f"\nOver Budget by: {abs(remaining)} calories"
             except:
                 pass  # If goal check fails, just show the food log
             
@@ -249,22 +256,28 @@ def add_food_log(
             result += f"Calories: {calories}\n"
         result += f"\nToday's Total Calories: {total_calories}"
         
-        # Check for daily calorie goal in local storage
+        # Check for daily calorie goal in local storage and update current value
         daily_calorie_goal = None
-        for goal in health_goals.values():
+        daily_goal_id = None
+        for goal_id, goal in health_goals.items():
             if goal.get("goal_type") == "daily_calories":
                 daily_calorie_goal = goal.get("target_value")
+                daily_goal_id = goal_id
+                # Update the current value to reflect today's consumption
+                goal["current_value"] = total_calories
                 break
         
         if daily_calorie_goal:
-            progress = (total_calories / daily_calorie_goal) * 100
             remaining = daily_calorie_goal - total_calories
-            result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+            progress = (total_calories / daily_calorie_goal) * 100
+            
+            result += f"\n\nDaily Calorie Budget: {daily_calorie_goal} calories"
+            result += f"\nCalories Consumed: {total_calories} calories"
             result += f"\nProgress: {progress:.1f}%"
             if remaining > 0:
-                result += f"\nRemaining: {remaining} calories"
+                result += f"\nRemaining Budget: {remaining} calories"
             else:
-                result += f"\nOver goal by: {abs(remaining)} calories"
+                result += f"\nOver Budget by: {abs(remaining)} calories"
         
         return result
     
@@ -313,24 +326,31 @@ def get_food_log() -> str:
             
             result += f"Daily Total: {total_calories} calories"
             
-            # Check for daily calorie goal
+            # Check for daily calorie goal and update current value
             try:
                 goals = supabase_manager.get_health_goals()
                 daily_calorie_goal = None
+                daily_goal_id = None
                 for goal in goals:
                     if goal.get("goal_type") == "daily_calories" and goal.get("is_active", True):
                         daily_calorie_goal = goal.get("target_value")
+                        daily_goal_id = goal.get("goal_id")
                         break
                 
-                if daily_calorie_goal:
-                    progress = (total_calories / daily_calorie_goal) * 100
+                if daily_calorie_goal and daily_goal_id:
+                    # Update the current value to reflect today's consumption
+                    supabase_manager.update_health_goal(daily_goal_id, {"current_value": total_calories})
+                    
                     remaining = daily_calorie_goal - total_calories
-                    result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+                    progress = (total_calories / daily_calorie_goal) * 100
+                    
+                    result += f"\n\nDaily Calorie Budget: {daily_calorie_goal} calories"
+                    result += f"\nCalories Consumed: {total_calories} calories"
                     result += f"\nProgress: {progress:.1f}%"
                     if remaining > 0:
-                        result += f"\nRemaining: {remaining} calories"
+                        result += f"\nRemaining Budget: {remaining} calories"
                     else:
-                        result += f"\nOver goal by: {abs(remaining)} calories"
+                        result += f"\nOver Budget by: {abs(remaining)} calories"
             except:
                 pass  # If goal check fails, just show the food log
             
@@ -371,22 +391,28 @@ def get_food_log() -> str:
         
         result += f"Daily Total: {total_calories} calories"
         
-        # Check for daily calorie goal in local storage
+        # Check for daily calorie goal in local storage and update current value
         daily_calorie_goal = None
-        for goal in health_goals.values():
+        daily_goal_id = None
+        for goal_id, goal in health_goals.items():
             if goal.get("goal_type") == "daily_calories":
                 daily_calorie_goal = goal.get("target_value")
+                daily_goal_id = goal_id
+                # Update the current value to reflect today's consumption
+                goal["current_value"] = total_calories
                 break
         
         if daily_calorie_goal:
-            progress = (total_calories / daily_calorie_goal) * 100
             remaining = daily_calorie_goal - total_calories
-            result += f"\n\nDaily Calorie Goal: {daily_calorie_goal} calories"
+            progress = (total_calories / daily_calorie_goal) * 100
+            
+            result += f"\n\nDaily Calorie Budget: {daily_calorie_goal} calories"
+            result += f"\nCalories Consumed: {total_calories} calories"
             result += f"\nProgress: {progress:.1f}%"
             if remaining > 0:
-                result += f"\nRemaining: {remaining} calories"
+                result += f"\nRemaining Budget: {remaining} calories"
             else:
-                result += f"\nOver goal by: {abs(remaining)} calories"
+                result += f"\nOver Budget by: {abs(remaining)} calories"
         
         return result
     

@@ -221,13 +221,13 @@ def add_food_log(
                     remaining = daily_calorie_goal - total_calories
                     progress = (total_calories / daily_calorie_goal) * 100
                     
-                    result += f"\n\nDaily Calorie Budget: {daily_calorie_goal} calories"
+                    result += f"\n\nDaily Calorie Limit: {daily_calorie_goal} calories"
                     result += f"\nCalories Consumed: {total_calories} calories"
                     result += f"\nProgress: {progress:.1f}%"
                     if remaining > 0:
-                        result += f"\nRemaining Budget: {remaining} calories"
+                        result += f"\nRemaining Limit: {remaining} calories"
                     else:
-                        result += f"\nOver Budget by: {abs(remaining)} calories"
+                        result += f"\nOver Limit by: {abs(remaining)} calories"
             except:
                 pass  # If goal check fails, just show the food log
             

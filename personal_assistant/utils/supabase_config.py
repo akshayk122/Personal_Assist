@@ -217,41 +217,60 @@ class SupabaseManager:
     
     def get_expense_summary(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Get expense summary and analytics from Supabase"""
-        expenses = self.get_expenses(filters, user_id=self.user_id)
-        
-        if not expenses:
+        try:
+            expenses = self.get_expenses(filters, user_id=self.user_id)
+            
+            if not expenses:
+                return {
+                    "total_expenses": 0,
+                    "total_amount": 0.0,
+                    "categories": {},
+                    "average_expense": 0.0,
+                    "date_range": "No expenses found"
+                }
+            
+            # Calculate summary statistics
+            total_amount = sum(float(expense.get("amount", 0)) for expense in expenses)
+            total_expenses = len(expenses)
+            
+            # Category breakdown with error handling
+            categories = {}
+            for expense in expenses:
+                try:
+                    category = expense.get("category", "unknown")
+                    if category not in categories:
+                        categories[category] = {"count": 0, "amount": 0.0}
+                    categories[category]["count"] += 1
+                    categories[category]["amount"] += float(expense.get("amount", 0))
+                except (KeyError, TypeError, ValueError) as e:
+                    print(f"[Supabase] Error processing expense for summary: {e}")
+                    print(f"[Supabase] Problematic expense data: {expense}")
+                    continue
+            
+            # Date range with error handling
+            try:
+                dates = [expense.get("date", "") for expense in expenses if expense.get("date")]
+                date_range = f"{min(dates)} to {max(dates)}" if dates else "No dates"
+            except (ValueError, TypeError) as e:
+                print(f"[Supabase] Error calculating date range: {e}")
+                date_range = "Date range unavailable"
+            
+            return {
+                "total_expenses": total_expenses,
+                "total_amount": round(total_amount, 2),
+                "categories": categories,
+                "average_expense": round(total_amount / total_expenses, 2) if total_expenses > 0 else 0.0,
+                "date_range": date_range
+            }
+        except Exception as e:
+            print(f"[Supabase] Error in get_expense_summary: {e}")
             return {
                 "total_expenses": 0,
                 "total_amount": 0.0,
                 "categories": {},
                 "average_expense": 0.0,
-                "date_range": "No expenses found"
+                "date_range": "Error occurred"
             }
-        
-        # Calculate summary statistics
-        total_amount = sum(expense["amount"] for expense in expenses)
-        total_expenses = len(expenses)
-        
-        # Category breakdown
-        categories = {}
-        for expense in expenses:
-            category = expense["category"]
-            if category not in categories:
-                categories[category] = {"count": 0, "amount": 0.0}
-            categories[category]["count"] += 1
-            categories[category]["amount"] += expense["amount"]
-        
-        # Date range
-        dates = [expense["date"] for expense in expenses]
-        date_range = f"{min(dates)} to {max(dates)}" if dates else "No dates"
-        
-        return {
-            "total_expenses": total_expenses,
-            "total_amount": round(total_amount, 2),
-            "categories": categories,
-            "average_expense": round(total_amount / total_expenses, 2) if total_expenses > 0 else 0.0,
-            "date_range": date_range
-        }
 
     # ============================================================================
     # LEGACY METHODS (NO USER_ID SUPPORT) - FOR BACKWARD COMPATIBILITY

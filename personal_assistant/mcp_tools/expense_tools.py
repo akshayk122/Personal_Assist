@@ -268,12 +268,20 @@ def get_expense_summary(
         
         result += f"Breakdown by Category:\n"
         
-        # Sort categories by amount (highest first)
-        sorted_categories = sorted(summary['categories'].items(), key=lambda x: x[1]['amount'], reverse=True)
-        
-        for category_name, category_data in sorted_categories:
-            percentage = (category_data['amount'] / summary['total_amount']) * 100
-            result += f"{category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
+        # Check if categories exist and handle empty case
+        if summary['categories']:
+            # Sort categories by amount (highest first)
+            sorted_categories = sorted(summary['categories'].items(), key=lambda x: x[1]['amount'], reverse=True)
+            
+            for category_name, category_data in sorted_categories:
+                try:
+                    percentage = (category_data['amount'] / summary['total_amount']) * 100 if summary['total_amount'] > 0 else 0
+                    result += f"{category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
+                except (KeyError, TypeError, ZeroDivisionError) as e:
+                    print(f"[MCP Tool] Error formatting category {category_name}: {e}")
+                    result += f"{category_name.title()}: ${category_data.get('amount', 0):.2f} - {category_data.get('count', 0)} transactions\n"
+        else:
+            result += "No categories found in expense data.\n"
         
         return result
         

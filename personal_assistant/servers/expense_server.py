@@ -2,11 +2,12 @@
 Expense Tracker Server
 Port: 8200
 
-Handles expense tracking and management
+Handles expense tracking and management with user_id support
 """
 
 import logging
 import os
+import re
 from dotenv import load_dotenv
 from collections.abc import AsyncGenerator
 from datetime import datetime
@@ -39,7 +40,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from utils.gemini_config import get_llm
 from mcp_tools.expense_tools import (
     add_expense, list_expenses, get_expense_summary,
-    update_expense, delete_expense, filter_expenses
+    update_expense, delete_expense, filter_expenses, get_user_expenses_summary
 )
 
 # Apply asyncio patch for Jupyter compatibility
@@ -49,7 +50,30 @@ nest_asyncio.apply()
 server = Server()
 llm = get_llm()
 
-# Create proper CrewAI tools
+def extract_user_id_from_query(query: str) -> str:
+    """Extract user_id from query using various patterns"""
+    # Pattern 1: "for user: user123" or "user: user123"
+    user_pattern1 = r'(?:for\s+)?user\s*:\s*([a-zA-Z0-9_-]+)'
+    match = re.search(user_pattern1, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 2: "user123's expenses" or "user123 expenses"
+    user_pattern2 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:expenses?|spending|costs?)'
+    match = re.search(user_pattern2, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 3: "my expenses as user123" or "expenses for user123"
+    user_pattern3 = r'(?:my\s+)?expenses?\s+(?:as\s+|for\s+)([a-zA-Z0-9_-]+)'
+    match = re.search(user_pattern3, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Default to environment variable
+    return os.getenv('USER_ID', 'default_user')
+
+# Create proper CrewAI tools with user_id support
 class AddExpenseTool(BaseTool):
     name: str = "add_expense"
     description: str = """Help users record their spending.
@@ -72,8 +96,8 @@ class AddExpenseTool(BaseTool):
 
     Remember: Be specific when users track their spending!"""
 
-    def _run(self, amount: float, category: str, description: str, date: str = "", payment_method: str = "credit") -> str:
-        return add_expense(amount=amount, category=category, description=description, date=date, payment_method=payment_method)
+    def _run(self, amount: float, category: str, description: str, date: str = "", payment_method: str = "credit", user_id: str = "") -> str:
+        return add_expense(amount=amount, category=category, description=description, date=date, payment_method=payment_method, user_id=user_id)
 
 class ListExpensesTool(BaseTool):
     name: str = "list_expenses"
@@ -98,8 +122,8 @@ class ListExpensesTool(BaseTool):
 
     Remember: Keep it simple and clear - just show their expenses!"""
 
-    def _run(self, start_date: str = "", end_date: str = "", category: str = "all", list_all: bool = True) -> str:
-        return list_expenses(start_date=start_date, end_date=end_date, category=category, list_all=list_all)
+    def _run(self, start_date: str = "", end_date: str = "", category: str = "all", list_all: bool = True, user_id: str = "") -> str:
+        return list_expenses(start_date=start_date, end_date=end_date, category=category, list_all=list_all, user_id=user_id)
 
 class FilterExpensesTool(BaseTool):
     name: str = "filter_expenses"
@@ -123,8 +147,8 @@ class FilterExpensesTool(BaseTool):
 
     Remember: Focus on the specific category they're interested in!"""
 
-    def _run(self, category: str) -> str:
-        return filter_expenses(category=category)
+    def _run(self, category: str, user_id: str = "") -> str:
+        return filter_expenses(category=category, user_id=user_id)
 
 class GetExpenseSummaryTool(BaseTool):
     name: str = "get_expense_summary"
@@ -149,8 +173,8 @@ class GetExpenseSummaryTool(BaseTool):
 
     Remember: Be specific and clear when showing spending patterns!"""
 
-    def _run(self, period: str = "month", group_by: str = "category") -> str:
-        return get_expense_summary(period=period, group_by=group_by)
+    def _run(self, period: str = "month", group_by: str = "category", user_id: str = "") -> str:
+        return get_expense_summary(period=period, group_by=group_by, user_id=user_id)
 
 class UpdateExpenseTool(BaseTool):
     name: str = "update_expense"
@@ -174,8 +198,8 @@ class UpdateExpenseTool(BaseTool):
 
     Remember: Make it easy for users to keep their records accurate!"""
 
-    def _run(self, expense_id: str, updates: str) -> str:
-        return update_expense(expense_id=expense_id, updates=updates)
+    def _run(self, expense_id: str, updates: str, user_id: str = "") -> str:
+        return update_expense(expense_id=expense_id, updates=updates, user_id=user_id)
 
 class DeleteExpenseTool(BaseTool):
     name: str = "delete_expense"
@@ -196,8 +220,34 @@ class DeleteExpenseTool(BaseTool):
 
     Remember: Double-check before removing any records!"""
 
-    def _run(self, expense_id: str) -> str:
-        return delete_expense(expense_id=expense_id)
+    def _run(self, expense_id: str, user_id: str = "") -> str:
+        return delete_expense(expense_id=expense_id, user_id=user_id)
+
+class GetUserExpensesSummaryTool(BaseTool):
+    name: str = "get_user_expenses_summary"
+    description: str = """Get a comprehensive summary of all expenses for a specific user.
+
+    ## Perfect for:
+    - "Show my complete expense summary"
+    - "Give me a full spending overview"
+    - "Analyze all my expenses"
+    - "Comprehensive expense report"
+
+    ## Features:
+    - Complete expense breakdown
+    - Category and payment method analysis
+    - Overall statistics
+    - Date range information
+
+    ## Not for:
+    - Adding new expenses
+    - Filtering specific categories
+    - Updating expenses
+
+    Remember: Provide comprehensive insights about the user's spending patterns!"""
+
+    def _run(self, user_id: str = "") -> str:
+        return get_user_expenses_summary(user_id=user_id)
 
 # Initialize tools
 expense_tools = [
@@ -206,7 +256,8 @@ expense_tools = [
     FilterExpensesTool(),
     GetExpenseSummaryTool(),
     UpdateExpenseTool(),
-    DeleteExpenseTool()
+    DeleteExpenseTool(),
+    GetUserExpensesSummaryTool()
 ]
 
 @server.agent(
@@ -242,18 +293,30 @@ I am your dedicated financial assistant, focused on helping you manage expenses 
 - Respond with empathy and understanding
 - Keep information private and secure
 
+## User ID Support
+- Automatically extracts user_id from queries
+- Supports patterns like "for user: user123", "user123's expenses"
+- Falls back to environment USER_ID if not specified
+
 ## Example Interactions
 User: "I spent too much on food this month"
 Response: Shows your food expenses with understanding, no judgment
 
-User: "Show my expenses"
-Response: Clear, organized list with helpful context
+User: "Show my expenses for user: john123"
+Response: Clear, organized list for user john123
 
 User: "Help me track my spending"
 Response: Simple, encouraging guidance for expense tracking"""
 )
 async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     """This agent manages personal and business expenses using various tools"""
+    
+    # Extract user query and user_id
+    user_query = input[0].parts[0].content
+    extracted_user_id = extract_user_id_from_query(user_query)
+    
+    print(f"[Expense Server] Query: {user_query}")
+    print(f"[Expense Server] Extracted user_id: {extracted_user_id}")
     
     # Create the expense management agent
     expense_manager = Agent(
@@ -278,6 +341,12 @@ You are a supportive financial assistant who helps users manage their expenses w
    - Stay within expense management scope
    - Use the right tool for each task
    - Keep responses clear and direct
+
+## User ID Handling
+- Always use the user_id provided in the query
+- Pass user_id to all expense tools
+- Ensure user data isolation
+- Provide user-specific responses
 
 ## Response Guidelines
 1. For Simple Requests
@@ -306,6 +375,7 @@ You are a supportive financial assistant who helps users manage their expenses w
    - filter_expenses: For category questions
    - get_expense_summary: For patterns and insights
    - add_expense: For recording new expenses
+   - get_user_expenses_summary: For comprehensive analysis
 
 3. Stay Focused
    - Keep to expense management
@@ -318,7 +388,8 @@ You are a supportive financial assistant who helps users manage their expenses w
 - Keep responses concise
 - Focus on being helpful
 - Show understanding
-- Maintain privacy""",
+- Maintain privacy
+- Always include user context""",
         llm=llm,
         tools=expense_tools,
         allow_delegation=False,
@@ -327,8 +398,16 @@ You are a supportive financial assistant who helps users manage their expenses w
 
     # Create the task for handling the user's expense query
     task = Task(
-        description=f"Help the user with their expense request: {input[0].parts[0].content}",
-        expected_output="Clear, supportive response using exactly one appropriate tool.",
+        description=f"""Help the user with their expense request: {user_query}
+
+IMPORTANT: 
+- Extract and use user_id: {extracted_user_id}
+- Pass user_id to all expense tools
+- Ensure user data isolation
+- Provide user-specific responses
+
+User ID Context: {extracted_user_id}""",
+        expected_output="Clear, supportive response using exactly one appropriate tool with user_id support.",
         agent=expense_manager,
         verbose=True
     )
@@ -350,9 +429,13 @@ if __name__ == "__main__":
     print("Starting Expense Tracker Server on port 8200...")
     print("Available endpoints:")
     print("  - POST /runs (agent: expense_tracker)")
+    print("\nUser ID Support:")
+    print("  - 'for user: user123'")
+    print("  - 'user123's expenses'")
+    print("  - 'my expenses as user123'")
     print("\nExample queries:")
-    print("  - 'Show my food expenses this month'")
-    print("  - 'I spent $25 on lunch today'")
-    print("  - 'List my expenses'")
-    print("  - 'Show me what I spent'")
+    print("  - 'Show my food expenses for user: john123'")
+    print("  - 'I spent $25 on lunch today for user: jane456'")
+    print("  - 'List my expenses for user: user789'")
+    print("  - 'Show me what I spent for user: alice123'")
     server.run(port=8200) 

@@ -1,6 +1,6 @@
 """
 Supabase Configuration and Client Setup
-Handles database connections for expense management
+Handles database connections for expense management with user_id support
 """
 
 import os
@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class SupabaseManager:
-    """Manages Supabase client and database operations for expenses"""
+    """Manages Supabase client and database operations for expenses with user_id support"""
     
     def __init__(self, user_id: str = None):
         self.supabase_url = os.getenv("SUPABASE_URL")
@@ -55,9 +55,12 @@ class SupabaseManager:
         """Check if Supabase client is available"""
         return self.client is not None
 
+    # ============================================================================
+    # EXPENSE METHODS WITH USER_ID SUPPORT
+    # ============================================================================
     
     def add_expense(self, expense_data: Dict[str, Any]) -> str:
-        """Add a new expense to Supabase"""
+        """Add a new expense to Supabase with user_id"""
         print("[Supabase] Starting expense addition...")
         print(f"[Supabase] Expense data: {expense_data}")
         
@@ -92,7 +95,7 @@ class SupabaseManager:
             result = self.client.table("expenses").insert(supabase_data).execute()
             
             if result.data:
-                print(f"[Supabase] SUCCESS: Expense {expense_id} added to database")
+                print(f"[Supabase] SUCCESS: Expense {expense_id} added to database for user: {self.user_id}")
                 print(f"[Supabase] Response data: {result.data}")
                 return expense_id
             else:
@@ -108,8 +111,8 @@ class SupabaseManager:
                 print("[Supabase] RLS Policy Error Detected!")
                 print("[Supabase] This indicates a Row Level Security policy issue.")
                 print("[Supabase] Please check your Supabase RLS policies in the dashboard.")
-                print("[Supabase] Run the database_setup.sql script again to fix RLS policies.")
-                raise Exception("Database security policy violation. Please run database_setup.sql in Supabase SQL Editor to fix RLS policies.")
+                print("[Supabase] Run the database_setup_user_specific.sql script to fix RLS policies.")
+                raise Exception("Database security policy violation. Please run database_setup_user_specific.sql in Supabase SQL Editor to fix RLS policies.")
             
             logger.error(f"Error adding expense to Supabase: {error_msg}")
             raise Exception(f"Database error: {error_msg}")
@@ -147,10 +150,19 @@ class SupabaseManager:
             result = query.execute()
             print(f"[Supabase] Query executed for user {target_user_id}, checking results...")
             
+            # Check if result exists and has data
+            if result is None:
+                print(f"[Supabase] Query returned None result")
+                return []
+            
+            if result.data is None:
+                print(f"[Supabase] Query returned None data")
+                return []
+            
             if result.data:
                 count = len(result.data)
                 print(f"[Supabase] Retrieved {count} expense(s) for user {target_user_id}")
-                if "category" in filters:
+                if filters and "category" in filters:
                     category = filters["category"].lower().strip()
                     matching = sum(1 for e in result.data if e["category"].lower().strip() == category)
                     print(f"[Supabase] {matching} expense(s) match category '{category}'")
@@ -205,7 +217,7 @@ class SupabaseManager:
     
     def get_expense_summary(self, filters: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Get expense summary and analytics from Supabase"""
-        expenses = self.get_expenses(filters)
+        expenses = self.get_expenses(filters, user_id=self.user_id)
         
         if not expenses:
             return {
@@ -240,9 +252,13 @@ class SupabaseManager:
             "average_expense": round(total_amount / total_expenses, 2) if total_expenses > 0 else 0.0,
             "date_range": date_range
         }
+
+    # ============================================================================
+    # LEGACY METHODS (NO USER_ID SUPPORT) - FOR BACKWARD COMPATIBILITY
+    # ============================================================================
     
     def get_notes(self,note_id:str) -> List[Dict[str, Any]]:
-        """Get notes from Supabase"""
+        """Get notes from Supabase (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
@@ -254,7 +270,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {str(e)}")
 
     def add_note(self, note_data: Dict[str, Any]) -> str:
-        """Add a new note to Supabase"""
+        """Add a new note to Supabase (legacy - no user_id support)"""
         print("[Supabase] Starting note addition...")
         print(f"[Supabase] Note data: {note_data}")
 
@@ -306,7 +322,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {error_msg}")
 
     def update_note(self, note_id: str, updates: Dict[str, Any]) -> bool:
-        """Update a note in Supabase"""
+        """Update a note in Supabase (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         try:
@@ -322,7 +338,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {str(e)}")
 
     def delete_note(self, note_id: str) -> bool:
-        """Delete a note from Supabase"""
+        """Delete a note from Supabase (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
@@ -340,9 +356,9 @@ class SupabaseManager:
             logger.error(f"Error deleting note from Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
-    # Health Goals Methods
+    # Health Goals Methods (legacy - no user_id support)
     def add_health_goal(self, goal_data: Dict[str, Any]) -> str:
-        """Add a new health goal to Supabase"""
+        """Add a new health goal to Supabase (legacy - no user_id support)"""
         print("[Supabase] Starting health goal addition...")
         print(f"[Supabase] Goal data: {goal_data}")
         
@@ -395,7 +411,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {error_msg}")
 
     def update_health_goal(self, goal_id: str, updates: Dict[str, Any]) -> bool:
-        """Update a health goal in Supabase"""
+        """Update a health goal in Supabase (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
@@ -413,7 +429,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {str(e)}")
 
     def get_health_goals(self) -> List[Dict[str, Any]]:
-        """Get all health goals from Supabase"""
+        """Get all health goals from Supabase (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
@@ -425,9 +441,9 @@ class SupabaseManager:
             logger.error(f"Error retrieving health goals from Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
-    # Food Logging Methods
+    # Food Logging Methods (legacy - no user_id support)
     def add_food_log(self, food_data: Dict[str, Any]) -> str:
-        """Add a new food log to Supabase"""
+        """Add a new food log to Supabase (legacy - no user_id support)"""
         print("[Supabase] Starting food log addition...")
         print(f"[Supabase] Food data: {food_data}")
         
@@ -479,7 +495,7 @@ class SupabaseManager:
             raise Exception(f"Database error: {error_msg}")
 
     def get_food_logs(self, date: str = None) -> List[Dict[str, Any]]:
-        """Get food logs from Supabase with optional date filter"""
+        """Get food logs from Supabase with optional date filter (legacy - no user_id support)"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
@@ -503,5 +519,5 @@ class SupabaseManager:
             logger.error(f"Error retrieving food logs from Supabase: {str(e)}")
             raise Exception(f"Database error: {str(e)}")
 
-# Global instance
+# Global instance for backward compatibility
 supabase_manager = SupabaseManager() 

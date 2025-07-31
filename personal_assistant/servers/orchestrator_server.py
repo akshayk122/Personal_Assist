@@ -8,6 +8,7 @@ Following the pattern from acp_demo.py
 
 import logging
 import os
+import re
 from collections.abc import AsyncGenerator
 from acp_sdk.models import Message, MessagePart
 from acp_sdk.server import Server, RunYield, RunYieldResume
@@ -39,6 +40,41 @@ nest_asyncio.apply()
 server = Server()
 llm = get_llm()
 
+def extract_user_id_from_query(query: str) -> str:
+    """Extract user_id from query using various patterns"""
+    # Pattern 1: "for user: user123" or "user: user123"
+    user_pattern1 = r'(?:for\s+)?user\s*:\s*([a-zA-Z0-9_-]+)'
+    match = re.search(user_pattern1, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 2: "user123's expenses" or "user123 expenses"
+    user_pattern2 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:expenses?|spending|costs?)'
+    match = re.search(user_pattern2, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 3: "my expenses as user123" or "expenses for user123"
+    user_pattern3 = r'(?:my\s+)?expenses?\s+(?:as\s+|for\s+)([a-zA-Z0-9_-]+)'
+    match = re.search(user_pattern3, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 4: "user123's meetings" or "user123 meetings"
+    user_pattern4 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:meetings?|schedule|calendar)'
+    match = re.search(user_pattern4, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Pattern 5: "meetings for user123" or "schedule for user123"
+    user_pattern5 = r'(?:meetings?|schedule|calendar)\s+(?:for\s+)([a-zA-Z0-9_-]+)'
+    match = re.search(user_pattern5, query, re.IGNORECASE)
+    if match:
+        return match.group(1)
+    
+    # Default to environment variable
+    return os.getenv('USER_ID', 'default_user')
+
 # Create CrewAI tools for sub-agent communication
 class QueryMeetingAgentTool(BaseTool):
     name: str = "query_meeting_agent"
@@ -59,8 +95,15 @@ class QueryExpenseAgentTool(BaseTool):
     name: str = "query_expense_agent"
     description: str = "Query the expense tracking agent for financial management tasks"
     
-    async def _run(self, query: str) -> str:
+    async def _run(self, query: str, user_id: str = "") -> str:
         try:
+            # Add user_id to the query if provided
+            if user_id and user_id != os.getenv('USER_ID', 'default_user'):
+                if "for user:" not in query.lower() and "user:" not in query.lower():
+                    query = f"{query} for user: {user_id}"
+            
+            print(f"[Orchestrator] Sending expense query: {query}")
+            
             async with Client(base_url="http://localhost:8200") as client:
                 run = await client.run_sync(
                     agent="expense_tracker", 
@@ -107,6 +150,12 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Notes Management**: Create, search, organize notes
 - **Integrated Services**: Handle multi-agent queries
 
+## User ID Support
+- Automatically extracts user_id from queries
+- Supports patterns like "for user: user123", "user123's expenses"
+- Passes user_id to appropriate agents
+- Ensures user data isolation
+
 ## Query Routing
 - **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
 - **Expense queries** → Expense Tracker (expense, spend, money, budget)
@@ -123,6 +172,13 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 )
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:
+        # Extract user query and user_id
+        user_query = input[0].parts[0].content
+        extracted_user_id = extract_user_id_from_query(user_query)
+        
+        print(f"[Orchestrator] Query: {user_query}")
+        print(f"[Orchestrator] Extracted user_id: {extracted_user_id}")
+        
         # Create the orchestrator agent
         coordinator = Agent(
             role="Personal Assistant Coordinator",
@@ -135,11 +191,19 @@ Coordinates between specialized agents for personal and professional task manage
 - Analyze user queries and route to appropriate agents
 - Process and refine agent responses based on user intent
 - Handle errors gracefully and provide helpful alternatives
+- Extract and pass user_id to ensure data isolation
+
+## User ID Handling
+- Extract user_id from various query patterns
+- Pass user_id to expense and meeting agents
+- Ensure user-specific data isolation
+- Maintain user context throughout processing
 
 ## Operating Rules
 - Use single agent for specific queries (meeting → Meeting Manager, expense → Expense Tracker)
 - Use multiple agents only when explicitly needed
 - Choose exactly ONE tool per task, never retry with different tools
+- Always pass user_id to expense queries
 
 ## Query Classification
 - **Meeting queries**: meeting, schedule, calendar, appointment
@@ -168,7 +232,8 @@ Coordinates between specialized agents for personal and professional task manage
    - **Filter by Categories**: "food", "transportation", "utilities"
    - **Consolidate Similar Expenses**: Group identical descriptions
    - **Calculate Totals**: Show filtered totals, not raw data
-   - Format: "**[Category] Expenses for [Period]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
+   - **User ID Context**: Always include user context in responses
+   - Format: "**[Category] Expenses for [Period] for user: [user_id]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
 
 4. **Notes Agent Responses**
    - **Filter by Status**: "completed notes", "pending notes", "all notes"
@@ -188,37 +253,37 @@ Coordinates between specialized agents for personal and professional task manage
    - Format: "[Type] Health/Diet Summary**\n\n**Goals**: [Current status]\n**Food Log**: [Today's meals]\n**Totals**: [Daily calories]"
 
 ### **Response Processing Examples**
-- **User**: "Show my food expenses for last month"
-- **Process**: Filter expenses by category="food" AND date="last month"
-- **Output**: "Food Expenses for Last Month**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
+- **User**: "Show my food expenses for last month for user: john123"
+- **Process**: Filter expenses by category="food" AND date="last month" AND user_id="john123"
+- **Output**: "Food Expenses for Last Month for user: john123**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
 
-- **User**: "What meetings do I have this week?"
-- **Process**: Filter meetings by date range="this week"
-- **Output**: "**Meetings This Week**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
+- **User**: "What meetings do I have this week for user: alice456"
+- **Process**: Filter meetings by date range="this week" AND user_id="alice456"
+- **Output**: "**Meetings This Week for user: alice456**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
 
-- **User**: "Show my completed notes from last week"
-- **Process**: Filter notes by status="completed" AND date="last week"
-- **Output**: "**Completed Notes from Last Week**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
+- **User**: "Show my completed notes from last week for user: bob789"
+- **Process**: Filter notes by status="completed" AND date="last week" AND user_id="bob789"
+- **Output**: "**Completed Notes from Last Week for user: bob789**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
 
-- **User**: "List all my meeting notes"
-- **Process**: Filter notes by content containing "meeting"
-- **Output**: "**Meeting Notes**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
+- **User**: "List all my meeting notes for user: carol123"
+- **Process**: Filter notes by content containing "meeting" AND user_id="carol123"
+- **Output**: "**Meeting Notes for user: carol123**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
 
-- **User**: "Show my weight progress this month"
-- **Process**: Filter health records by type="weight" AND date="this month"
-- **Output**: "**Weight Progress This Month**\n\n**Progress**: Down 2.5 lbs (trending downward)\n**Current**: 175 lbs\n**Goal**: 170 lbs (5 lbs remaining)\n**Details**:\n• Weekly average: 175.2 lbs\n• Best day: 174.8 lbs\n• Trend: Consistent downward progress"
+- **User**: "Show my weight progress this month for user: dave456"
+- **Process**: Filter health records by type="weight" AND date="this month" AND user_id="dave456"
+- **Output**: "**Weight Progress This Month for user: dave456**\n\n**Progress**: Down 2.5 lbs (trending downward)\n**Current**: 175 lbs\n**Goal**: 170 lbs (5 lbs remaining)\n**Details**:\n• Weekly average: 175.2 lbs\n• Best day: 174.8 lbs\n• Trend: Consistent downward progress"
 
-- **User**: "Add a weight goal of 170 lbs"
-- **Process**: Create new health goal for weight
-- **Output**: "Health goal added!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]"
+- **User**: "Add a weight goal of 170 lbs for user: eve789"
+- **Process**: Create new health goal for weight AND user_id="eve789"
+- **Output**: "Health goal added for user: eve789!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]"
 
-- **User**: "Add a weight goal of 170 lbs with daily calorie goal of 2000"
-- **Process**: Create new health goal for weight and daily calorie goal
-- **Output**: "Health goal added!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]\n\nDaily Calorie Goal: 2000 calories\nCalorie Goal ID: [generated_id]"
+- **User**: "Add a weight goal of 170 lbs with daily calorie goal of 2000 for user: frank123"
+- **Process**: Create new health goal for weight and daily calorie goal AND user_id="frank123"
+- **Output**: "Health goal added for user: frank123!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]\n\nDaily Calorie Goal: 2000 calories\nCalorie Goal ID: [generated_id]"
 
-- **User**: "What did I eat today?"
-- **Process**: Filter diet records by date="today"
-- **Output**: "Today's Food Log\n\nBreakfast:\n• Oatmeal with berries (320 cal)\nLunch:\n• Grilled chicken salad (450 cal)\nDinner:\n• Salmon with vegetables (680 cal)\nDaily Total: 1,450 calories\n\nDaily Calorie Goal: 2000 calories\nProgress: 72.5%\nRemaining: 550 calories"
+- **User**: "What did I eat today for user: grace456"
+- **Process**: Filter diet records by date="today" AND user_id="grace456"
+- **Output**: "Today's Food Log for user: grace456\n\nBreakfast:\n• Oatmeal with berries (320 cal)\nLunch:\n• Grilled chicken salad (450 cal)\nDinner:\n• Salmon with vegetables (680 cal)\nDaily Total: 1,450 calories\n\nDaily Calorie Goal: 2000 calories\nProgress: 72.5%\nRemaining: 550 calories"
 
 ### **Data Consolidation Rules**
 1. **Expenses**: Group identical descriptions, sum amounts, show visit count
@@ -249,29 +314,33 @@ Coordinates between specialized agents for personal and professional task manage
             verbose=True
         )
 
-        # Extract user query
-        user_query = input[0].parts[0].content
-        
         # Create task for handling the query
         task = Task(
             description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
 
-IMPORTANT: After receiving the agent response, analyze the user's intent and:
+IMPORTANT: 
+- Extract and use user_id: {extracted_user_id}
+- Pass user_id to expense queries
+- Ensure user data isolation
+- After receiving the agent response, analyze the user's intent and:
 1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes", "weight goals", "today's meals")
 2. Consolidate duplicate or similar entries
 3. Group related items intelligently
 4. Calculate totals and summaries
 5. Present the refined, filtered result instead of raw data
+6. Always include user context in responses
 
 Examples:
-- If user asks "food expenses last month" and agent returns multiple identical entries, consolidate them into a single line with visit count
-- If user asks "meeting notes" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
-- If user asks "completed notes from last week", filter by completion status and date range, then group by topic
-- If user asks "add a weight goal of 170 lbs", create a new health goal for weight tracking
-- If user asks "add a weight goal of 170 lbs with daily calorie goal of 2000", create both weight and daily calorie goals
-- If user asks "what did I eat today", show today's food log grouped by meal type with daily calorie total and progress against daily calorie goal
-- If user asks "log my lunch: chicken salad, 450 calories", add the food item and show updated daily totals with progress against daily calorie goal""",
-            expected_output="Intelligently filtered and processed response based on user criteria, not raw agent data",
+- If user asks "food expenses last month for user: john123" and agent returns multiple identical entries, consolidate them into a single line with visit count
+- If user asks "meeting notes for user: alice456" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
+- If user asks "completed notes from last week for user: bob789", filter by completion status and date range, then group by topic
+- If user asks "add a weight goal of 170 lbs for user: carol123", create a new health goal for weight tracking
+- If user asks "add a weight goal of 170 lbs with daily calorie goal of 2000 for user: dave456", create both weight and daily calorie goals
+- If user asks "what did I eat today for user: eve789", show today's food log grouped by meal type with daily calorie total and progress against daily calorie goal
+- If user asks "log my lunch: chicken salad, 450 calories for user: frank123", add the food item and show updated daily totals with progress against daily calorie goal
+
+User ID Context: {extracted_user_id}""",
+            expected_output="Intelligently filtered and processed response based on user criteria with user_id context, not raw agent data",
             agent=coordinator,
             verbose=True
         )
@@ -302,14 +371,20 @@ if __name__ == "__main__":
     print("  - Expense Tracker (port 8200)")
     print("  - Notes Agent (local)")
     print("  - Health & Diet Agent (local)")
+    print("\nUser ID Support:")
+    print("  - 'for user: user123'")
+    print("  - 'user123's expenses'")
+    print("  - 'my expenses as user123'")
+    print("  - 'user123's meetings'")
+    print("  - 'meetings for user123'")
     print("\nExample queries:")
-    print("  - 'Schedule a meeting with John tomorrow at 2 PM'")
-    print("  - 'I spent $25 on lunch today'")
-    print("  - 'Add a note about the project meeting'")
-    print("  - 'Add a weight goal of 170 lbs'")
-    print("  - 'Add a weight goal of 170 lbs with daily calorie goal of 2000'")
-    print("  - 'I ate oatmeal for breakfast, 320 calories'")
-    print("  - 'What did I eat today?'")
-    print("  - 'Update my weight goal to 165 lbs'")
+    print("  - 'Schedule a meeting with John tomorrow at 2 PM for user: alice123'")
+    print("  - 'I spent $25 on lunch today for user: bob456'")
+    print("  - 'Add a note about the project meeting for user: carol789'")
+    print("  - 'Add a weight goal of 170 lbs for user: dave123'")
+    print("  - 'Add a weight goal of 170 lbs with daily calorie goal of 2000 for user: eve456'")
+    print("  - 'I ate oatmeal for breakfast, 320 calories for user: frank789'")
+    print("  - 'What did I eat today for user: grace123?'")
+    print("  - 'Update my weight goal to 165 lbs for user: henry456'")
     
     server.run(port=8300) 

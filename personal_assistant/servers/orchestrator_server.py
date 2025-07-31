@@ -15,6 +15,7 @@ from acp_sdk.server import Server, RunYield, RunYieldResume
 from acp_sdk.client import Client
 from crewai import Agent, Task, Crew
 from crewai.tools import BaseTool
+from crewai.memory import ConversationBufferMemory
 import nest_asyncio
 import sys
 import os
@@ -149,12 +150,19 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Expense Tracking**: Record, categorize, analyze expenses  
 - **Notes Management**: Create, search, organize notes
 - **Integrated Services**: Handle multi-agent queries
+- **Session Memory**: Remembers conversation context within current session
 
 ## User ID Support
 - Automatically extracts user_id from queries
 - Supports patterns like "for user: user123", "user123's expenses"
 - Passes user_id to appropriate agents
 - Ensures user data isolation
+
+## Session Memory Features
+- **Conversation History**: Remembers previous interactions in current session
+- **Context Awareness**: Understands references to previous actions
+- **Pronoun Resolution**: Handles "it", "that", "the first one" based on context
+- **User-Specific**: Each user has their own conversation memory
 
 ## Query Routing
 - **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
@@ -167,8 +175,8 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - Filter data based on user criteria (time periods, categories, status)
 - Consolidate duplicate entries and group related items
 - Provide formatted summaries with totals and breakdowns
-- Present refined results instead of raw data"""
-
+- Present refined results instead of raw data
+- Maintain conversation context for better user experience"""
 )
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:
@@ -179,7 +187,7 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         print(f"[Orchestrator] Query: {user_query}")
         print(f"[Orchestrator] Extracted user_id: {extracted_user_id}")
         
-        # Create the orchestrator agent
+        # Create the orchestrator agent with built-in memory
         coordinator = Agent(
             role="Personal Assistant Coordinator",
             goal="Route queries to appropriate specialized agents and coordinate their responses",
@@ -192,6 +200,7 @@ Coordinates between specialized agents for personal and professional task manage
 - Process and refine agent responses based on user intent
 - Handle errors gracefully and provide helpful alternatives
 - Extract and pass user_id to ensure data isolation
+- Maintain conversation memory for contextual responses
 
 ## User ID Handling
 - Extract user_id from various query patterns
@@ -199,11 +208,19 @@ Coordinates between specialized agents for personal and professional task manage
 - Ensure user-specific data isolation
 - Maintain user context throughout processing
 
+## Memory Management
+- Remember conversation history within current session
+- Understand references to previous actions and items
+- Resolve pronouns like "it", "that", "the first one"
+- Provide contextual responses based on conversation history
+- Maintain user-specific conversation context
+
 ## Operating Rules
 - Use single agent for specific queries (meeting → Meeting Manager, expense → Expense Tracker)
 - Use multiple agents only when explicitly needed
 - Choose exactly ONE tool per task, never retry with different tools
 - Always pass user_id to expense queries
+- Use conversation memory to understand context and references
 
 ## Query Classification
 - **Meeting queries**: meeting, schedule, calendar, appointment
@@ -311,7 +328,11 @@ Coordinates between specialized agents for personal and professional task manage
             llm=llm,
             tools=orchestrator_tools,
             allow_delegation=False,
-            verbose=True
+            verbose=True,
+            memory=ConversationBufferMemory(
+                return_messages=True,
+                memory_key="chat_history"
+            )
         )
 
         # Create task for handling the query
@@ -322,6 +343,7 @@ IMPORTANT:
 - Extract and use user_id: {extracted_user_id}
 - Pass user_id to expense queries
 - Ensure user data isolation
+- Use conversation memory to understand context and references
 - After receiving the agent response, analyze the user's intent and:
 1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes", "weight goals", "today's meals")
 2. Consolidate duplicate or similar entries
@@ -374,8 +396,15 @@ if __name__ == "__main__":
     print("\nUser ID Support:")
     print("  - 'for user: user123'")
     print("  - 'user123's expenses'")
+    print("\nSession Memory Features:")
+    print("  - Remembers conversation context")
+    print("  - Understands references to previous actions")
+    print("  - Resolves pronouns (it, that, the first one)")
+    print("  - Maintains conversation history within session")
     print("\nExample queries:")
     print("  - 'Schedule a meeting with John tomorrow at 2 PM for user: alice123'")
     print("  - 'I spent $25 on lunch today for user: bob456'")
+    print("  - 'Cancel it' (after scheduling a meeting)")
+    print("  - 'Show the first one' (after listing expenses)")
     
     server.run(port=8300) 

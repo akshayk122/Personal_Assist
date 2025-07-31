@@ -32,6 +32,7 @@ load_dotenv()
 print(f"[Expense Server] Environment check:")
 print(f"SUPABASE_URL: {'SET' if os.getenv('SUPABASE_URL') else 'MISSING'}")
 print(f"SUPABASE_API_KEY: {'SET' if os.getenv('SUPABASE_API_KEY') else 'MISSING'}")
+print(f"USER_ID: {'SET' if os.getenv('USER_ID') else 'MISSING (using default_user)'}")
 
 # Add parent directories to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))

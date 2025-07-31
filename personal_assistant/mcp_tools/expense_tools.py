@@ -13,7 +13,11 @@ from collections import defaultdict
 
 # Add parent directory to path to import utils
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from utils.supabase_config import supabase_manager
+from utils.supabase_config import SupabaseManager
+
+# Initialize Supabase manager with user_id from environment
+user_id = os.getenv('USER_ID', 'default_user')
+supabase_manager = SupabaseManager(user_id=user_id)
 
 # Initialize MCP server
 mcp = FastMCP()

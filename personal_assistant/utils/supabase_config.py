@@ -19,9 +19,10 @@ logger = logging.getLogger(__name__)
 class SupabaseManager:
     """Manages Supabase client and database operations for expenses"""
     
-    def __init__(self):
+    def __init__(self, user_id: str = None):
         self.supabase_url = os.getenv("SUPABASE_URL")
         self.supabase_key = os.getenv("SUPABASE_API_KEY")
+        self.user_id = user_id or os.getenv("USER_ID", "default_user")
         self.client: Optional[Client] = None
         self._initialize_client()
     
@@ -73,6 +74,7 @@ class SupabaseManager:
             # Prepare data for Supabase
             supabase_data = {
                 "expense_id": expense_id,
+                "user_id": self.user_id,  # Add user_id to expense data
                 "amount": expense_data["amount"],
                 "currency": expense_data.get("currency", "USD"),
                 "category": expense_data["category"],
@@ -112,15 +114,18 @@ class SupabaseManager:
             logger.error(f"Error adding expense to Supabase: {error_msg}")
             raise Exception(f"Database error: {error_msg}")
     
-    def get_expenses(self, filters: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Get expenses from Supabase with optional filters"""
+    def get_expenses(self, filters: Optional[Dict[str, Any]] = None, user_id: str = None) -> List[Dict[str, Any]]:
+        """Get expenses from Supabase with optional filters and user_id filtering"""
         if not self.is_connected():
             raise Exception("Supabase client not initialized. Check your credentials.")
         
         try:
-            query = self.client.table("expenses").select("*")
+            # Use provided user_id or default to instance user_id
+            target_user_id = user_id or self.user_id
             
-            # Apply filters if provided
+            query = self.client.table("expenses").select("*").eq("user_id", target_user_id)
+            
+            # Apply additional filters if provided
             if filters:
                 print(f"[Supabase] Applying filters: {filters}")
                 if "start_date" in filters:
@@ -140,11 +145,11 @@ class SupabaseManager:
             query = query.order("date", desc=True)
             
             result = query.execute()
-            print(f"[Supabase] Query executed, checking results...")
+            print(f"[Supabase] Query executed for user {target_user_id}, checking results...")
             
             if result.data:
                 count = len(result.data)
-                print(f"[Supabase] Retrieved {count} expense(s)")
+                print(f"[Supabase] Retrieved {count} expense(s) for user {target_user_id}")
                 if "category" in filters:
                     category = filters["category"].lower().strip()
                     matching = sum(1 for e in result.data if e["category"].lower().strip() == category)
@@ -154,7 +159,7 @@ class SupabaseManager:
                     print(f"[Supabase] Categories found in results: {unique_categories}")
                 return result.data
             else:
-                print("[Supabase] No expenses found")
+                print(f"[Supabase] No expenses found for user {target_user_id}")
                 return []
                 
         except Exception as e:

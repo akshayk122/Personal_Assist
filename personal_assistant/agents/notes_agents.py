@@ -18,7 +18,7 @@ llm = get_llm()
 
 class NotesAgentTool(BaseTool):
     name: str = "notes_agent"
-    description: str = "Show users their notes in a friendly way."
+    description: str = "Show users their notes in a structured way."
     def _run(self, query: str) -> str:
         return list_notes(query)
 

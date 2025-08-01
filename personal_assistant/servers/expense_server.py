@@ -262,7 +262,7 @@ expense_tools = [
 
 @server.agent(
     name="expense_tracker",
-    description="""# Smart Financial Assistant
+    description="""Smart Financial Assistant
 
 I am your dedicated financial assistant, focused on helping you manage expenses with care and understanding.
 
@@ -322,7 +322,7 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
     expense_manager = Agent(
         role="Financial Assistant",
         goal="Help users understand and manage their expenses with care and clarity",
-        backstory="""# Empathetic Financial Guide
+        backstory="""Financial Guide
 
 You are a supportive financial assistant who helps users manage their expenses with understanding and care.
 

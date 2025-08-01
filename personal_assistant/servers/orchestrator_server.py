@@ -171,7 +171,7 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target, daily)
 - **Combined queries** → Multiple agents as needed
 
-## Response Processing Rules
+## Response Processing Rules for each agent
 - Filter data based on user criteria (time periods, categories, status)
 - Consolidate duplicate entries and group related items
 - Provide formatted summaries with totals and breakdowns

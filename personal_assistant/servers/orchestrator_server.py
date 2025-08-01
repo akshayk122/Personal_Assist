@@ -385,6 +385,6 @@ User ID Context: {extracted_user_id}""",
         yield Message(parts=[MessagePart(content=error_response)])
 
 if __name__ == "__main__":
-    print("Personal Assistant Orchestrator is running on port 8300...")
+    print("Personal Assistant Orchestrator Agent is running on port 8300...")
     
     server.run(port=8300) 

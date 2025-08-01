@@ -78,7 +78,7 @@ Manages basic health goal tracking and food logging.
 - **Progress Tracking**: Show progress against daily calorie goals
 - **Simple Tracking**: Easy-to-use health and diet management
 
-## Response Style
+## Response Formatting
 - **Simple Formatting**: Clear, easy-to-read responses
 - **Direct Language**: Provide straightforward answers
 - **Success Indicators**: Use clear success/error messages

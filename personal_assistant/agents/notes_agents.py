@@ -4,11 +4,9 @@ from crewai import Agent, Task, Crew
 from crewai.tools import BaseTool
 import nest_asyncio
 import sys
-# personal_assistant/age
 from utils.gemini_config import get_llm
 from mcp_tools.notes_tool import list_notes, add_note, update_note, delete_note
 
-# Add parent directories to path
 load_dotenv()
 
 from utils.gemini_config import get_llm

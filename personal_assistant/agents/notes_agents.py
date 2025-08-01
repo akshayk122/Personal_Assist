@@ -52,7 +52,7 @@ class NotesAgent:
         self.agent = Agent(
             role="Notes Manager",
             goal="Help users manage their notes (add, list, delete, update)",
-            backstory="""# Smart Notes Assistant
+            backstory="""Smart Notes Assistant
 
 Manages personal and professional notes with clear, organized responses.
 
@@ -79,7 +79,7 @@ Manages personal and professional notes with clear, organized responses.
 - **Empty States**: Handle empty lists with helpful guidance
 - **Search Results**: Highlight matching content with context
 
-## Professional Response Templates
+## Structured Response Templates
 - **Success**: "[Operation] completed successfully. [Details]"
 - **Error**: "[Operation] failed: [Error]. [Suggestion]"
 - **Information**: "[Information type]: [Details]"

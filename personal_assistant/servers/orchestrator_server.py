@@ -15,7 +15,6 @@ from acp_sdk.server import Server, RunYield, RunYieldResume
 from acp_sdk.client import Client
 from crewai import Agent, Task, Crew
 from crewai.tools import BaseTool
-from crewai.memory import ConversationBufferMemory
 import nest_asyncio
 import sys
 import os
@@ -184,6 +183,7 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         user_query = input[0].parts[0].content
         extracted_user_id = extract_user_id_from_query(user_query)
         
+        
         print(f"[Orchestrator] Query: {user_query}")
         print(f"[Orchestrator] Extracted user_id: {extracted_user_id}")
         
@@ -329,10 +329,7 @@ Coordinates between specialized agents for personal and professional task manage
             tools=orchestrator_tools,
             allow_delegation=False,
             verbose=True,
-            memory=ConversationBufferMemory(
-                return_messages=True,
-                memory_key="chat_history"
-            )
+            # Memory removed due to compatibility issues with current CrewAI version
         )
 
         # Create task for handling the query

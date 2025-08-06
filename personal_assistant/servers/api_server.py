@@ -39,7 +39,7 @@ nest_asyncio.apply()
 
 @app.post("/query")
 async def handle_query(request: QueryRequest):
-    """Handle user query with user ID support - calls orchestrator server"""
+    """Handle user query with user ID to call orchestrator server"""
     try:
         logger.info(f"Received query: {request.query} for user: {request.user_id}")
         

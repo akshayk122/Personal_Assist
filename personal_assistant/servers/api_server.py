@@ -50,7 +50,6 @@ async def handle_query(request: QueryRequest):
             query_with_user = request.query
         
         # Call orchestrator server
-        #print(f"Query with user: {query_with_user}")
         async with Client(base_url="http://localhost:8300") as client:
             response = await client.run_sync(
                 agent="personal_assistant",

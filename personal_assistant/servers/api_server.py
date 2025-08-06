@@ -117,14 +117,14 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting Personal Assistant API Server on port 8400...")
-    print("📋 Available Endpoints:")
+    print("Starting Personal Assistant API Server on port 8400...")
+    print("Available Endpoints:")
     print("  - POST /query (General queries with user ID - calls orchestrator)")
     print("  - GET /health (Health check)")
     print("  - GET / (API information)")
-    print("\n💡 Example usage:")
+    print("\nExample usage:")
     print('  curl -X POST "http://localhost:8400/query" \\')
     print('       -H "Content-Type: application/json" \\')
     print('       -d \'{"query": "Show my expenses", "user_id": "user123"}\'')
-    print("\n🎯 All queries are routed through the orchestrator server!")
+    print("\nAll queries are routed through the orchestrator server!")
     uvicorn.run(app, host="0.0.0.0", port=8400)

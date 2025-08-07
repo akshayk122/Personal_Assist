@@ -148,7 +148,7 @@ async def meeting_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
 **Note:** This is the AI analysis of your meeting request. In a full implementation, 
 the actual meeting operations would be performed using the integrated MCP tools.
 
-🔧 **Available Operations:**
+**Available Operations:**
 - Add meetings with conflict checking
 - List meetings by date/status
 - Search meetings by various criteria  

@@ -312,9 +312,3 @@ await client.run_sync(
 - Meeting transcription and summary
 - Expense receipt scanning and OCR
 
-## Success Metrics
-- Successful agent communication and data exchange
-- Accurate query processing and response generation
-- Proper data persistence and retrieval
-- Error handling and graceful degradation
-- Performance benchmarks (response time < 2 seconds) 

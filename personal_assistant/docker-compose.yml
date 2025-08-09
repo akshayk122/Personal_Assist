@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  personal-assistant:
+    build: .
+    ports:
+      - "8000:8000"   # API Server
+      - "8100:8100"   # Meeting Server
+      - "8200:8200"   # Expense Server
+      - "8300:8300"   # Orchestrator Server
+    environment:
+      - PYTHONPATH=/app
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_API_KEY=${SUPABASE_API_KEY}
+      - USER_ID=${USER_ID:-default_user}
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-this}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - personal-assistant-network
+
+networks:
+  personal-assistant-network:
+    driver: bridge

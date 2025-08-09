@@ -1,8 +1,5 @@
 # Google Cloud Deployment Guide - Personal Assistant
 
-## 🚀 Quick Overview
-Deploy your Personal Assistant as a single Docker container on Google Cloud Run for maximum simplicity and cost efficiency.
-
 ## 📋 Prerequisites
 
 ### 1. Google Cloud Account Setup

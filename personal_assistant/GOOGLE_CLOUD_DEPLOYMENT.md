@@ -1,6 +1,6 @@
 # Google Cloud Deployment Guide - Personal Assistant
 
-## 📋 Prerequisites
+## Prerequisites
 
 ### 1. Google Cloud Account Setup
 - Google Cloud account with billing enabled
@@ -22,7 +22,7 @@ gcloud --version
 # Visit: https://www.docker.com/products/docker-desktop
 ```
 
-## ⚙️ Initial Setup
+## Initial Setup
 
 ### 1. Authenticate with Google Cloud
 ```bash
@@ -80,11 +80,10 @@ NODE_ENV=production
 3. Go to Settings → API
 4. Copy URL and anon/public key
 
-## 🚀 Deployment Methods
+## Deployment Methods
 
 Choose one of these deployment methods:
 
----
 
 ## Method 1: Deploy from Source (Recommended)
 
@@ -124,7 +123,6 @@ gcloud run deploy personal-assistant \
     JWT_SECRET="your-jwt-secret"
 ```
 
----
 
 ## Method 2: Build and Push Docker Image
 
@@ -153,9 +151,7 @@ gcloud run deploy personal-assistant \
   --env-vars-file .env.production
 ```
 
----
-
-## 🔍 Verify Deployment
+## Verify Deployment
 
 ### 1. Get Service URL
 ```bash
@@ -193,7 +189,7 @@ curl -X POST $SERVICE_URL/expense/query \
   -d '{"query": "Show my expenses"}'
 ```
 
-## 🔒 Security Configuration
+## Security Configuration
 
 ### 1. Restrict Access (Optional)
 If you want to restrict access to authenticated users only:
@@ -212,7 +208,7 @@ gcloud run domain-mappings create \
   --region us-central1
 ```
 
-## 📊 Monitoring and Logs
+## Monitoring and Logs
 
 ### 1. View Logs
 ```bash
@@ -230,7 +226,7 @@ gcloud logs tail "resource.type=cloud_run_revision AND resource.labels.service_n
 echo "Visit: https://console.cloud.google.com/run/detail/us-central1/personal-assistant"
 ```
 
-## 🔄 Updates and Maintenance
+## Updates and Maintenance
 
 ### 1. Update Environment Variables
 ```bash
@@ -265,7 +261,7 @@ gcloud run services update-traffic personal-assistant \
   --to-revisions REVISION_NAME=100
 ```
 
-## 💰 Cost Optimization
+## Cost Optimization
 
 ### 1. Configure Auto-scaling
 ```bash
@@ -281,7 +277,7 @@ gcloud run services update personal-assistant \
 - Set up billing alerts
 - Monitor Cloud Run usage
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues:
 
@@ -330,33 +326,3 @@ const API_BASE_URL = 'https://your-service-url.run.app';
 // Update axios configuration
 axios.defaults.baseURL = API_BASE_URL;
 ```
-
-## 🎯 Success Checklist
-
-- [ ] Google Cloud project setup
-- [ ] APIs enabled (Cloud Run, Cloud Build, Container Registry)
-- [ ] Environment variables configured
-- [ ] Service deployed successfully
-- [ ] Health check passing
-- [ ] Expense queries working
-- [ ] Logs accessible
-- [ ] Monitoring configured
-
-## 🚀 Estimated Costs
-
-For low traffic (< 1000 requests/day):
-- **Cloud Run**: $0-5/month
-- **Cloud Build**: $0-1/month
-- **Container Registry**: $0-1/month
-- **Total**: ~$0-7/month
-
-## 🎉 Congratulations!
-
-Your Personal Assistant is now running on Google Cloud Run! 
-
-**Your service URL**: Copy from the deployment output
-**All 4 servers running**: API (8000), Meeting (8100), Expense (8200), Orchestrator (8300)
-**Auto-scaling**: Scales to zero when not in use
-**Global**: Available worldwide with Google's CDN
-
-Perfect for production use! 🌟

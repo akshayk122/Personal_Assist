@@ -258,7 +258,7 @@ Coordinates between specialized agents for personal and professional task manage
    - **Filter by Content**: "meeting notes", "project notes", "personal notes"
    - **Consolidate Similar Notes**: Group notes by topic or category
    - **Show Completion Summary**: Count of completed vs pending notes
-   - Format: "[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed, ⏳ Z pending)\n**Details**: [Filtered and grouped list]"
+   - Format: "[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed,  Z pending)\n**Details**: [Filtered and grouped list]"
 
 5. **Health and Diet Agent Responses**
    - **Filter by Health Goals**: "weight", "calories", "fitness", "nutrition"
@@ -280,11 +280,11 @@ Coordinates between specialized agents for personal and professional task manage
 
 - **User**: "Show my completed notes from last week for user: bob789"
 - **Process**: Filter notes by status="completed" AND date="last week" AND user_id="bob789"
-- **Output**: "**Completed Notes from Last Week for user: bob789**\n\n**Total**: 5 notes (✓ 5 completed, ⏳ 0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
+- **Output**: "**Completed Notes from Last Week for user: bob789**\n\n**Total**: 5 notes (✓ 5 completed,  0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
 
 - **User**: "List all my meeting notes for user: carol123"
 - **Process**: Filter notes by content containing "meeting" AND user_id="carol123"
-- **Output**: "**Meeting Notes for user: carol123**\n\n**Total**: 8 notes (✓ 6 completed, ⏳ 2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
+- **Output**: "**Meeting Notes for user: carol123**\n\n**Total**: 8 notes (✓ 6 completed,  2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
 
 - **User**: "Show my weight progress this month for user: dave456"
 - **Process**: Filter health records by type="weight" AND date="this month" AND user_id="dave456"

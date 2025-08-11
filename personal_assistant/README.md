@@ -1,4 +1,4 @@
-# Personal Assistant System
+# Agentinc Personal Assistant System
 
 A comprehensive multi-agent personal assistant system using Agent Communication Protocol (ACP) servers that manages meetings, expenses, notes, health tracking, and diet management through specialized agents and a central orchestrator with intelligent user ID support and session memory.
 

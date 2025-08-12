@@ -142,26 +142,20 @@ orchestrator_tools = [
     name="personal_assistant",
     description="""# Personal Assistant Orchestrator
 
-Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provide intelligent responses.
+Coordinates between Meeting Manager, Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
 
 ## Core Capabilities
 - **Meeting Management**: Schedule, update, cancel meetings
 - **Expense Tracking**: Record, categorize, analyze expenses  
 - **Notes Management**: Create, search, organize notes
+- **Health & Diet**: Track goals, log food, monitor progress
 - **Integrated Services**: Handle multi-agent queries
-- **Session Memory**: Remembers conversation context within current session
 
 ## User ID Support
 - Automatically extracts user_id from queries
 - Supports patterns like "for user: user123", "user123's expenses"
 - Passes user_id to appropriate agents
 - Ensures user data isolation
-
-## Session Memory Features
-- **Conversation History**: Remembers previous interactions in current session
-- **Context Awareness**: Understands references to previous actions
-- **Pronoun Resolution**: Handles "it", "that", "the first one" based on context
-- **User-Specific**: Each user has their own conversation memory
 
 ## Query Routing
 - **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
@@ -170,12 +164,11 @@ Coordinates between Meeting Manager, Expense Tracker, and Notes agents to provid
 - **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target, daily)
 - **Combined queries** → Multiple agents as needed
 
-## Response Processing Rules for each agent
+## Response Processing
 - Filter data based on user criteria (time periods, categories, status)
 - Consolidate duplicate entries and group related items
 - Provide formatted summaries with totals and breakdowns
-- Present refined results instead of raw data
-- Maintain conversation context for better user experience"""
+- Present refined results instead of raw data"""
 )
 async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYieldResume]:
     try:
@@ -187,7 +180,7 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         print(f"[Orchestrator] Query: {user_query}")
         print(f"[Orchestrator] Extracted user_id: {extracted_user_id}")
         
-        # Create the orchestrator agent with built-in memory
+        # Create the orchestrator agent
         coordinator = Agent(
             role="Personal Assistant Coordinator",
             goal="Route queries to appropriate specialized agents and coordinate their responses",

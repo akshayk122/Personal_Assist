@@ -76,20 +76,21 @@ def extract_user_id_from_query(query: str) -> str:
     return os.getenv('USER_ID', 'default_user')
 
 # Create CrewAI tools for sub-agent communication
-class QueryMeetingAgentTool(BaseTool):
-    name: str = "query_meeting_agent"
-    description: str = "Query the meeting management agent for scheduling and calendar related tasks"
-    
-    async def _run(self, query: str) -> str:
-        try:
-            async with Client(base_url="http://localhost:8100") as client:
-                run = await client.run_sync(
-                    agent="meeting_manager", 
-                    input=query
-                )
-                return run.output[0].parts[0].content
-        except Exception as e:
-            return f"Unable to contact Meeting Manager: {str(e)}"
+# MEETING AGENT DISABLED - Commented out for now
+# class QueryMeetingAgentTool(BaseTool):
+#     name: str = "query_meeting_agent"
+#     description: str = "Query the meeting management agent for scheduling and calendar related tasks"
+#     
+#     async def _run(self, query: str) -> str:
+#         try:
+#             async with Client(base_url="http://localhost:8100") as client:
+#                 run = await client.run_sync(
+#                     agent="meeting_manager", 
+#                     input=query
+#                 )
+#                 return run.output[0].parts[0].content
+#         except Exception as e:
+#             return f"Unable to contact Meeting Manager: {str(e)}"
 
 class QueryExpenseAgentTool(BaseTool):
     name: str = "query_expense_agent"
@@ -132,7 +133,7 @@ class QueryHealthDietAgentTool(BaseTool):
 
 # Initialize tools
 orchestrator_tools = [
-    QueryMeetingAgentTool(),
+    # QueryMeetingAgentTool(),  # DISABLED - Meeting agent commented out
     QueryExpenseAgentTool(),
     QueryNotesAgentTool(),
     QueryHealthDietAgentTool()
@@ -142,10 +143,9 @@ orchestrator_tools = [
     name="personal_assistant",
     description="""# Personal Assistant Orchestrator
 
-Coordinates between Meeting Manager, Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
+Coordinates between Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
 
 ## Core Capabilities
-- **Meeting Management**: Schedule, update, cancel meetings
 - **Expense Tracking**: Record, categorize, analyze expenses  
 - **Notes Management**: Create, search, organize notes
 - **Health & Diet**: Track goals, log food, monitor progress
@@ -158,7 +158,6 @@ Coordinates between Meeting Manager, Expense Tracker, Notes, and Health/Diet age
 - Ensures user data isolation
 
 ## Query Routing
-- **Meeting queries** → Meeting Manager (meeting, schedule, calendar)
 - **Expense queries** → Expense Tracker (expense, spend, money, budget)
 - **Notes queries** → Notes Agent (note, search, organize)
 - **Health and Diet queries** → Health and Diet Agent (health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target, daily)
@@ -201,13 +200,12 @@ Coordinates between specialized agents for personal and professional task manage
 - Maintain user context throughout processing
 
 ## Operating Rules
-- Use single agent for specific queries (meeting → Meeting Manager, expense → Expense Tracker)
+- Use single agent for specific queries (expense → Expense Tracker, notes → Notes Agent, health → Health/Diet Agent)
 - Use multiple agents only when explicitly needed
 - Choose exactly ONE tool per task, never retry with different tools
 - Always pass user_id to expense queries
 
 ## Query Classification
-- **Meeting queries**: meeting, schedule, calendar, appointment
 - **Expense queries**: expense, spend, cost, money, budget  
 - **Notes queries**: note, search, organize, complete
 - **Health and Diet queries**: health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target

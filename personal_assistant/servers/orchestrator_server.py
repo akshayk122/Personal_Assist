@@ -200,7 +200,6 @@ Coordinates between specialized agents for personal and professional task manage
 - Process and refine agent responses based on user intent
 - Handle errors gracefully and provide helpful alternatives
 - Extract and pass user_id to ensure data isolation
-- Maintain conversation memory for contextual responses
 
 ## User ID Handling
 - Extract user_id from various query patterns
@@ -208,19 +207,11 @@ Coordinates between specialized agents for personal and professional task manage
 - Ensure user-specific data isolation
 - Maintain user context throughout processing
 
-## Memory Management
-- Remember conversation history within current session
-- Understand references to previous actions and items
-- Resolve pronouns like "it", "that", "the first one"
-- Provide contextual responses based on conversation history
-- Maintain user-specific conversation context
-
 ## Operating Rules
 - Use single agent for specific queries (meeting → Meeting Manager, expense → Expense Tracker)
 - Use multiple agents only when explicitly needed
 - Choose exactly ONE tool per task, never retry with different tools
 - Always pass user_id to expense queries
-- Use conversation memory to understand context and references
 
 ## Query Classification
 - **Meeting queries**: meeting, schedule, calendar, appointment
@@ -229,107 +220,16 @@ Coordinates between specialized agents for personal and professional task manage
 - **Health and Diet queries**: health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target
 - **Combined queries**: Explicitly asks for multiple types of info
 
-## Response Format & Processing Rules
-
-### **Intelligent Response Processing**
-1. **Filter and Refine Raw Data**
-   - Analyze user intent (e.g., "last month", "this week", "food expenses")
-   - Filter agent responses based on user criteria
-   - Consolidate duplicate or similar entries
-   - Group related items intelligently
-
-2. **Meeting Manager Responses**
-   - Filter by date ranges when specified
-   - Group meetings by day/week/month
-   - Consolidate recurring meetings
-   - Format: "**Meetings for [Period]**\n\n**Total**: X meetings\n**Details**: [Filtered list]"
-
-3. **Expense Tracker Responses**
-   - **Filter by Time Periods**: "last month", "this week", "last 30 days"
-   - **Filter by Categories**: "food", "transportation", "utilities"
-   - **Consolidate Similar Expenses**: Group identical descriptions
-   - **Calculate Totals**: Show filtered totals, not raw data
-   - **User ID Context**: Always include user context in responses
-   - Format: "**[Category] Expenses for [Period] for user: [user_id]**\n\n**Total**: $XXX.XX\n**Breakdown**: [Consolidated list]"
-
-4. **Notes Agent Responses**
-   - **Filter by Status**: "completed notes", "pending notes", "all notes"
-   - **Filter by Date Ranges**: "notes from last week", "today's notes", "this month"
-   - **Filter by Content**: "meeting notes", "project notes", "personal notes"
-   - **Consolidate Similar Notes**: Group notes by topic or category
-   - **Show Completion Summary**: Count of completed vs pending notes
-   - Format: "[Type] Notes for [Period]**\n\n**Total**: X notes (✓ Y completed,  Z pending)\n**Details**: [Filtered and grouped list]"
-
-5. **Health and Diet Agent Responses**
-   - **Filter by Health Goals**: "weight", "calories", "fitness", "nutrition"
-   - **Filter by Food Logging**: "meals", "calories", "food items", "ate", "eat"
-   - **Filter by Date Ranges**: "today", "yesterday", "this week"
-   - **Filter by Goals**: "weight goals", "calorie goals", "health targets"
-   - **Consolidate Food Logs**: Group meals by type and show daily totals
-   - **Show Goal Progress**: Track current vs target values
-   - Format: "[Type] Health/Diet Summary**\n\n**Goals**: [Current status]\n**Food Log**: [Today's meals]\n**Totals**: [Daily calories]"
-
-### **Response Processing Examples**
-- **User**: "Show my food expenses for last month for user: john123"
-- **Process**: Filter expenses by category="food" AND date="last month" AND user_id="john123"
-- **Output**: "Food Expenses for Last Month for user: john123**\n\n**Total**: $300.00\n**Breakdown**:\n• $100.00 - Dinner at 5th Element (3 visits)"
-
-- **User**: "What meetings do I have this week for user: alice456"
-- **Process**: Filter meetings by date range="this week" AND user_id="alice456"
-- **Output**: "**Meetings This Week for user: alice456**\n\n**Total**: 3 meetings\n**Schedule**: [Filtered list]"
-
-- **User**: "Show my completed notes from last week for user: bob789"
-- **Process**: Filter notes by status="completed" AND date="last week" AND user_id="bob789"
-- **Output**: "**Completed Notes from Last Week for user: bob789**\n\n**Total**: 5 notes (✓ 5 completed,  0 pending)\n**Details**:\n• Meeting notes (3 notes)\n• Project tasks (2 notes)"
-
-- **User**: "List all my meeting notes for user: carol123"
-- **Process**: Filter notes by content containing "meeting" AND user_id="carol123"
-- **Output**: "**Meeting Notes for user: carol123**\n\n**Total**: 8 notes (✓ 6 completed,  2 pending)\n**Details**:\n• Team standup notes (4 notes)\n• Client meeting notes (3 notes)\n• Project review notes (1 note)"
-
-- **User**: "Show my weight progress this month for user: dave456"
-- **Process**: Filter health records by type="weight" AND date="this month" AND user_id="dave456"
-- **Output**: "**Weight Progress This Month for user: dave456**\n\n**Progress**: Down 2.5 lbs (trending downward)\n**Current**: 175 lbs\n**Goal**: 170 lbs (5 lbs remaining)\n**Details**:\n• Weekly average: 175.2 lbs\n• Best day: 174.8 lbs\n• Trend: Consistent downward progress"
-
-- **User**: "Add a weight goal of 170 lbs for user: eve789"
-- **Process**: Create new health goal for weight AND user_id="eve789"
-- **Output**: "Health goal added for user: eve789!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]"
-
-- **User**: "Add a weight goal of 170 lbs with daily calorie goal of 2000 for user: frank123"
-- **Process**: Create new health goal for weight and daily calorie goal AND user_id="frank123"
-- **Output**: "Health goal added for user: frank123!\n\nGoal: Weight\nTarget: 170 lbs\nGoal ID: [generated_id]\n\nDaily Calorie Goal: 2000 calories\nCalorie Goal ID: [generated_id]"
-
-- **User**: "What did I eat today for user: grace456"
-- **Process**: Filter diet records by date="today" AND user_id="grace456"
-- **Output**: "Today's Food Log for user: grace456\n\nBreakfast:\n• Oatmeal with berries (320 cal)\nLunch:\n• Grilled chicken salad (450 cal)\nDinner:\n• Salmon with vegetables (680 cal)\nDaily Total: 1,450 calories\n\nDaily Calorie Goal: 2000 calories\nProgress: 72.5%\nRemaining: 550 calories"
-
-### **Data Consolidation Rules**
-1. **Expenses**: Group identical descriptions, sum amounts, show visit count
-2. **Meetings**: Group by type, show frequency for recurring meetings
-3. **Notes**: 
-   - Group by topic/category (meeting notes, project notes, personal notes)
-   - Show completion status summary (completed vs pending)
-   - Consolidate similar content under common themes
-   - Filter by date ranges when specified
-   - Count notes by type and status
-4. **Health Goals**:
-   - Track goal type, target value, and current value
-   - Show progress towards health goals
-   - Update current values when new data is added
-   - Filter by goal type (weight, calories, fitness)
-   - Include daily calorie goals for food tracking
-5. **Food Logs**:
-   - Group by meal type (breakfast, lunch, dinner, snacks)
-   - Calculate daily calorie totals
-   - Show meal breakdowns with individual items
-   - Track daily food intake patterns
-   - Compare against daily calorie goals
-   - Show progress and remaining calories
-""",
+## Response Processing
+- Filter data based on user criteria (time periods, categories, status)
+- Consolidate duplicate entries and group related items
+- Provide formatted summaries with totals and breakdowns
+- Present refined results instead of raw data
+- Always include user context in responses""",
             llm=llm,
             tools=orchestrator_tools,
             allow_delegation=False,
-            verbose=True,
-            # Memory removed due to compatibility issues with current CrewAI version
+            verbose=True
         )
 
         # Create task for handling the query
@@ -340,23 +240,13 @@ IMPORTANT:
 - Extract and use user_id: {extracted_user_id}
 - Pass user_id to expense queries
 - Ensure user data isolation
-- Use conversation memory to understand context and references
 - After receiving the agent response, analyze the user's intent and:
-1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes", "weight goals", "today's meals")
+1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes")
 2. Consolidate duplicate or similar entries
 3. Group related items intelligently
 4. Calculate totals and summaries
 5. Present the refined, filtered result instead of raw data
 6. Always include user context in responses
-
-Examples:
-- If user asks "food expenses last month for user: john123" and agent returns multiple identical entries, consolidate them into a single line with visit count
-- If user asks "meeting notes for user: alice456" and agent returns all notes, filter to only show notes containing "meeting" and group by meeting type
-- If user asks "completed notes from last week for user: bob789", filter by completion status and date range, then group by topic
-- If user asks "add a weight goal of 170 lbs for user: carol123", create a new health goal for weight tracking
-- If user asks "add a weight goal of 170 lbs with daily calorie goal of 2000 for user: dave456", create both weight and daily calorie goals
-- If user asks "what did I eat today for user: eve789", show today's food log grouped by meal type with daily calorie total and progress against daily calorie goal
-- If user asks "log my lunch: chicken salad, 450 calories for user: frank123", add the food item and show updated daily totals with progress against daily calorie goal
 
 User ID Context: {extracted_user_id}""",
             expected_output="Intelligently filtered and processed response based on user criteria with user_id context, not raw agent data",

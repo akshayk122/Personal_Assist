@@ -2,7 +2,7 @@
 ACP Server 3 - Personal Assistant Orchestrator 
 Port: 8300
 
-Coordinates between Meeting Manager and Expense Tracker agents
+Coordinates between Meeting Manager, Expense Tracker, Notes, and Health/Diet agents
 Following the pattern from acp_demo.py
 """
 
@@ -60,17 +60,17 @@ def extract_user_id_from_query(query: str) -> str:
     if match:
         return match.group(1)
     
-    # Pattern 4: "user123's meetings" or "user123 meetings"
-    user_pattern4 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:meetings?|schedule|calendar)'
-    match = re.search(user_pattern4, query, re.IGNORECASE)
-    if match:
-        return match.group(1)
+    # Pattern 4: "user123's meetings" or "user123 meetings" - DISABLED
+    # user_pattern4 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:meetings?|schedule|calendar)'
+    # match = re.search(user_pattern4, query, re.IGNORECASE)
+    # if match:
+    #     return match.group(1)
     
-    # Pattern 5: "meetings for user123" or "schedule for user123"
-    user_pattern5 = r'(?:meetings?|schedule|calendar)\s+(?:for\s+)([a-zA-Z0-9_-]+)'
-    match = re.search(user_pattern5, query, re.IGNORECASE)
-    if match:
-        return match.group(1)
+    # Pattern 5: "meetings for user123" or "schedule for user123" - DISABLED
+    # user_pattern5 = r'(?:meetings?|schedule|calendar)\s+(?:for\s+)([a-zA-Z0-9_-]+)'
+    # match = re.search(user_pattern5, query, re.IGNORECASE)
+    # if match:
+    #     return match.group(1)
     
     # Default to environment variable
     return os.getenv('USER_ID', 'default_user')
@@ -143,7 +143,7 @@ orchestrator_tools = [
     name="personal_assistant",
     description="""# Personal Assistant Orchestrator
 
-Coordinates between Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
+Coordinates between Meeting Manager (DISABLED), Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
 
 ## Core Capabilities
 - **Expense Tracking**: Record, categorize, analyze expenses  
@@ -195,17 +195,18 @@ Coordinates between specialized agents for personal and professional task manage
 
 ## User ID Handling
 - Extract user_id from various query patterns
-- Pass user_id to expense and meeting agents
+- Pass user_id to expense and meeting agents (when enabled)
 - Ensure user-specific data isolation
 - Maintain user context throughout processing
 
 ## Operating Rules
-- Use single agent for specific queries (expense → Expense Tracker, notes → Notes Agent, health → Health/Diet Agent)
+- Use single agent for specific queries (meeting → Meeting Manager - DISABLED, expense → Expense Tracker, notes → Notes Agent, health → Health/Diet Agent)
 - Use multiple agents only when explicitly needed
 - Choose exactly ONE tool per task, never retry with different tools
 - Always pass user_id to expense queries
 
 ## Query Classification
+- **Meeting queries**: meeting, schedule, calendar, appointment - DISABLED
 - **Expense queries**: expense, spend, cost, money, budget  
 - **Notes queries**: note, search, organize, complete
 - **Health and Diet queries**: health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target
@@ -231,6 +232,8 @@ IMPORTANT:
 - Extract and use user_id: {extracted_user_id}
 - Pass user_id to expense queries
 - Ensure user data isolation
+- MEETING SERVER IS DISABLED - Do NOT respond with meeting information
+- Available services: Expense Tracking, Notes Management, Health & Diet
 - After receiving the agent response, analyze the user's intent and:
 1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes")
 2. Consolidate duplicate or similar entries

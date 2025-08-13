@@ -217,7 +217,11 @@ Coordinates between specialized agents for personal and professional task manage
 - Consolidate duplicate entries and group related items
 - Provide formatted summaries with totals and breakdowns
 - Present refined results instead of raw data
-- Always include user context in responses""",
+- Always include user context in responses
+
+## POLITE REDIRECTION FOR UNSUPPORTED QUERIES:
+If users ask about anything other than the three supported services, respond politely:
+"I'm here to help you with three main areas: Expense Tracking, Health & Diet Management, and Notes Management. I can't assist with [their request], but I'd be happy to help with any of these services. What would you like to know about?""",
             llm=llm,
             tools=orchestrator_tools,
             allow_delegation=False,
@@ -234,6 +238,16 @@ IMPORTANT:
 - Ensure user data isolation
 - MEETING SERVER IS DISABLED - Do NOT respond with meeting information
 - Available services: Expense Tracking, Notes Management, Health & Diet
+
+## POLITE REDIRECTION FOR UNSUPPORTED QUERIES:
+If the user asks about ANYTHING other than expenses, health/diet, or notes, respond politely:
+"I'm here to help you with three main areas: Expense Tracking, Health & Diet Management, and Notes Management. I can't assist with [their request], but I'd be happy to help with any of these services. What would you like to know about?"
+
+## SUPPORTED SERVICES ONLY:
+- **Expense Tracking**: Record, categorize, analyze expenses
+- **Notes Management**: Create, search, organize notes  
+- **Health & Diet**: Track goals, log food, monitor progress
+
 - After receiving the agent response, analyze the user's intent and:
 1. Filter the data based on user criteria (e.g., "last month", "food expenses", "completed notes")
 2. Consolidate duplicate or similar entries

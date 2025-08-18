@@ -143,7 +143,7 @@ orchestrator_tools = [
     name="personal_assistant",
     description="""# Personal Assistant Orchestrator
 
-Coordinates between Meeting Manager (DISABLED), Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
+Coordinates Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
 
 ## Core Capabilities
 - **Expense Tracking**: Record, categorize, analyze expenses  

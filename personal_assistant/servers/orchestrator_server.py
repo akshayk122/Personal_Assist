@@ -232,6 +232,19 @@ If users ask about anything other than the three supported services, respond pol
         task = Task(
             description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
 
+## GREETING-ONLY QUERIES:
+If the user query is just a simple greeting (hi, hello, hey, good morning, etc.) or general question about capabilities:
+- **DO NOT** call any tools or agents
+- **DO NOT** provide sample data or examples
+- **ONLY** respond with a warm greeting and brief service overview
+- Example response: "Hello! I'm your personal assistant. I can help you with three main areas: Expense Tracking, Health & Diet Management, and Notes Management. What would you like to work on today?"
+
+## SPECIFIC TASK QUERIES:
+Only call tools/agents when user asks for specific actions like:
+- Adding/viewing expenses
+- Creating/searching notes  
+- Logging food or health goals
+
 IMPORTANT: 
 - Extract and use user_id: {extracted_user_id}
 - Pass user_id to expense queries

@@ -1,6 +1,6 @@
 # Agentinc Personal Assistant System
 
-A comprehensive multi-agent personal assistant system using Agent Communication Protocol (ACP) servers that manages meetings, expenses, notes, health tracking, and diet management through specialized agents and a central orchestrator with intelligent user ID support and session memory.
+A comprehensive multi-agent personal assistant system using Agent Communication Protocol (ACP) servers that manages <!-- meetings, --> expenses, notes, health tracking, and diet management through specialized agents and a central orchestrator with intelligent user ID support and session memory.
 
 ## Quick Start with UV
 
@@ -21,7 +21,7 @@ cp env.example .env
 # If you encounter "Database security policy violation" errors, see RLS_TROUBLESHOOTING.md
 
 # 5. Start servers (3 separate terminals)
-#make meeting      # Terminal 1: Meeting Manager (port 8100)
+<!-- #make meeting      # Terminal 1: Meeting Manager (port 8100) -->
 make expense      # Terminal 2: Expense Tracker (port 8200) 
 make orchestrator # Terminal 3: Orchestrator (port 8300)
 
@@ -49,13 +49,16 @@ asyncio.run(test())
 
 The system consists of four main ACP servers with intelligent orchestration:
 
+<!--
 - **Server 1 (Port 8100)**: Meeting Manager Agent - Handles all meeting-related operations
+-->
 - **Server 2 (Port 8200)**: Expense Tracker Agent - Manages expense tracking and budget analysis  
 - **Server 3 (Port 8300)**: Personal Assistant Orchestrator - Coordinates between all specialized agents
 - **Server 4 (Port 8501)**: Streamlit Web UI - Modern web interface for user interaction
 
 ## Core Features
 
+<!--
 ### 🗓️ Meeting Management
 - **Smart Scheduling**: Schedule new meetings with automatic conflict detection
 - **Flexible Queries**: List meetings by date range, status, or attendees
@@ -64,6 +67,7 @@ The system consists of four main ACP servers with intelligent orchestration:
 - **Cancellation Support**: Cancel or delete meetings with confirmation
 - **Conflict Detection**: Automatic checking for scheduling conflicts
 - **User-Specific**: Support for multiple users with isolated meeting data
+-->
 
 ### 💰 Expense Tracking
 - **Intelligent Recording**: Record expenses with automatic categorization
@@ -116,7 +120,7 @@ The system consists of four main ACP servers with intelligent orchestration:
   - "for user: user123"
   - "user123's expenses"
   - "my expenses as user123"
-  - "meetings for user123"
+  <!-- - "meetings for user123" -->
 - **Data Isolation**: Complete user data separation and privacy
 - **Session Memory**: User-specific conversation memory
 - **Fallback Support**: Environment variable fallback for user ID
@@ -138,16 +142,16 @@ personal_assistant/
 ├── env.example                  # Environment template
 ├── Makefile                    # Development commands
 ├── data/                        # JSON data storage
-│   ├── meetings.json           # Meeting data (auto-generated)
+<!-- │   ├── meetings.json           # Meeting data (auto-generated) -->
 │   ├── categories.json         # Categories config (auto-generated)
 │   └── .gitkeep               # Git placeholder
 ├── servers/                     # ACP server implementations
-│   ├── meeting_server.py       # Meeting Manager (Port 8100)
+<!-- │   ├── meeting_server.py       # Meeting Manager (Port 8100) -->
 │   ├── expense_server.py       # Expense Tracker (Port 8200)
 │   ├── orchestrator_server.py  # Orchestrator (Port 8300)
 │   └── api_server.py           # API Server (Port 8400)
 ├── mcp_tools/                   # MCP tool implementations
-│   ├── meeting_tools.py        # Meeting operations
+<!-- │   ├── meeting_tools.py        # Meeting operations -->
 │   ├── expense_tools.py        # Expense operations
 │   ├── notes_tool.py           # Notes operations
 │   └── health_diet_tools.py    # Health and diet operations
@@ -159,14 +163,14 @@ personal_assistant/
 │   ├── supabase_config.py      # Supabase database configuration
 │   └── data_manager.py         # JSON data operations
 ├── tests/                       # Test suite
-│   ├── test_meetings.py
+<!-- │   ├── test_meetings.py -->
 │   ├── test_expenses.py
 │   └── test_orchestrator.py
 ├── SUPABASE_SETUP.md           # Supabase setup instructions
 ├── RLS_TROUBLESHOOTING.md      # RLS policy troubleshooting guide
 ├── USER_SPECIFIC_SETUP.md      # User-specific setup guide
 ├── database_setup.sql          # Database schema and RLS policies
-├── database_setup_user_specific.sql # User-specific database setup
+<!-- ├── database_setup_user_specific.sql # User-specific database setup -->
 ├── streamlit_ui.py             # Streamlit web interface
 ├── run_streamlit.py            # Streamlit launcher
 ├── demo.py                     # System demonstration script
@@ -219,7 +223,7 @@ SUPABASE_API_KEY=your_supabase_api_key
 USER_ID=default_user
 
 # Server Configuration (Default values)
-MEETING_SERVER_PORT=8100
+<!-- MEETING_SERVER_PORT=8100 -->
 EXPENSE_SERVER_PORT=8200
 ORCHESTRATOR_SERVER_PORT=8300
 
@@ -230,7 +234,7 @@ TEMPERATURE=0.7
 
 # Data Configuration
 DATA_PATH=./data
-MEETINGS_FILE=meetings.json
+<!-- MEETINGS_FILE=meetings.json -->
 EXPENSES_FILE=expenses.json
 CATEGORIES_FILE=categories.json
 
@@ -244,9 +248,9 @@ LOG_FILE=personal_assistant.log
 You need to run each server in a separate terminal:
 
 ```bash
-# Terminal 1: Meeting Manager
+<!-- # Terminal 1: Meeting Manager
 cd personal_assistant
-uv run python servers/meeting_server.py
+uv run python servers/meeting_server.py -->
 
 # Terminal 2: Expense Tracker  
 cd personal_assistant
@@ -259,8 +263,8 @@ uv run python servers/orchestrator_server.py
 
 **Alternative using project scripts:**
 ```bash
-# Terminal 1: Meeting Manager
-uv run meeting-server
+<!-- # Terminal 1: Meeting Manager
+uv run meeting-server -->
 
 # Terminal 2: Expense Tracker
 uv run expense-server
@@ -271,8 +275,8 @@ uv run orchestrator-server
 
 **Using Makefile commands:**
 ```bash
-# Terminal 1: Meeting Manager
-make meeting
+<!-- # Terminal 1: Meeting Manager
+make meeting -->
 
 # Terminal 2: Expense Tracker
 make expense
@@ -290,7 +294,7 @@ make streamlit
 
 1. **Start all servers** (in separate terminals):
    ```bash
-   make meeting      # Terminal 1
+   <!-- make meeting      # Terminal 1 -->
    make expense      # Terminal 2  
    make orchestrator # Terminal 3
    ```

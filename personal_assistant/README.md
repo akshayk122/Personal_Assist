@@ -21,7 +21,7 @@ cp env.example .env
 # If you encounter "Database security policy violation" errors, see RLS_TROUBLESHOOTING.md
 
 # 5. Start servers (3 separate terminals)
-make meeting      # Terminal 1: Meeting Manager (port 8100)
+#make meeting      # Terminal 1: Meeting Manager (port 8100)
 make expense      # Terminal 2: Expense Tracker (port 8200) 
 make orchestrator # Terminal 3: Orchestrator (port 8300)
 

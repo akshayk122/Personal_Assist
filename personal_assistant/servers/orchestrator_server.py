@@ -241,7 +241,7 @@ If the user query is just a simple greeting (hi, hello, hey, good morning, etc.)
 
 ## SPECIFIC TASK QUERIES:
 Only call tools/agents when user asks for specific actions like:
-- Adding/viewing expenses
+- Adding/viewing/Deleting expenses
 - Creating/searching notes  
 - Logging food or health goals
 

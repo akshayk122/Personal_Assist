@@ -206,7 +206,6 @@ Coordinates between specialized agents for personal and professional task manage
 - Always pass user_id to expense queries
 
 ## Query Classification
-- **Meeting queries**: meeting, schedule, calendar, appointment - DISABLED
 - **Expense queries**: expense, spend, cost, money, budget  
 - **Notes queries**: note, search, organize, complete
 - **Health and Diet queries**: health, diet, fitness, nutrition, weight, exercise, meal, calorie, workout, food, goal, ate, eat, target

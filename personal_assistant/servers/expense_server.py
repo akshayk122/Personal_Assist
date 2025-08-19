@@ -313,7 +313,9 @@ async def expense_agent(input: list[Message]) -> AsyncGenerator[RunYield, RunYie
     
     # Extract user query and user_id
     user_query = input[0].parts[0].content
-    extracted_user_id = extract_user_id_from_query(user_query)
+    user_id = input[1].parts[0].content
+    #extracted_user_id = extract_user_id_from_query(user_query)
+    extracted_user_id = user_id
     
     print(f"[Expense Server] Query: {user_query}")
     print(f"[Expense Server] Extracted user_id: {extracted_user_id}")
@@ -401,7 +403,7 @@ You are a supportive financial assistant who helps users manage their expenses w
         description=f"""Help the user with their expense request: {user_query}
 
 IMPORTANT: 
-- Extract and use user_id: {extracted_user_id}
+- use user_id: {extracted_user_id}
 - Pass user_id to all expense tools
 - Ensure user data isolation
 - Provide user-specific responses

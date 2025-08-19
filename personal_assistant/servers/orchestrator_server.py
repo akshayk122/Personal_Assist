@@ -108,7 +108,10 @@ class QueryExpenseAgentTool(BaseTool):
             async with Client(base_url="http://localhost:8200") as client:
                 run = await client.run_sync(
                     agent="expense_tracker", 
-                    input=query
+                    input=[
+                        Message(parts=[MessagePart(content=query, content_type="text/plain")]),
+                        Message(parts=[MessagePart(content=user_id, content_type="text/plain")])
+                        ]
                 )
                 return run.output[0].parts[0].content
         except Exception as e:
@@ -173,7 +176,9 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
     try:
         # Extract user query and user_id
         user_query = input[0].parts[0].content
-        extracted_user_id = extract_user_id_from_query(user_query)
+        user_id = input[1].parts[0].content
+        #extracted_user_id = extract_user_id_from_query(user_query)
+        extracted_user_id = user_id
         
         
         print(f"[Orchestrator] Query: {user_query}")
@@ -245,7 +250,7 @@ Only call tools/agents when user asks for specific actions like:
 - Logging food or health goals
 
 IMPORTANT: 
-- Extract and use user_id: {extracted_user_id}
+- use user_id: {extracted_user_id}
 - Pass user_id to expense queries
 - Ensure user data isolation
 - MEETING SERVER IS DISABLED - Do NOT respond with meeting information

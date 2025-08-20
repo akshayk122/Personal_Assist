@@ -135,13 +135,13 @@ def list_expenses(
         expenses = supabase_manager.get_expenses(filters, user_id=target_user_id)
         
         if not expenses:
-            return f"💰 No expenses found for user: {target_user_id}"
+            return f"No expenses found for user: {target_user_id}"
         
         # Calculate total
         total_amount = sum(e["amount"] for e in expenses)
         
         # Format expenses list
-        result = f"💰 Found {len(expenses)} expense(s) for user: {target_user_id} | Total: ${total_amount:.2f}\n\n"
+        result = f"Found {len(expenses)} expense(s) for user: {target_user_id} | Total: ${total_amount:.2f}\n\n"
         
         for expense in expenses:
             tags_str = ", ".join(expense.get("tags", []))

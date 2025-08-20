@@ -60,37 +60,8 @@ def extract_user_id_from_query(query: str) -> str:
     if match:
         return match.group(1)
     
-    # Pattern 4: "user123's meetings" or "user123 meetings" - DISABLED
-    # user_pattern4 = r'([a-zA-Z0-9_-]+)\'?s?\s+(?:meetings?|schedule|calendar)'
-    # match = re.search(user_pattern4, query, re.IGNORECASE)
-    # if match:
-    #     return match.group(1)
-    
-    # Pattern 5: "meetings for user123" or "schedule for user123" - DISABLED
-    # user_pattern5 = r'(?:meetings?|schedule|calendar)\s+(?:for\s+)([a-zA-Z0-9_-]+)'
-    # match = re.search(user_pattern5, query, re.IGNORECASE)
-    # if match:
-    #     return match.group(1)
-    
-    # Default to environment variable
     return os.getenv('USER_ID', 'default_user')
 
-# Create CrewAI tools for sub-agent communication
-# MEETING AGENT DISABLED - Commented out for now
-# class QueryMeetingAgentTool(BaseTool):
-#     name: str = "query_meeting_agent"
-#     description: str = "Query the meeting management agent for scheduling and calendar related tasks"
-#     
-#     async def _run(self, query: str) -> str:
-#         try:
-#             async with Client(base_url="http://localhost:8100") as client:
-#                 run = await client.run_sync(
-#                     agent="meeting_manager", 
-#                     input=query
-#                 )
-#                 return run.output[0].parts[0].content
-#         except Exception as e:
-#             return f"Unable to contact Meeting Manager: {str(e)}"
 
 class QueryExpenseAgentTool(BaseTool):
     name: str = "query_expense_agent"

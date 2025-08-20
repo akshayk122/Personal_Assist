@@ -451,7 +451,7 @@ def get_user_expenses_summary(user_id: str = "") -> str:
         # Date range
         dates = [e["date"] for e in all_expenses]
         if dates:
-            result += f"\n📅 DATE RANGE:\n"
+            result += f"\nDATE RANGE:\n"
             result += f"From: {min(dates)} to {max(dates)}\n"
         
         return result

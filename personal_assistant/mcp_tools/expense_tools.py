@@ -436,13 +436,13 @@ def get_user_expenses_summary(user_id: str = "") -> str:
         result += f"Total Transactions: {total_transactions}\n"
         result += f"Average per Transaction: ${average_expense:.2f}\n\n"
         
-        result += f"📂 BREAKDOWN BY CATEGORY:\n"
+        result += f"BREAKDOWN BY CATEGORY:\n"
         sorted_categories = sorted(categories.items(), key=lambda x: x[1]['amount'], reverse=True)
         for category_name, category_data in sorted_categories:
             percentage = (category_data['amount'] / total_amount) * 100
             result += f"• {category_name.title()}: ${category_data['amount']:.2f} ({percentage:.1f}%) - {category_data['count']} transactions\n"
         
-        result += f"\n💳 BREAKDOWN BY PAYMENT METHOD:\n"
+        result += f"\nBREAKDOWN BY PAYMENT METHOD:\n"
         sorted_payments = sorted(payment_methods.items(), key=lambda x: x[1]['amount'], reverse=True)
         for payment_name, payment_data in sorted_payments:
             percentage = (payment_data['amount'] / total_amount) * 100

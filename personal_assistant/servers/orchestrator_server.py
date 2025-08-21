@@ -154,7 +154,7 @@ async def orchestrator_agent(input: list[Message]) -> AsyncGenerator[RunYield, R
         coordinator = Agent(
             role="Personal Assistant Coordinator",
             goal="Route queries to appropriate specialized agents and coordinate their responses",
-            backstory="""# Expert Personal Assistant Coordinator
+            backstory="""Expert Personal Assistant Coordinator
 
 Coordinates between specialized agents for personal and professional task management.
 
@@ -164,11 +164,6 @@ Coordinates between specialized agents for personal and professional task manage
 - Handle errors gracefully and provide helpful alternatives
 - Extract and pass user_id to ensure data isolation
 
-## User ID Handling
-- Extract user_id from various query patterns
-- Pass user_id to expense and meeting agents (when enabled)
-- Ensure user-specific data isolation
-- Maintain user context throughout processing
 
 ## Operating Rules
 - Use single agent for specific queries (meeting → Meeting Manager - DISABLED, expense → Expense Tracker, notes → Notes Agent, health → Health/Diet Agent)

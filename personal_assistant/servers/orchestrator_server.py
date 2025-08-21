@@ -125,11 +125,6 @@ Coordinates Expense Tracker, Notes, and Health/Diet agents to provide intelligen
 - **Health & Diet**: Track goals, log food, monitor progress
 - **Integrated Services**: Handle multi-agent queries
 
-## User ID Support
-- Automatically extracts user_id from queries
-- Supports patterns like "for user: user123", "user123's expenses"
-- Passes user_id to appropriate agents
-- Ensures user data isolation
 
 ## Query Routing
 - **Expense queries** → Expense Tracker (expense, spend, money, budget)

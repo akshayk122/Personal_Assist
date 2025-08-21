@@ -115,7 +115,7 @@ orchestrator_tools = [
 
 @server.agent(
     name="personal_assistant",
-    description="""# Personal Assistant Orchestrator
+    description="""Personal Assistant Orchestrator
 
 Coordinates Expense Tracker, Notes, and Health/Diet agents to provide intelligent responses.
 

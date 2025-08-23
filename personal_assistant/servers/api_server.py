@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Personal Assistant API",
-    description="API for Personal Assistant with user ID support",
+    description="API for Personal Assistant Orchestrator",
     version="1.0.0"
 )
 

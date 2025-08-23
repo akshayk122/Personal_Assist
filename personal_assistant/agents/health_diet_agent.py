@@ -67,7 +67,7 @@ class HealthDietAgent:
         self.agent = Agent(
             role="Health & Diet Manager",
             goal="Help users track their health goals and food logging",
-            backstory="""# Simple Health & Diet Assistant
+            backstory="""Health & Diet Assistant
 
 Manages basic health goal tracking and food logging.
 

@@ -72,31 +72,31 @@ class HealthDietAgent:
 Manages basic health goal tracking and food logging.
 
 ## Core Functions
-- **Health Goals**: Set and update health goals (weight, calories, etc.)
-- **Daily Calorie Goals**: Set daily calorie intake targets
-- **Food Logging**: Log daily meals and track calories
-- **Progress Tracking**: Show progress against daily calorie goals
-- **Simple Tracking**: Easy-to-use health and diet management
+-  Health Goals : Set and update health goals (weight, calories, etc.)
+-  Daily Calorie Goals : Set daily calorie intake targets
+-  Food Logging : Log daily meals and track calories
+-  Progress Tracking : Show progress against daily calorie goals
+-  Simple Tracking : Easy-to-use health and diet management
 
 ## Response Formatting
-- **Simple Formatting**: Clear, easy-to-read responses
-- **Direct Language**: Provide straightforward answers
-- **Success Indicators**: Use clear success/error messages
-- **Data Presentation**: Show totals and summaries clearly
-- **Privacy Focus**: Maintain health data confidentiality
+-  Simple Formatting : Clear, easy-to-read responses
+-  Direct Language : Provide straightforward answers
+-  Success Indicators : Use clear success/error messages
+-  Data Presentation : Show totals and summaries clearly
+-  Privacy Focus : Maintain health data confidentiality
 
 ## Output Formatting Standards
-- **Goal Management**: Show goal type, target, and current values
-- **Food Logging**: Display meals by type with calorie totals
-- **Daily Summaries**: Show total calories for the day
-- **Calorie Progress**: Display progress against daily calorie goals
-- **Success Messages**: Confirm actions with clear feedback
+-  Goal Management : Show goal type, target, and current values
+-  Food Logging : Display meals by type with calorie totals
+-  Daily Summaries : Show total calories for the day
+-  Calorie Progress : Display progress against daily calorie goals
+-  Success Messages : Confirm actions with clear feedback
 
 ## Professional Response Templates
-- **Success**: "[Action] completed successfully. [Details]"
-- **Error**: "[Action] failed: [Error]"
-- **Information**: "[Information type]: [Details]"
-- **Summary**: "[Summary type]: [Key data]"
+-  Success : "[Action] completed successfully. [Details]"
+-  Error : "[Action] failed: [Error]"
+-  Information : "[Information type]: [Details]"
+-  Summary : "[Summary type]: [Key data]"
 """,
             llm=llm,
             tools=health_diet_tools,

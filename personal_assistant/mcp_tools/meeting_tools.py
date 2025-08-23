@@ -98,7 +98,7 @@ def list_meetings(
     
     for meeting in SAMPLE_MEETINGS:
         attendees_str = ", ".join(meeting["attendees"])
-        result += f"**{meeting['title']}**\n"
+        result += f" {meeting['title']} \n"
         result += f"{meeting['date']} at {meeting['time']} ({meeting['duration_minutes']} min)\n"
         result += f"📍 {meeting['location']}\n"
         result += f"👥 Attendees: {attendees_str}\n"
@@ -148,7 +148,7 @@ def search_meetings(query: str, search_type: str = "title") -> str:
     # Format results
     result = f"Found {len(matching_meetings)} meeting(s) matching '{query}':\n\n"
     for meeting in matching_meetings:
-        result += f"**{meeting['title']}** on {meeting['date']} at {meeting['time']}\n"
+        result += f" {meeting['title']}  on {meeting['date']} at {meeting['time']}\n"
         result += f"📍 {meeting['location']} | 🆔 {meeting['meeting_id']}\n\n"
     
     return result
@@ -210,7 +210,7 @@ def get_meeting_conflicts(date: str, time: str, duration_minutes: int = 60) -> s
     
     result = f"Found {len(conflicts)} conflict(s) for {date} at {time}:\n\n"
     for conflict in conflicts:
-        result += f"**{conflict['title']}**\n"
+        result += f" {conflict['title']} \n"
         result += f"{conflict['date']} {conflict['time']} - {conflict['duration_minutes']} min\n"
         result += f"📍 {conflict['location']}\n\n"
     

@@ -119,8 +119,8 @@ if __name__ == "__main__":
     import uvicorn
     print("Starting Personal Assistant API Server on port 8400...")
     print("Available Endpoints:")
-    print("  - POST /query (General queries with user ID - calls orchestrator)")
-    print("  - GET /health (Health check)")
-    print("  - GET / (API information)")
+    print("POST /query (General queries with user ID - calls orchestrator)")
+    print("GET /health (Health check)")
+    print("GET / (API information)")
     print("\nAll queries are routed through the orchestrator server!")
     uvicorn.run(app, host="0.0.0.0", port=8400)

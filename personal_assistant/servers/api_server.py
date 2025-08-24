@@ -56,8 +56,8 @@ async def handle_query(request: QueryRequest):
                 agent="personal_assistant",
                 #input=query_with_user
                 input=[
-                Message(parts=[MessagePart(content="list my expenses", content_type="text/plain")]),
-                Message(parts=[MessagePart(content="Akshay456", content_type="text/plain")])
+                Message(parts=[MessagePart(content=request.query, content_type="text/plain")]),
+                Message(parts=[MessagePart(content=request.user_id, content_type="text/plain")])
                ]
             )
             

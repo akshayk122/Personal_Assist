@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Personal Assistant API",
+    title="Personal Assistant API Endpoint",
     description="API for Personal Assistant Orchestrator",
     version="1.0.0"
 )

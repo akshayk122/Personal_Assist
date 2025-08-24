@@ -4,6 +4,7 @@ from colorama import Fore
 import asyncio
 import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
+from acp_sdk.models import Message, MessagePart
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
@@ -53,7 +54,11 @@ async def handle_query(request: QueryRequest):
         async with Client(base_url="http://localhost:8300") as client:
             response = await client.run_sync(
                 agent="personal_assistant",
-                input=query_with_user
+                #input=query_with_user
+                input=[
+                Message(parts=[MessagePart(content="list my expenses", content_type="text/plain")]),
+                Message(parts=[MessagePart(content="Akshay456", content_type="text/plain")])
+               ]
             )
             
             response_content = response.output[0].parts[0].content

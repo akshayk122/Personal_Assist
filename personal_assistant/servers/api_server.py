@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException
 from acp_sdk.client import Client
 from colorama import Fore
 import asyncio
-import nest_asyncio
 from fastapi.middleware.cors import CORSMiddleware
 from acp_sdk.models import Message, MessagePart
 from fastapi.responses import JSONResponse

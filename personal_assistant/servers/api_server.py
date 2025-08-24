@@ -35,8 +35,6 @@ class QueryRequest(BaseModel):
     user_id: Optional[str] = None
     session_id: Optional[str] = None
 
-# Apply nest_asyncio to allow running async code in Jupyter
-nest_asyncio.apply()
 
 @app.post("/query")
 async def handle_query(request: QueryRequest):

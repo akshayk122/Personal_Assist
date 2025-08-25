@@ -192,8 +192,6 @@ If users ask about anything other than the three supported services, respond pol
             allow_delegation=False,
             verbose=True
         )
-
-        # Create task for handling the query
         task = Task(
             description=f"""Route this query to the appropriate agent(s) and process the response intelligently: {user_query}
 

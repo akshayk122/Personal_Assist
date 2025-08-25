@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from typing import Optional
 import logging
 
-# Configure logging
+# Configure logging for the API server
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 

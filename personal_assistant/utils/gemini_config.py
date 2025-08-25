@@ -22,12 +22,12 @@ def setup_gemini_config() -> tuple[LLM, Dict[str, Any]]:
     api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
     
     if not api_key:
-        logger.error("❌ API Key Missing")
+        logger.error("API Key Missing")
         logger.error("Please set either GEMINI_API_KEY or GOOGLE_API_KEY in your .env file")
         raise ValueError("GEMINI_API_KEY or GOOGLE_API_KEY environment variable is required")
     
     if api_key == "API_KEY" or api_key == "your_actual_api_key_here":
-        logger.error("❌ Invalid API Key")
+        logger.error("Invalid API Key")
         logger.error("Please replace the placeholder API key with your actual Google AI API key")
         raise ValueError("Invalid API key - please use your actual Google AI API key")
     
@@ -49,7 +49,7 @@ def setup_gemini_config() -> tuple[LLM, Dict[str, Any]]:
         logger.info("✓ LLM instance created successfully")
         
     except Exception as e:
-        logger.error(f"❌ Failed to create LLM instance: {str(e)}")
+        logger.error(f"Failed to create LLM instance: {str(e)}")
         raise
     
     # Your config dictionary for RAG tools looks fine conceptually
@@ -82,7 +82,7 @@ def get_llm() -> LLM:
         llm, _ = setup_gemini_config()
         return llm
     except Exception as e:
-        logger.error(f"❌ Failed to get LLM: {str(e)}")
+        logger.error(f"Failed to get LLM: {str(e)}")
         raise
 
 def get_config() -> Dict[str, Any]:
@@ -91,5 +91,5 @@ def get_config() -> Dict[str, Any]:
         _, config = setup_gemini_config()
         return config
     except Exception as e:
-        logger.error(f"❌ Failed to get config: {str(e)}")
+        logger.error(f"Failed to get config: {str(e)}")
         raise
